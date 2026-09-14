@@ -20,11 +20,26 @@
   <link rel="alternate" href="https://dict.dhamma.gift/" hreflang="en">
   <link rel="alternate" href="https://dict.dhamma.gift/" hreflang="x-default">
 
-  <link rel="icon" type="image/png" href="static/dgsankhaonly.png?v=ui7">
+  <link rel="icon" type="image/svg+xml" href="static/favicon.svg?v=ui10">
+  <link rel="icon" type="image/png" sizes="32x32" href="static/favicon-32.png?v=ui10">
+  <link rel="apple-touch-icon" href="static/apple-touch-icon.png?v=ui10">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Dict.Dhamma.Gift">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:url" content="https://dict.dhamma.gift/ru/">
+  <meta property="og:title" content="Dict.Dhamma.Gift — Пали Мультисловарь">
+  <meta property="og:description" content="Dict.Dhamma.Gift (DDG) — мультисловарь пали, объединяющий DPD, Гандхари, PTS, санскрит и определения Sutta-Vinaya в одном месте.">
+  <meta property="og:image" content="https://dict.dhamma.gift/static/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Dict.Dhamma.Gift — Пали Мультисловарь">
+  <meta name="twitter:description" content="Dict.Dhamma.Gift (DDG) — мультисловарь пали, объединяющий DPD, Гандхари, PTS, санскрит и определения Sutta-Vinaya в одном месте.">
+  <meta name="twitter:image" content="https://dict.dhamma.gift/static/og-image.png">
   <link rel="stylesheet" href="static/dpd.css">
   <link rel="stylesheet" href="static/jquery-ui.min.css">
   <link rel="stylesheet" href="static/fa/fa.min.css">
-  <link rel="stylesheet" href="static/dg.css?v=ui8">
+  <link rel="stylesheet" href="static/dg.css?v=ui10">
   <script src="static/jquery-3.7.0.min.js"></script>
   <script src="static/jquery-ui.min.js"></script>
 </head>
@@ -43,9 +58,9 @@
 
 <div class="tbar"><div class="in">
   <a href="javascript:void(0)" class="wordmark alogo" id="logo-link" title="На главную / Сменить язык (долгое нажатие или ПКМ, Alt+1)">
-    <img src="static/dgsankhaonly.png" alt="" id="header-image">
+    <svg id="header-image" width="29" height="26" style="display:block;flex:none" viewBox="218 232 700 640" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="48" stroke-linejoin="miter"><path d="M410 381H282V600C282 690 330 721 372 721C420 721 462 690 462 612"/><path d="M608 690V545H738V380H855V292"/></g><circle cx="608" cy="712" r="38" fill="currentColor"/><path class="dg-mark-rule" d="M258 826.0H879" stroke-width="30"/></svg>
     <b id="title-clear">Dict</b>
-    <span><span class="brahmi" title="Pāḷi (Brahmi)">𑀧𑀸𑀴𑀺</span> → Ru/En</span>
+    <span>Pāḷi → Ru/En</span>
   </a>
 
   <form class="shell" id="search-form">
@@ -78,8 +93,13 @@
     <!-- start screen -->
     <main class="screen" id="s-start">
       <div class="start">
-        <h1>Словари Pāḷi и Sanskrit<button class="helpq" type="button" title="Справка" onclick="dgOpenHelp()"><i class="gi i-help"></i></button></h1>
-        <p class="sub">Одно слово, несколько источников: DPD, санскритские словари, глоссарии и определения из Сутт и Винаи.</p>
+        <div class="start-head">
+          <div>
+          <h1>Словари Pāḷi и Sanskrit<button class="helpq" type="button" title="Справка" onclick="dgOpenHelp()"><i class="gi i-help"></i></button></h1>
+          <p class="sub">Одно слово, несколько источников: DPD, санскритские словари, глоссарии и определения из Сутт и Винаи.</p>
+          </div>
+          <svg class="start-mark" width="150" height="137" viewBox="218 232 700 640" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="48" stroke-linejoin="miter"><path d="M410 381H282V600C282 690 330 721 372 721C420 721 462 690 462 612"/><path d="M608 690V545H738V380H855V292"/></g><circle cx="608" cy="712" r="38" fill="currentColor"/><path class="dg-mark-rule" d="M258 822.0H879" stroke-width="22"/></svg>
+        </div>
         <div class="hows">
           <div class="how"><b><i class="fa-solid fa-keyboard"></i>Четыре способа ввода</b><p>Пали с автоподсказками, Velthuis (<code>kacchapaa</code>), английский, русский.</p></div>
           <div class="how"><b><i class="fa-solid fa-arrow-up-right-from-square"></i>Словарь на любом сайте</b><p><a href="https://chromewebstore.google.com/detail/dhammagift-search-and-wor/dnnogjdcmhbiobpnkhdbfnfjnjlikabd?hl=ru" target="_blank" rel="noopener">Расширение для браузера</a>, <a href="#" id="installLink" title="Меню Chrome Android → Добавить на главную">Web</a> и <a href="https://github.com/dhammagift/dpd-twa/releases" target="_blank" rel="noopener">Android</a>: выделите слово → «Поделиться» → Dict.DG.</p></div>

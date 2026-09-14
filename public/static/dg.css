@@ -447,3 +447,12 @@ body[data-hist=on] .rail{animation:rail-in .34s var(--dg-ease) both}
 .mrow:focus-visible{outline:2px solid var(--dg-accent);outline-offset:2px;border-radius:6px}
 @media(hover:hover) and (pointer:fine){.mrow:hover span{color:var(--dg-accent-ink)}}
 @media(max-width:767.98px){.mrow kbd{display:none}}
+
+/* Full dictionary mark (Brahmi pāḷi + ground rule): header and start screen */
+.dg-mark-rule{stroke:#149c7c}
+body.dark-mode .dg-mark-rule{stroke:#16b394}
+.start-head{display:flex;align-items:center;justify-content:space-between;gap:32px;margin:0 0 26px}
+.start-head>div{flex:1 1 auto;min-width:0}
+.start-head .sub{margin-bottom:0}
+.start-mark{flex:none;display:block;color:var(--dg-text);margin-right:8px}
+@media(max-width:767.98px){.start-mark{display:none}}
