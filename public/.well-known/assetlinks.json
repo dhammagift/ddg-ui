@@ -4,7 +4,7 @@
     "target": {
       "namespace": "android_app",
       "package_name": "gift.dhamma.dict.twa",
-      "sha256_cert_fingerprints": ["C0:5E:91:1B:B6:5A:BF:84:9D:94:6E:85:F7:C2:25:61:86:B5:AC:5B:F9:4C:BB:BF:32:15:AE:EF:C1:E9:DE:19"]
+      "sha256_cert_fingerprints": ["5D:86:D6:4B:89:27:37:78:6F:74:3F:5B:07:B0:6F:1B:6F:25:A2:A5:A1:99:8F:74:07:E5:54:0B:94:AF:B0:D6"]
     }
   }
 ]
