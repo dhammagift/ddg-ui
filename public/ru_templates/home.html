@@ -78,7 +78,7 @@
     <!-- start screen -->
     <main class="screen" id="s-start">
       <div class="start">
-        <h1>Словари Pāḷi и Sanskrit<button class="helpq" type="button" title="Справка" onclick="window.open('https://dhamma.gift/ru/docs/dictionary','_blank')"><i class="gi i-help"></i></button></h1>
+        <h1>Словари Pāḷi и Sanskrit<button class="helpq" type="button" title="Справка" onclick="dgOpenHelp()"><i class="gi i-help"></i></button></h1>
         <p class="sub">Одно слово, несколько источников: DPD, санскритские словари, глоссарии и определения из Сутт и Винаи.</p>
         <div class="hows">
           <div class="how"><b><i class="fa-solid fa-keyboard"></i>Четыре способа ввода</b><p>Пали с автоподсказками, Velthuis (<code>kacchapaa</code>), английский, русский.</p></div>
@@ -159,14 +159,14 @@
       <div class="stepper big"><button type="button" onclick="decreaseFontSize()">−</button><span id="menu-font-size"></span><button type="button" onclick="increaseFontSize()">+</button></div></div>
     <div class="grp">Ещё</div>
     <button class="mrow first" type="button" onclick="openPanel('set')"><i class="gi i-gear"></i><span>Настройки</span><kbd>Alt+Shift+S</kbd></button>
-    <button class="mrow" type="button" onclick="closePanels();window.open('https://dhamma.gift/ru/docs/dictionary','_blank')"><i class="gi i-help"></i><span>Справка</span><kbd>Alt+H</kbd></button>
+    <button class="mrow" type="button" onclick="closePanels();dgOpenHelp()"><i class="gi i-help"></i><span>Справка</span><kbd>Alt+H</kbd></button>
   </div>
 </aside>
 
 <!-- settings panel -->
 <aside class="panel" id="p-set">
   <div class="ph"><b>Настройки</b>
-    <a href="javascript:void(0)" class="phelp" onclick="window.open('https://dhamma.gift/ru/docs/dictionary','_blank')"><i class="gi i-help"></i>Справка</a>
+    <a href="javascript:void(0)" class="phelp" onclick="dgOpenHelp()"><i class="gi i-help"></i>Справка</a>
     <button class="rb" type="button" title="Закрыть" onclick="closePanels()"><i class="fa-solid fa-xmark"></i></button>
   </div>
   <div class="pb">
@@ -229,11 +229,11 @@
 <script src="static/home.js?v=ui7"></script>
 <script src="static/dpd.js" defer></script>
 <script src="static/autopali.js" defer></script>
-<script src="static/extra.js?v=ui8"></script>
+<script src="static/extra.js?v=ui9"></script>
 <script src="static/sorter.js" defer></script>
 <script src="static/openDicts.js" defer></script>
 <script src="static/ui.js?v=ui7"></script>
-<script src="static/dg-site.js?v=ui8"></script>
+<script src="static/dg-site.js?v=ui9"></script>
 </body>
 
 </html>

@@ -162,7 +162,7 @@ document.addEventListener('keydown', function (event) {
   }
   switch (code) {
     case 'KeyS': run(() => { const t = document.querySelector('.dict-dropdown-toggle'); if (t) t.click(); }); break;
-    case 'KeyH': run(() => window.open(ru ? 'https://dhamma.gift/ru/docs/dictionary' : 'https://dhamma.gift/docs/dictionary', '_blank')); break;
+    case 'KeyH': run(() => window.dgOpenHelp && window.dgOpenHelp()); break;
     case 'KeyP': case 'KeyY': run(() => window.dgOpenCompass && window.dgOpenCompass()); break;
     case 'KeyM': run(() => window.dgToggleMenu && window.dgToggleMenu()); break;
     case 'Digit0': case 'Numpad0': run(() => { if (typeof setFontSize === 'function') { fontSize = BASE_FONT_SIZE; setFontSize(); saveFontSize(); } }); break;

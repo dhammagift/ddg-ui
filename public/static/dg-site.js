@@ -7,6 +7,10 @@
 // step with the settings panel, which stays the single place those values are saved.
 (function () {
   const SITE = location.hostname === 'dict.dhamma.gift' ? 'https://dhamma.gift' : '';
+  // Help opens the docs on the site serving this page (test.dhamma.gift/dict → test docs).
+  window.dgOpenHelp = function () {
+    window.open(SITE + (window.isRu ? '/ru' : '') + '/docs/dictionary/', '_blank');
+  };
   const loading = {};
 
   function load(kind, url) {
