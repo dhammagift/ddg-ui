@@ -252,7 +252,7 @@
   document.addEventListener('DOMContentLoaded', () => {
     $('histbtn')?.setAttribute('aria-pressed', String(B.dataset.hist === 'on'));
     $('clear-history-button')?.addEventListener('click', clearHistory); // clears history + favorites, repaints
-    const q = new URLSearchParams(location.search).get('q');
+    const q = new URLSearchParams(location.search).get('q') || window.dgPathWord; // word may be in the path (extra.js)
     if (q) { const h = $('whead-word'); if (h) h.textContent = q; updateDgStats(q); }
     paintHist();
     // shadow under the sticky bar once the page scrolls (no scroll listener)

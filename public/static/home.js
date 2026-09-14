@@ -40,6 +40,8 @@ let language;
 //// uri utils
 
 function getQueryVariable(variable) {
+    // The word may live in the path (/dukkha) instead of ?q= (see dictUrl in extra.js).
+    if (variable === 'q' && !new URLSearchParams(window.location.search).get('q') && window.dgPathWord) return window.dgPathWord;
     var query = window.location.search.substring(1);
     var vars = query.split('&');
 

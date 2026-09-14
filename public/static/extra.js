@@ -23,7 +23,7 @@ function getAppBase() {
 // from this very script's own resolved src rather than hardcoded, so it tracks wherever
 // the app is actually deployed. urlParams below folds this in, so every existing
 // urlParams.get('q') call site just works, whichever way the word arrived.
-const pathWord = (function () {
+let pathWord = (function () {
     if (new URLSearchParams(window.location.search).get('q')) return null; // ?q= already wins
 
     let installBase = '/';
@@ -44,6 +44,34 @@ const pathWord = (function () {
 
 // Every "new URLSearchParams(window.location.search)" below goes through this instead,
 // so a clean-path word (pathWord, computed above) reads back as q= too.
+// The dictionary's own address for a word: the word as a clean path (/dukkha, /dict/dukkha),
+// ?lang=ru for Russian, other parameters kept. A word with "/" in it can't be a path segment,
+// so that one stays ?q=.
+function dictUrl(word) {
+    const params = new URLSearchParams(window.location.search);
+    params.delete('q');
+    params.delete('lang');
+    if (window.isRu) params.set('lang', 'ru');
+    let path = getAppBase();
+    if (word) {
+        if (word.includes('/')) params.set('q', word);
+        else path += encodeURIComponent(word);
+    }
+    const qs = params.toString();
+    return path + (qs ? '?' + qs : '');
+}
+
+// The word the page shows right now: ?q= or the path after the app base (and ru/). Unlike
+// pathWord (fixed at load), this follows searches pushed into the address bar.
+function currentDictWord() {
+    const q = new URLSearchParams(window.location.search).get('q');
+    if (q) return q;
+    const base = getAppBase();
+    let rest = window.location.pathname.startsWith(base) ? window.location.pathname.slice(base.length) : '';
+    rest = rest.replace(/^(ru|th)\/?/, '').replace(/^\/+|\/+$/g, '');
+    return (rest && !rest.includes('/')) ? decodeURIComponent(rest) : null;
+}
+
 function getUrlParams() {
     const params = new URLSearchParams(window.location.search);
     if (pathWord && !params.get('q')) params.set('q', pathWord);
@@ -90,12 +118,21 @@ function getUrlParams() {
   // English is the default and needs no parameter.
   params.delete('lang');
   if (window.isRu) params.set('lang', 'ru');
+  // An old-style ?q= word moves into the path (/dukkha), the same address a search produces.
+  let shownPath = window.location.pathname.replace(/\/(ru|th)(\/|$)/, '/').replace(/\/\//g, '/') || '/';
+  const qWord = params.get('q');
+  if (qWord && !qWord.includes('/') && shownPath === getAppBase()) {
+    shownPath = getAppBase() + encodeURIComponent(qWord);
+    params.delete('q');
+    pathWord = qWord;
+  }
+  window.dgPathWord = pathWord;
   const qs = params.toString();
-  // Keep a clean-path word in the bar (/dukkha), only the /ru/ or /th/ folder is masked away.
-  const shownPath = window.location.pathname.replace(/\/(ru|th)(\/|$)/, '/').replace(/\/\//g, '/') || '/';
   const newUrl = shownPath + (qs ? '?' + qs : '') + window.location.hash;
-  if (newUrl !== window.location.pathname + window.location.search + window.location.hash) {
-    history.replaceState(null, '', newUrl);
+  // The landing entry carries its word too, so Back from a later search can bring it back.
+  const needsState = pathWord && !(history.state && history.state.q);
+  if (needsState || newUrl !== window.location.pathname + window.location.search + window.location.hash) {
+    history.replaceState(pathWord ? { q: pathWord } : null, '', newUrl);
   }
 })();
 
@@ -437,9 +474,11 @@ function changeLanguage(lang) {
 
   const url = new URL(window.location.href);
   const base = getAppBase();
-  url.pathname = lang === 'ru' ? base.replace(/\/$/, '') + '/ru/' : base;
-  // A clean-path word (/dukkha) travels as ?q= so the other language opens the same entry.
-  if (pathWord && !url.searchParams.get('q')) url.searchParams.set('q', pathWord);
+  // The word stays in the path (/ru/dukkha), so the other language opens the same entry.
+  const word = currentDictWord();
+  url.searchParams.delete('q');
+  url.pathname = (lang === 'ru' ? base + 'ru/' : base) + (word && !word.includes('/') ? encodeURIComponent(word) : '');
+  if (word && word.includes('/')) url.searchParams.set('q', word);
   // The target language decides ?lang= (a leftover lang=ru would bounce English straight back).
   if (lang === 'ru') url.searchParams.set('lang', 'ru'); else url.searchParams.delete('lang');
   const siteLanguage = lang === 'ru' ? 'ru' : 'en';
@@ -497,9 +536,7 @@ async function handleClientSearch(rawQuery) {
     if (typeof addToHistory === 'function') {
         addToHistory(query);
     } else {
-        const newUrl = new URL(window.location);
-        newUrl.searchParams.set('q', query);
-        window.history.pushState({}, '', newUrl);
+        window.history.pushState({ q: query }, '', dictUrl(query));
     }
     
     if (typeof populateHistoryBody === 'function') {
@@ -2236,14 +2273,10 @@ function addToHistory(word) {
     if (historyList.length > 50) historyList.pop();
     localStorage.setItem("history-list", JSON.stringify(historyList));
 
-    // A clean-path landing (e.g. /kacchapa) already names the word in the URL —
-    // leave it alone instead of bolting a redundant ?q= onto it.
-    if (word !== pathWord || window.location.search) {
-        const newUrl = new URL(window.location);
-        newUrl.searchParams.set('q', word);
-        if (window.location.search !== newUrl.search) {
-            window.history.pushState({ q: word }, '', newUrl);
-        }
+    // The word goes into the path (/kacchapa), not ?q=; nothing to push when it's already there.
+    const newUrl = dictUrl(word);
+    if (newUrl !== window.location.pathname + window.location.search) {
+        window.history.pushState({ q: word }, '', newUrl);
     }
     toggleClearHistoryButton();
 }
