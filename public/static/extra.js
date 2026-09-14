@@ -135,90 +135,47 @@ if (isPWA) {
 const LANGUAGE_PREFIX = '/ru'; // Префикс для русского языка
 const DEFAULT_LANG = 'en';     // Язык по умолчанию
 
-// ======== Основной код ========
-// Обработка горячих клавиш Alt+H (История) и Alt+S (Настройки) независимо от раскладки
-document.addEventListener('keydown', function(event) {
-    if (event.altKey) {
-        if (event.code === 'KeyH') {
-            event.preventDefault();
-            if (window.innerWidth >= 769) {
-                if (typeof toggleDesktopHistoryBtn === 'function') {
-                    toggleDesktopHistoryBtn();
-                }
-            } else {
-                if (typeof toggleHistory === 'function') {
-                    toggleHistory();
-                }
-            }
-        } else if (event.code === 'KeyS') {
-            event.preventDefault();
-            if (window.innerWidth >= 769) {
-                if (typeof toggleDesktopSettingsBtn === 'function') {
-                    toggleDesktopSettingsBtn();
-                }
-            } else {
-                if (typeof toggleSettings === 'function') {
-                    toggleSettings();
-                }
-            }
-        }
-    }
-});
-
-
-document.addEventListener('keydown', function(event) {
-  const isCtrl3 = event.ctrlKey && event.code === 'Digit3';
-  const isAlt3 = event.altKey && event.code === 'Digit3';
-
-  if (isCtrl3 || isAlt3) {
-    event.preventDefault();
-
-    const currentUrl = window.location.href;
-    const currentParams = window.location.search; // включает ? и все параметры
-
-    let targetUrl;
-
-    if (
-      currentUrl.includes('/ru') ||
-      currentUrl.includes('/r') ||
-      currentUrl.includes('/ml')
-    ) {
-      targetUrl = 'https://dhamma.gift/ru/';
-    } else {
-      targetUrl = 'https://dhamma.gift/';
-    }
-
-    // Добавляем параметры, если есть
-    if (currentParams) {
-      targetUrl += currentParams;
-    }
-
-    window.location.href = targetUrl;
+// ======== Hotkeys ========
+// The same scheme as dhamma.gift (owner: the dictionary's keys should repeat the site's). By
+// event.code, so they work in any keyboard layout. Alt+1 (language), Alt+T (theme) and "/" (search
+// box) are handled further down in this file.
+//   Alt+S — "other dictionaries" menu (the dictionary's quick settings), Alt+Shift+S — settings panel
+//   Alt+M — menu, Alt+H — help, Alt+P / Alt+Y — compass (the site's quick window)
+//   Alt+Q — word to favorites, Alt+R — read the word aloud
+//   Alt+F / Alt+Shift+F / Ctrl+Shift+F — find on the page, Alt+− / Alt+= / Alt+0 — font size
+//   Alt+2 — Dhamma.Gift table of contents, Alt+3 — this word in Dhamma.Gift search
+// dgOpenFind / dgOpenCompass / dgToggleMenu live in dg-site.js (loaded after this file).
+function dgFind() { if (typeof window.dgOpenFind === 'function') window.dgOpenFind(); }
+document.addEventListener('keydown', function (event) {
+  const code = event.code;
+  // Ctrl/Cmd+Shift+F — the site's other find binding (plain Ctrl+F belongs to the browser).
+  if ((event.ctrlKey || event.metaKey) && event.shiftKey && !event.altKey && code === 'KeyF') {
+    event.preventDefault(); dgFind(); return;
   }
-});
-
-
-document.addEventListener('keydown', function(event) {
-  const isCtrl2 = event.ctrlKey && event.code === 'Digit2';
-  const isAlt2 = event.altKey && event.code === 'Digit2';
-
-  if (isCtrl2 || isAlt2) {
-    event.preventDefault();
-
-    const currentUrl = window.location.href;
-    let targetUrl;
-
-    if (
-      currentUrl.includes('/ru') ||
-      currentUrl.includes('/r') ||
-      currentUrl.includes('/ml')
-    ) {
-      targetUrl = 'https://dhamma.gift/ru/read.php';
-    } else {
-      targetUrl = 'https://dhamma.gift/read.php';
-    }
-
-    window.location.href = targetUrl;
+  if (!event.altKey || event.ctrlKey || event.metaKey) return;
+  const run = (fn) => { event.preventDefault(); fn(); };
+  const ru = !!window.isRu;
+  if (event.shiftKey) {
+    if (code === 'KeyS') run(() => window.toggleSettings && window.toggleSettings());
+    else if (code === 'KeyF') run(dgFind);
+    return;
+  }
+  switch (code) {
+    case 'KeyS': run(() => { const t = document.querySelector('.dict-dropdown-toggle'); if (t) t.click(); }); break;
+    case 'KeyH': run(() => window.open(ru ? 'https://dhamma.gift/ru/docs/dictionary' : 'https://dhamma.gift/docs/dictionary', '_blank')); break;
+    case 'KeyP': case 'KeyY': run(() => window.dgOpenCompass && window.dgOpenCompass()); break;
+    case 'KeyM': run(() => window.dgToggleMenu && window.dgToggleMenu()); break;
+    case 'Digit0': case 'Numpad0': run(() => { if (typeof setFontSize === 'function') { fontSize = BASE_FONT_SIZE; setFontSize(); saveFontSize(); } }); break;
+    case 'KeyQ': run(() => window.favToggle && window.favToggle()); break;
+    case 'KeyR': run(() => window.speakWord && window.speakWord()); break;
+    case 'KeyF': run(dgFind); break;
+    case 'Minus': case 'NumpadSubtract': run(() => typeof decreaseFontSize === 'function' && decreaseFontSize()); break;
+    case 'Equal': case 'NumpadAdd': run(() => typeof increaseFontSize === 'function' && increaseFontSize()); break;
+    case 'Digit2': run(() => { window.location.href = 'https://dhamma.gift/toc' + (ru ? '?lang=ru' : ''); }); break;
+    case 'Digit3': run(() => {
+      const q = (document.getElementById('search-box')?.value || '').trim();
+      window.location.href = 'https://dhamma.gift/' + (q ? encodeURIComponent(q) : '') + (ru ? '?lang=ru' : '');
+    }); break;
   }
 });
 
@@ -240,7 +197,7 @@ document.addEventListener("keydown", handleLanguageShortcut);
 
 // Обработка горячих клавиш
 function handleLanguageShortcut(event) {
-    if ((event.altKey || event.ctrlKey) && event.code === "Digit1") {
+    if (event.altKey && !event.ctrlKey && !event.metaKey && !event.shiftKey && event.code === "Digit1") {
         event.preventDefault();
         toggleLanguage();
     }
@@ -268,14 +225,6 @@ function toggleThemeProgrammatically() {
   const event = new Event('change');
   themeToggle.dispatchEvent(event);
 }
-
-document.addEventListener('keydown', (event) => {
-  if (event.altKey && (event.code === 'Period' || event.code === 'KeyQ')) {
-    event.preventDefault();
-
-openDictionaries(event);
-  }
-});
 
 //установка фокуса в инпуте по нажатию / 
 document.addEventListener('keydown', function(event) {
@@ -386,11 +335,11 @@ function initStartMessage(lang) {
     </p>
     <p class="message">
   <b>Available Hotkeys:</b> press <strong>/</strong> to activate the search bar<br>
-  <strong>Ctrl+1</strong> or <strong>Alt+1</strong> — Toggle English/Russian<br>
-  <strong>Ctrl+2</strong> or <strong>Alt+2</strong> — Open <em>Dhamma.Gift Read</em><br>
-  <strong>Ctrl+3</strong> or <strong>Alt+3</strong> — Open <em>Dhamma.Gift Search</em><br>
-  <strong>Alt+Q</strong> — Look up word in multiple dictionaries<br>
-  <strong>Alt+T</strong> — Toggle Theme
+  <strong>Alt+1</strong> — Toggle English/Russian<br>
+  <strong>Alt+2</strong> — Dhamma.Gift table of contents · <strong>Alt+3</strong> — this word in Dhamma.Gift search<br>
+  <strong>Alt+S</strong> — other dictionaries · <strong>Alt+Shift+S</strong> — settings · <strong>Alt+H</strong> — help<br>
+  <strong>Alt+M</strong> — menu · <strong>Alt+P</strong> — compass · <strong>Alt+Q</strong> — to favorites · <strong>Alt+R</strong> — read aloud<br>
+  <strong>Alt+F</strong> — find on the page · <strong>Alt+−/=/0</strong> — font size · <strong>Alt+T</strong> — Toggle Theme
 </p>
     <p class="message"><b>Footer links</b>: Dict - to search the word in other dicts, DG - with Dhamma.Gift, DPD - in Dpdict.net</p>
     <p class="message">Adjust <b>Settings</b> as needed including changing language. <b>Refresh</b> page if issues occur.</p>
@@ -425,12 +374,11 @@ function initStartMessage(lang) {
   
   <div class="collapsible">
 <p class="message"><b>Горячие Клавиши</b>: нажмите <strong>/</strong> чтобы активировать строку поиска<br>
-<strong>Ctrl+1</strong> или <strong>Alt+1</strong> переключить Рус/Англ<br>
-<strong>Ctrl+2</strong> или <strong>Alt+2</strong> открыть Dhamma.Gift Read<br>
-<strong>Ctrl+3</strong> или <strong>Alt+3</strong> открыть Dhamma.Gift Search<br>
-<strong>Alt+Q</strong> открыть слово в нескольких словарях<br>
-<strong>Alt+T</strong> переключить тему
-
+<strong>Alt+1</strong> переключить Рус/Англ<br>
+<strong>Alt+2</strong> оглавление Dhamma.Gift · <strong>Alt+3</strong> это слово в поиске Dhamma.Gift<br>
+<strong>Alt+S</strong> другие словари · <strong>Alt+Shift+S</strong> настройки · <strong>Alt+H</strong> справка<br>
+<strong>Alt+M</strong> меню · <strong>Alt+P</strong> компас · <strong>Alt+Q</strong> в избранное · <strong>Alt+R</strong> озвучить<br>
+<strong>Alt+F</strong> найти на странице · <strong>Alt+−/=/0</strong> размер шрифта · <strong>Alt+T</strong> переключить тему
 </p>
 <p class="message"><b>Ссылки в футере</b> Dict - поиск слова в разных словарях, DG - через Dhamma.Gift, DPD - на Dpdict.net</p>
 <p class="message">Попробуйте разные <b>Настройки</b>, включая смену языка. При возникновении проблем <b>Обновите</b> страницу.</p>

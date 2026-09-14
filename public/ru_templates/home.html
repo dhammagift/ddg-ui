@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="static/dpd.css">
   <link rel="stylesheet" href="static/jquery-ui.min.css">
   <link rel="stylesheet" href="static/fa/fa.min.css">
-  <link rel="stylesheet" href="static/dg.css?v=ui7">
+  <link rel="stylesheet" href="static/dg.css?v=ui8">
   <script src="static/jquery-3.7.0.min.js"></script>
   <script src="static/jquery-ui.min.js"></script>
 </head>
@@ -59,11 +59,10 @@
     <button class="rnd go" type="submit" id="search-button" title="Найти"><i class="fa-solid fa-magnifying-glass"></i></button>
   </form>
 
+  <!-- Owner: header keeps only word history and the burger; everything else lives in the menu. -->
   <div class="hbtns">
-    <button class="rb" id="histbtn" type="button" aria-pressed="true" title="История: показать / скрыть (Alt+H)" onclick="histToggle()"><i class="gi i-history"></i></button>
-    <button class="rb" type="button" title="Настройки (Alt+S)" onclick="openPanel('set')"><i class="gi i-gear"></i></button>
-    <button class="rb hide-m" type="button" title="Тема (Alt+T)" onclick="toggleThemeProgrammatically()"><i class="gi i-theme"></i></button>
-    <button class="rb hide-m" type="button" title="Справка" onclick="window.open('https://dhamma.gift/ru/docs/dictionary','_blank')"><i class="gi i-help"></i></button>
+    <button class="rb" id="histbtn" type="button" aria-pressed="true" title="История: показать / скрыть" onclick="histToggle()"><i class="gi i-history"></i></button>
+    <button class="rb" id="menubtn" type="button" title="Меню (Alt+M)" onclick="dgToggleMenu()"><i class="gi i-menu"></i></button>
   </div>
 </div></div>
 
@@ -137,11 +136,32 @@
   <a href="https://creativecommons.org/licenses/by-nc-sa/4.0" target="_blank" rel="noopener" title="CC BY-NC-SA 4.0">CC BY-NC-SA 4.0</a><span class="dot">·</span>
   <a class="dpd-link" href="" target="_blank" title="Открыть на Dpdict.net">Powered by DPD</a>
   <div class="sp">
-    <a href="https://github.com/dhammagift/dpd-ui" target="_blank" rel="noopener" title="GitHub"><i class="fa-brands fa-github"></i></a>
+    <a href="https://github.com/dhammagift/ddg-ui" target="_blank" rel="noopener" title="GitHub"><i class="fa-brands fa-github"></i></a>
     <a href="https://t.me/dhamma_gift" target="_blank" rel="noopener" title="Telegram"><i class="fa-brands fa-telegram"></i></a>
   </div>
 </footer>
 </div>
+
+<!-- burger menu (dg-site.js) -->
+<aside class="panel" id="p-menu">
+  <div class="ph"><b>Меню</b>
+    <button class="rb" type="button" title="Закрыть" onclick="closePanels()"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div class="pb">
+    <button class="mrow first" type="button" onclick="closePanels();dgOpenFind()"><i class="gi i-find"></i><span>Найти на странице</span><kbd>Alt+F</kbd></button>
+    <button class="mrow" type="button" onclick="dgOpenCompass()"><i class="gi i-compass"></i><span>Компас</span><kbd>Alt+P</kbd></button>
+    <div class="grp">Вид</div>
+    <div class="set"><span class="lb">Язык</span>
+      <div class="seg big"><button type="button" aria-pressed="" onclick="changeLanguage('en')">En</button><button type="button" aria-pressed="true" onclick="changeLanguage('ru')">Ru</button></div></div>
+    <div class="set"><span class="lb">Тема</span>
+      <label class="seg big"><input type="checkbox" id="menu-theme-toggle"><span>день</span><span>ночь</span></label></div>
+    <div class="set"><span class="lb">Размер шрифта</span>
+      <div class="stepper big"><button type="button" onclick="decreaseFontSize()">−</button><span id="menu-font-size"></span><button type="button" onclick="increaseFontSize()">+</button></div></div>
+    <div class="grp">Ещё</div>
+    <button class="mrow first" type="button" onclick="openPanel('set')"><i class="gi i-gear"></i><span>Настройки</span><kbd>Alt+Shift+S</kbd></button>
+    <button class="mrow" type="button" onclick="closePanels();window.open('https://dhamma.gift/ru/docs/dictionary','_blank')"><i class="gi i-help"></i><span>Справка</span><kbd>Alt+H</kbd></button>
+  </div>
+</aside>
 
 <!-- settings panel -->
 <aside class="panel" id="p-set">
@@ -197,7 +217,7 @@
     <p>Пишите на пали с автоподсказками, в Velthuis или ищите по-русски. Двойной клик по любому слову в статье открывает его.</p>
     <div class="vel"><span>aa → ā</span><span>ii → ī</span><span>uu → ū</span><span>"n → ṅ</span><span>~n → ñ</span><span>.t → ṭ</span><span>.d → ḍ</span><span>.n → ṇ</span><span>.m → ṃ</span><span>.l → ḷ</span></div>
     <h4>Горячие клавиши</h4>
-    <p><kbd>/</kbd> фокус в поиск · <kbd>Alt+H</kbd> история · <kbd>Alt+S</kbd> настройки · <kbd>Alt+T</kbd> тема · <kbd>Alt+1</kbd> Рус/Англ · <kbd>Alt+2</kbd> Dhamma.Gift Read · <kbd>Alt+3</kbd> Dhamma.Gift Search</p>
+    <p><kbd>/</kbd> фокус в поиск · <kbd>Alt+M</kbd> меню · <kbd>Alt+P</kbd> компас · <kbd>Alt+F</kbd> найти на странице · <kbd>Alt+S</kbd> другие словари · <kbd>Alt+Shift+S</kbd> настройки · <kbd>Alt+H</kbd> справка · <kbd>Alt+Q</kbd> в избранное · <kbd>Alt+R</kbd> озвучить · <kbd>Alt+T</kbd> тема · <kbd>Alt+−</kbd> <kbd>Alt+=</kbd> <kbd>Alt+0</kbd> размер шрифта · <kbd>Alt+1</kbd> Рус/Англ · <kbd>Alt+2</kbd> оглавление Dhamma.Gift · <kbd>Alt+3</kbd> это слово в поиске Dhamma.Gift</p>
     <h4>Автоподсказки</h4>
     <p>Слова из Четырёх Никай (DN, MN, SN, AN), части KN (Dhp, Iti, Ud, Snp) и всех разделов Винаи, редакция Mahāsaṅgīti.</p>
     <h4>Приложения</h4>
@@ -209,10 +229,11 @@
 <script src="static/home.js?v=ui7"></script>
 <script src="static/dpd.js" defer></script>
 <script src="static/autopali.js" defer></script>
-<script src="static/extra.js?v=ui7"></script>
+<script src="static/extra.js?v=ui8"></script>
 <script src="static/sorter.js" defer></script>
 <script src="static/openDicts.js" defer></script>
 <script src="static/ui.js?v=ui7"></script>
+<script src="static/dg-site.js?v=ui8"></script>
 </body>
 
 </html>
