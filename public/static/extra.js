@@ -4,8 +4,17 @@
 window.isRu = /\/ru(\/|$)/.test(window.location.pathname);
 
 // Returns the app's install base path (e.g. '/' or '/dict/'), stripping any /ru or /th segment.
+// Install base of the app ("/" on dict.dhamma.gift, "/dict/" under dhamma.gift), read from where
+// this script was loaded — not from the page path, which may carry a clean-path word
+// (/dukkha) or the language folder (/ru/, whose static/ is a symlink to the same files).
 function getAppBase() {
-    return window.location.pathname.replace(/\/(ru|th)(\/|$)/, '/').replace(/\/\//g, '/') || '/';
+    for (const s of document.getElementsByTagName('script')) {
+        if (!s.src) continue;
+        const path = new URL(s.src).pathname;
+        const i = path.indexOf('/static/');
+        if (i !== -1) return path.slice(0, i + 1).replace(/(ru|th)\/$/, '');
+    }
+    return '/';
 }
 
 // Clean-path search: dict.dhamma.gift/kacchapa or /ru/kacchapa (and the same one folder
@@ -77,9 +86,14 @@ function getUrlParams() {
   // the address bar: drop a now-redundant ?lang=, and mask away /ru//th/ (language state
   // lives in localStorage/?lang=, not the path, going forward).
   if (explicitLang === 'ru' || explicitLang === 'en') localStorage.setItem('siteLanguage', explicitLang);
+  // Russian shows as ?lang=ru in the bar (like dhamma.gift), so a shared link opens in Russian too;
+  // English is the default and needs no parameter.
   params.delete('lang');
+  if (window.isRu) params.set('lang', 'ru');
   const qs = params.toString();
-  const newUrl = getAppBase() + (qs ? '?' + qs : '') + window.location.hash;
+  // Keep a clean-path word in the bar (/dukkha), only the /ru/ or /th/ folder is masked away.
+  const shownPath = window.location.pathname.replace(/\/(ru|th)(\/|$)/, '/').replace(/\/\//g, '/') || '/';
+  const newUrl = shownPath + (qs ? '?' + qs : '') + window.location.hash;
   if (newUrl !== window.location.pathname + window.location.search + window.location.hash) {
     history.replaceState(null, '', newUrl);
   }
@@ -424,6 +438,10 @@ function changeLanguage(lang) {
   const url = new URL(window.location.href);
   const base = getAppBase();
   url.pathname = lang === 'ru' ? base.replace(/\/$/, '') + '/ru/' : base;
+  // A clean-path word (/dukkha) travels as ?q= so the other language opens the same entry.
+  if (pathWord && !url.searchParams.get('q')) url.searchParams.set('q', pathWord);
+  // The target language decides ?lang= (a leftover lang=ru would bounce English straight back).
+  if (lang === 'ru') url.searchParams.set('lang', 'ru'); else url.searchParams.delete('lang');
   const siteLanguage = lang === 'ru' ? 'ru' : 'en';
 
   localStorage.setItem('siteLanguage', siteLanguage);
@@ -2327,6 +2345,19 @@ document.addEventListener('DOMContentLoaded', function() {
     let pressTimer;
 
     if (logoElements.length === 0) return;
+
+    // "Pāḷi → En/Ru" next to the logo: left or right click switches the language
+    // (the rest of the logo keeps click = home, long press / right click = language).
+    document.querySelectorAll('.wm-lang').forEach(cap => {
+        const switchLang = function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (typeof toggleLanguage === 'function') toggleLanguage();
+        };
+        cap.addEventListener('click', switchLang);
+        cap.addEventListener('contextmenu', switchLang);
+        ['mousedown', 'touchstart'].forEach(t => cap.addEventListener(t, e => e.stopPropagation(), { passive: true }));
+    });
 
     logoElements.forEach(el => {
         // Обычный клик (ЛКМ / Короткий тап)

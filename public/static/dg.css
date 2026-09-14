@@ -451,8 +451,11 @@ body[data-hist=on] .rail{animation:rail-in .34s var(--dg-ease) both}
 /* Full dictionary mark (Brahmi pāḷi + ground rule): header and start screen */
 .dg-mark-rule{stroke:#149c7c}
 body.dark-mode .dg-mark-rule{stroke:#16b394}
-.start-head{display:flex;align-items:center;justify-content:space-between;gap:32px;margin:0 0 26px}
-.start-head>div{flex:1 1 auto;min-width:0}
+.start-head{display:flex;align-items:center;gap:40px;margin:0 0 26px}
+.start-head>div{flex:0 1 auto;min-width:0}
 .start-head .sub{margin-bottom:0}
-.start-mark{flex:none;display:block;color:var(--dg-text);margin-right:8px}
-@media(max-width:767.98px){.start-mark{display:none}}
+.start-mark{flex:none;display:block;color:var(--dg-text)}
+@media(max-width:767.98px){.start-mark{display:none}.start-head>div{flex:1 1 auto}}
+/* Accent rule under the word actions, echoing the rule under the mark */
+.whead .acts{position:relative;padding-bottom:7px}
+.whead .acts::after{content:"";position:absolute;left:8px;right:8px;bottom:0;height:1px;background:var(--dg-accent)}
