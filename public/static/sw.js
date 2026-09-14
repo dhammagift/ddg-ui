@@ -1,7 +1,7 @@
 // Bumped on the redesign. Old cache-first strategy served stale /static files
 // after a deploy (browser kept the previous version), so this is now
 // network-first: always fetch fresh when online, fall back to cache offline.
-const CACHE_NAME = 'dpd-pwa-v2';
+const CACHE_NAME = 'ddg-pwa-v3';
 const urlsToCache = [
   '/',
   '/ru/',

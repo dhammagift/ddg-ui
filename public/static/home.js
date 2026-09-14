@@ -140,22 +140,36 @@ function saveFontSize() {
     localStorage.setItem("fontSize", fontSize);
 }
 
+// Font size is page zoom, the way dhamma.gift scales (search/js/home.js applyUiScale): dg.css sets
+// its sizes in px, so body{font-size} alone changed nothing visible (owner: +/− did nothing).
+// fontSize stays "px of BASE_FONT_SIZE" so saved values and the Alt+−/=/0 hotkeys (extra.js) keep
+// working; steps of 10%, 70–150%. --dg-zoom lets vw-based widths in dg.css undo the zoom.
+const CAN_ZOOM = !!(window.CSS && CSS.supports && CSS.supports('zoom', '1.5'));
+function fontScale() {
+    return Math.min(1.5, Math.max(0.7, Math.round(parseFloat(fontSize) / BASE_FONT_SIZE * 10) / 10 || 1));
+}
+
 function setFontSize() {
-    document.body.style.fontSize = fontSize + "px"
-    fontSizeDisplay.innerHTML = `${Math.round(fontSize / BASE_FONT_SIZE * 100)}%`
+    const scale = fontScale();
+    const root = document.documentElement;
+    // No zoom (Safari < 17, Firefox < 126): the old body font-size, better than a dead button.
+    document.body.style.fontSize = CAN_ZOOM ? '' : BASE_FONT_SIZE * scale + 'px';
+    root.style.zoom = CAN_ZOOM ? scale : '';
+    root.style.setProperty('--dg-zoom', CAN_ZOOM ? scale : 1);
+    fontSizeDisplay.innerHTML = `${Math.round(scale * 100)}%`
 }
 
 fontSizeUp.addEventListener("click", increaseFontSize)
 fontSizeDown.addEventListener("click", decreaseFontSize)
 
 function increaseFontSize() {
-    fontSize = parseInt(fontSize, 10) + 1
+    fontSize = BASE_FONT_SIZE * Math.min(1.5, fontScale() + 0.1)
     setFontSize()
     saveFontSize()
 }
 
 function decreaseFontSize() {
-    fontSize = parseInt(fontSize, 10) - 1
+    fontSize = BASE_FONT_SIZE * Math.max(0.7, fontScale() - 0.1)
     setFontSize()
     saveFontSize()
 }

@@ -103,7 +103,7 @@ body.tbar-hide .tbar{transform:translateY(-100%);margin-bottom:calc(-1 * var(--t
 #favbtn[aria-pressed=true]{color:var(--dg-accent-ink)}
 
 /* ── "same word in another dictionary" menu (openDicts.js markup) ── */
-.dict-dropdown-menu-down,.dict-dropdown-menu{display:none;position:fixed;width:296px;max-width:calc(100vw - 20px);max-height:min(70vh,560px);overflow-y:auto;background:var(--dg-surface);border:1px solid var(--dg-border);border-radius:14px;box-shadow:0 14px 40px var(--dg-shadow);padding:6px;z-index:50;font-size:13.5px}
+.dict-dropdown-menu-down,.dict-dropdown-menu{display:none;position:fixed;width:296px;max-width:calc(100vw / var(--dg-zoom, 1) - 20px);max-height:min(70vh,560px);overflow-y:auto;background:var(--dg-surface);border:1px solid var(--dg-border);border-radius:14px;box-shadow:0 14px 40px var(--dg-shadow);padding:6px;z-index:50;font-size:13.5px}
 .dict-dropdown-menu-down.show,.dict-dropdown-menu.show{display:block;animation:menu-in .16s var(--dg-ease)}
 @keyframes menu-in{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
 .dropdown-header{padding:11px 10px 5px;font-size:10.5px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--dg-text-muted)}
@@ -185,7 +185,7 @@ body[data-screen=start] #s-start,body[data-screen=entry] #s-entry{display:block}
 
 /* "*" info button next to the text/match count: opens a popover explaining the default search scope */
 .stat-star{position:relative;border:0;background:none;padding:0 0 0 1px;margin:0;color:var(--dg-accent-ink);font-size:12.5px;line-height:1;cursor:pointer;font-family:inherit}
-.stat-tip{display:none;position:absolute;top:100%;left:0;margin-top:8px;width:min(280px,calc(100vw - 16px));background:var(--dg-surface);border:1px solid var(--dg-border);border-radius:12px;box-shadow:0 14px 40px var(--dg-shadow);padding:10px 12px;z-index:70;white-space:normal;text-align:left;font-size:12.5px;line-height:1.5;color:var(--dg-text-2)}
+.stat-tip{display:none;position:absolute;top:100%;left:0;margin-top:8px;width:min(280px,calc(100vw / var(--dg-zoom, 1) - 16px));background:var(--dg-surface);border:1px solid var(--dg-border);border-radius:12px;box-shadow:0 14px 40px var(--dg-shadow);padding:10px 12px;z-index:70;white-space:normal;text-align:left;font-size:12.5px;line-height:1.5;color:var(--dg-text-2)}
 .stat-star[data-open] .stat-tip{display:block}
 .stat-tip p{margin:0 0 6px}
 .stat-tip p:last-child{margin-bottom:0}
@@ -326,7 +326,7 @@ body.dark-mode .dict-iframe-invert{filter:invert(1) hue-rotate(180deg)}
 /* ── panels (settings, mobile history) ─────────────────────── */
 body.pnopen::after{content:"";position:fixed;inset:0;background:rgba(27,29,25,.34);z-index:60;animation:fade-in .2s var(--dg-ease)}
 @keyframes fade-in{from{opacity:0}to{opacity:1}}
-.panel{position:fixed;top:0;right:0;bottom:0;width:330px;max-width:88vw;background:var(--dg-surface);border-left:1px solid var(--dg-border);z-index:61;display:flex;flex-direction:column;transform:translateX(102%);transition:transform .24s var(--dg-ease);box-shadow:-10px 0 34px var(--dg-shadow);visibility:hidden}
+.panel{position:fixed;top:0;right:0;bottom:0;width:330px;max-width:calc(88vw / var(--dg-zoom, 1));background:var(--dg-surface);border-left:1px solid var(--dg-border);z-index:61;display:flex;flex-direction:column;transform:translateX(102%);transition:transform .24s var(--dg-ease);box-shadow:-10px 0 34px var(--dg-shadow);visibility:hidden}
 .panel[data-open=true]{transform:none;visibility:visible}
 .panel .ph,.helpdlg .ph{display:flex;align-items:center;gap:9px;padding:14px 12px 12px 18px;border-bottom:1px solid var(--dg-border);flex:none}
 .panel .ph b,.helpdlg .ph b{font-size:14.5px;font-weight:600}
@@ -370,7 +370,7 @@ input.sw:focus-visible{outline:2px solid var(--dg-accent);outline-offset:2px}
 .hist-p li a:hover{background:var(--dg-surface-hover);color:var(--dg-text);text-decoration:none}
 
 /* help dialog (native <dialog>) */
-.helpdlg{border:1px solid var(--dg-border);border-radius:14px;padding:0;width:min(560px,92vw);max-height:86vh;background:var(--dg-surface);color:var(--dg-text);box-shadow:0 20px 60px var(--dg-shadow);display:flex;flex-direction:column}
+.helpdlg{border:1px solid var(--dg-border);border-radius:14px;padding:0;width:min(560px,calc(92vw / var(--dg-zoom, 1)));max-height:86vh;background:var(--dg-surface);color:var(--dg-text);box-shadow:0 20px 60px var(--dg-shadow);display:flex;flex-direction:column}
 .helpdlg:not([open]){display:none}
 .helpdlg::backdrop{background:rgba(27,29,25,.34)}
 .helpdlg .pb{font-size:13.5px;line-height:1.6;color:var(--dg-text-2)}
