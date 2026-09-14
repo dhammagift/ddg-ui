@@ -2,21 +2,14 @@
   "short_name": "DDG",
   "name": "Dict.Dhamma.Gift",
   "icons": [
-    {
-      "src": "/static/dpd.ico",
-      "type": "image/x-icon",
-      "sizes": "16x16"
-    },
-    {
-      "src": "/static/dg-logo.svg",
-      "type": "image/svg+xml",
-      "sizes": "192x192 512x512"
-    }
+    { "src": "/static/icon-192.png", "type": "image/png", "sizes": "192x192" },
+    { "src": "/static/icon-512.png", "type": "image/png", "sizes": "512x512" },
+    { "src": "/static/favicon.svg", "type": "image/svg+xml", "sizes": "any" }
   ],
   "start_url": "/?source=pwa",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#E4F8FF",
+  "background_color": "#111111",
   "theme_color": "#00131B",
   "description": "Dict.Dhamma.Gift — a Pāḷi multi-dictionary combining DPD, Gandhari, PTS, Sanskrit and Sutta-Vinaya definitions in one place.",
   "lang": "en",
@@ -28,93 +21,38 @@
     }
   },
   "screenshots": [
-        {
-            "src": "/static/android/1.jpg",
-            "type": "image/jpeg",
-            "sizes": "1080x1920",
-            "label": "Screen 1"
-        },
-        {
-            "src": "/static/android/2.jpg",
-            "type": "image/jpeg",
-            "sizes": "1080x1920",
-            "label": "Screen 2"
-        },
-        {
-            "src": "/static/android/3.jpg",
-            "type": "image/jpeg",
-            "sizes": "1080x1920",
-            "label": "Screen 3"
-        },
-        {
-            "src": "/static/android/4.jpg",
-            "type": "image/jpeg",
-            "sizes": "1080x1920",
-            "label": "Screen 4"
-        },
-        {
-            "src": "/static/android/5.jpg",
-            "type": "image/jpeg",
-            "sizes": "1080x1920",
-            "label": "Screen 5"
-        },
-        {
-            "src": "/static/android/6.jpg",
-            "type": "image/jpeg",
-            "sizes": "1080x1920",
-            "label": "Screen 6"
-        },
-        {
-            "src": "/static/android/7.jpg",
-            "type": "image/jpeg",
-            "sizes": "1080x1920",
-            "label": "Screen 7"
-        }
-    ],
+    { "src": "/static/android/1.jpg", "type": "image/jpeg", "sizes": "1080x1920", "label": "Screen 1" },
+    { "src": "/static/android/2.jpg", "type": "image/jpeg", "sizes": "1080x1920", "label": "Screen 2" },
+    { "src": "/static/android/3.jpg", "type": "image/jpeg", "sizes": "1080x1920", "label": "Screen 3" },
+    { "src": "/static/android/4.jpg", "type": "image/jpeg", "sizes": "1080x1920", "label": "Screen 4" },
+    { "src": "/static/android/5.jpg", "type": "image/jpeg", "sizes": "1080x1920", "label": "Screen 5" },
+    { "src": "/static/android/6.jpg", "type": "image/jpeg", "sizes": "1080x1920", "label": "Screen 6" },
+    { "src": "/static/android/7.jpg", "type": "image/jpeg", "sizes": "1080x1920", "label": "Screen 7" }
+  ],
   "shortcuts": [
     {
-      "name": "Dhamma.Gift",
-      "url": "/static/openDG.html",
-      "icons": [
-        {
-          "src": "/static/dg_icon_white-192.png",
-         "type": "image/png", 
-          "sizes": "192x192"
-        }
-      ]
+      "name": "Table of Contents",
+      "short_name": "TOC",
+      "url": "/static/openDG.html?url=https://dhamma.gift/toc",
+      "icons": [{ "src": "/static/shortcuts/toc.png", "type": "image/png", "sizes": "192x192" }]
     },
-		    {
-      "name": "Aksharamukha.com",
-      "url": "/static/openDG.html?url=https://www.aksharamukha.com/converter",
-      "icons": [
-        {
-          "src": "/static/maniIcon.png",
-         "type": "image/png", 
-          "sizes": "192x192"
-        }
-      ]
+    {
+      "name": "Favorites & history",
+      "short_name": "Favorites",
+      "url": "/static/openDG.html?url=https://dhamma.gift/4as",
+      "icons": [{ "src": "/static/shortcuts/favorites.png", "type": "image/png", "sizes": "192x192" }]
     },
-            {
+    {
       "name": "Dharmamitra.org",
+      "short_name": "Dharmamitra",
       "url": "/static/openDG.html?url=https://dharmamitra.org/",
-      "icons": [
-        {
-          "src": "/static/maniIcon.png",
-         "type": "image/png", 
-          "sizes": "192x192"
-        }
-      ]
+      "icons": [{ "src": "/static/shortcuts/dharmamitra.png", "type": "image/png", "sizes": "192x192" }]
     },
-          {
-      "name": "DPD Russian",
-      "url": "/ru/",
-      "icons": [
-        {
-          "src": "/static/dpd-dark-icon.svg",
-          "type": "image/svg+xml",
-          "sizes": "192x192"
-        }
-      ]
+    {
+      "name": "Aksharamukha.com",
+      "short_name": "Aksharamukha",
+      "url": "/static/openDG.html?url=https://www.aksharamukha.com/converter",
+      "icons": [{ "src": "/static/shortcuts/aksharamukha.png", "type": "image/png", "sizes": "192x192" }]
     }
   ]
 }
