@@ -32,13 +32,13 @@
   "shortcuts": [
     {
       "name": "Table of Contents",
-      "short_name": "TOC",
+      "short_name": "Table of Contents",
       "url": "/static/openDG.html?url=https://dhamma.gift/toc",
       "icons": [{ "src": "/static/shortcuts/toc.png", "type": "image/png", "sizes": "192x192" }]
     },
     {
-      "name": "Favorites & history",
-      "short_name": "Favorites",
+      "name": "Favorites & History",
+      "short_name": "Favorites & History",
       "url": "/static/openDG.html?url=https://dhamma.gift/4as",
       "icons": [{ "src": "/static/shortcuts/favorites.png", "type": "image/png", "sizes": "192x192" }]
     },
