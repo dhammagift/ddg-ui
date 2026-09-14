@@ -81,27 +81,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
     loadFontSize();
     swopSansSerif();
-
-    // Language switcher dropdown control
-    const languageIcon = document.querySelector(".language-icon");
-    const dropdown = document.querySelector(".dropdown");
-
-    // Ensure both elements exist before adding event listeners
-    if (languageIcon && dropdown) {
-        // Show or hide dropdown on icon click
-        languageIcon.addEventListener("click", function () {
-            dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
-        });
-
-        // Hide dropdown if clicked outside
-        document.addEventListener("click", function (e) {
-            if (!languageIcon.contains(e.target) && !dropdown.contains(e.target)) {
-                dropdown.style.display = "none";
-            }
-        });
-    } else {
-        console.error("Error: .language-icon or .dropdown element not found in the DOM.");
-    }
 });
 
 //// listeners
