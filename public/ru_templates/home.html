@@ -1,0 +1,263 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#149c7c">
+  <title>Dict.Dhamma.Gift — Пали Мультисловарь</title>
+  <meta name="description" content="Dict.Dhamma.Gift (DDG) — мультисловарь пали, объединяющий DPD, Гандхари, PTS, санскрит и определения Sutta-Vinaya в одном месте.">
+  <link rel="manifest" href="static/manifest-ru.json">
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('static/sw.js');
+    }
+  </script>
+
+  <link rel="canonical" href="https://dict.dhamma.gift/ru/">
+  <link rel="alternate" href="https://dict.dhamma.gift/ru/" hreflang="ru">
+  <link rel="alternate" href="https://dict.dhamma.gift/" hreflang="en">
+  <link rel="alternate" href="https://dict.dhamma.gift/" hreflang="x-default">
+
+  <link rel="icon" type="image/svg+xml" href="static/favicon.svg?v=ui10">
+  <link rel="icon" type="image/png" sizes="32x32" href="static/favicon-32.png?v=ui10">
+  <link rel="apple-touch-icon" href="static/apple-touch-icon.png?v=ui10">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Dict.Dhamma.Gift">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:url" content="https://dict.dhamma.gift/ru/">
+  <meta property="og:title" content="Dict.Dhamma.Gift — Пали Мультисловарь">
+  <meta property="og:description" content="Dict.Dhamma.Gift (DDG) — мультисловарь пали, объединяющий DPD, Гандхари, PTS, санскрит и определения Sutta-Vinaya в одном месте.">
+  <meta property="og:image" content="https://dict.dhamma.gift/static/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Dict.Dhamma.Gift — Пали Мультисловарь">
+  <meta name="twitter:description" content="Dict.Dhamma.Gift (DDG) — мультисловарь пали, объединяющий DPD, Гандхари, PTS, санскрит и определения Sutta-Vinaya в одном месте.">
+  <meta name="twitter:image" content="https://dict.dhamma.gift/static/og-image.png">
+  <link rel="stylesheet" href="static/dpd.css">
+  <link rel="stylesheet" href="static/jquery-ui.min.css">
+  <link rel="stylesheet" href="static/fa/fa.min.css">
+  <link rel="stylesheet" href="static/dg.css?v=ui15">
+  <script src="static/jquery-3.7.0.min.js"></script>
+  <script src="static/jquery-ui.min.js"></script>
+</head>
+
+<body data-screen="start" data-hist="on">
+<script>
+  // Apply saved theme/rail state before first paint (avoids flash)
+  try {
+    if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode');
+    if (localStorage.getItem('desktopHistoryHidden') === 'true') document.body.dataset.hist = 'off';
+    if (/[?&]q=/.test(location.search)) document.body.dataset.screen = 'entry';
+  } catch (e) {}
+</script>
+
+<div class="frame">
+
+<div class="tbar"><div class="in">
+  <a href="javascript:void(0)" class="wordmark alogo" id="logo-link" title="На главную / Сменить язык (долгое нажатие или ПКМ, Alt+1)">
+    <svg id="header-image" width="29" height="26" style="display:block;flex:none" viewBox="218 232 700 640" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="48" stroke-linejoin="miter"><path d="M410 381H282V600C282 690 330 721 372 721C420 721 462 690 462 612"/><path d="M608 690V545H738V380H855V292"/></g><circle cx="608" cy="712" r="38" fill="currentColor"/><path class="dg-mark-rule" d="M258 826.0H879" stroke-width="30"/></svg>
+    <b id="title-clear">Dict</b>
+    <span class="wm-lang" title="Сменить язык">Pāḷi → Ru/En</span>
+  </a>
+
+  <form class="shell" id="search-form">
+    <input class="search-box" type="search" name="search" id="search-box" placeholder="kacchapā, kacchapaa, черепаха"
+      aria-label="Слово на пали, Velthuis или по-русски" value="" autocomplete="off" inputmode="text" autocapitalize="off" autofocus>
+    <button class="clr" type="button" title="Очистить" onclick="var s=document.getElementById('search-box');s.value='';s.focus()"><i class="fa-solid fa-xmark"></i></button>
+    <span class="dict-dropdown-container">
+      <button class="rnd dict-dropdown-toggle" type="button" title="Искать это слово в другом словаре" onclick="toggleDictDropdown(event)"><i class="gi i-book"></i></button>
+      <div class="dict-dropdown-menu-down"></div>
+    </span>
+    <button class="rnd go" type="submit" id="search-button" title="Найти"><i class="fa-solid fa-magnifying-glass"></i></button>
+  </form>
+
+  <!-- Owner: header keeps only word history and the burger; everything else lives in the menu. -->
+  <div class="hbtns">
+    <button class="rb" id="histbtn" type="button" aria-pressed="true" title="История: показать / скрыть" onclick="histToggle()"><i class="gi i-history"></i></button>
+    <button class="rb" id="menubtn" type="button" title="Меню (Alt+M)" onclick="dgToggleMenu()"><i class="gi i-menu"></i></button>
+  </div>
+</div></div>
+
+<div class="page" id="main-pane">
+  <aside class="rail" id="history-pane">
+    <div class="rh">Избранное</div>
+    <ul id="rail-fav"></ul>
+    <div class="rh" style="padding-top:15px">История</div>
+    <ul id="rail-list"></ul>
+  </aside>
+
+  <div class="col">
+    <!-- start screen -->
+    <main class="screen" id="s-start">
+      <div class="start">
+        <div class="start-head">
+          <div>
+          <h1>Словари Pāḷi и Sanskrit<button class="helpq" type="button" title="Справка" onclick="dgOpenHelp()"><i class="gi i-help"></i></button></h1>
+          <p class="sub">Одно слово, несколько источников: DPD, санскритские словари, глоссарии и определения из Сутт и Винаи.</p>
+          </div>
+          <svg class="start-mark" width="96" height="88" viewBox="218 232 700 640" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="48" stroke-linejoin="miter"><path d="M410 381H282V600C282 690 330 721 372 721C420 721 462 690 462 612"/><path d="M608 690V545H738V380H855V292"/></g><circle cx="608" cy="712" r="38" fill="currentColor"/><path class="dg-mark-rule" d="M258 822.0H879" stroke-width="22"/></svg>
+        </div>
+        <div class="hows">
+          <div class="how"><b><i class="fa-solid fa-keyboard"></i>Четыре способа ввода</b><p>Пали с автоподсказками, Velthuis (<code>kacchapaa</code>), английский, русский.</p></div>
+          <div class="how"><b><i class="fa-solid fa-arrow-up-right-from-square"></i>Словарь на любом сайте</b><p><a href="https://chromewebstore.google.com/detail/dhammagift-search-and-wor/dnnogjdcmhbiobpnkhdbfnfjnjlikabd?hl=ru" target="_blank" rel="noopener">Расширение для браузера</a>, <a href="#" id="installLink" title="Меню Chrome Android → Добавить на главную">Web</a> и <a href="https://github.com/dhammagift/dpd-twa/releases" target="_blank" rel="noopener">Android</a>: выделите слово → «Поделиться» → Dict.DG.</p></div>
+          <div class="how"><b><i class="fa-solid fa-table-columns"></i>Таблицы сортируются</b><p>В словаре грамматики любой столбец кликается: падеж, число, род.</p></div>
+        </div>
+        <div class="recents" id="recents" hidden>
+          <h2>Недавние</h2>
+          <div class="chips" id="chips"></div>
+        </div>
+        <div class="dictlist">
+          <h2>Что подключено</h2>
+          <ul>
+            <li><b>Sutta-Vinaya Definitions and Similes</b><span class="n">определения из Канона</span></li>
+            <li><b>Gandhari Dictionary</b><em>M. Cone</em></li>
+            <li><b>PTS Dictionary</b><em>Rhys Davids</em></li>
+            <li><b>Buddhadust Glossology</b><em>сравнение терминов, Michael Olds</em></li>
+            <li><b>Wisdom Library</b><em>справочник по учениям Индии: буддизм, индуизм, джайнизм</em></li>
+            <li><b>Санскрит</b><em>Monier-Williams, Shabda-Sagara и ещё 30+ словарей</em></li>
+            <li><b>DPD</b><em>Digital Pāḷi Dictionary</em></li>
+          </ul>
+        </div>
+      </div>
+    </main>
+
+    <!-- entry screen -->
+    <main class="screen" id="s-entry">
+      <div class="whead">
+        <h1 id="whead-word"></h1>
+        <div class="acts">
+          <button class="rb" id="favbtn" type="button" aria-pressed="false" title="В избранное: закрепляет слово над историей" onclick="favToggle()"><i class="gi i-star"></i></button>
+          <button class="rb" type="button" title="Озвучить" onclick="speakWord()"><i class="fa-solid fa-volume-high"></i></button>
+          <button class="rb" type="button" title="Скопировать слово" onclick="copyWord()"><i class="gi i-copy"></i></button>
+          <button class="rb" type="button" title="Скопировать ссылку" onclick="copyLink()"><i class="gi i-link"></i></button>
+        </div>
+      </div>
+      <p class="meta"><span class="dg-stats skel" id="dg-stats" aria-live="polite"></span><a href="" class="dg-link" title="Искать это слово в текстах на Dhamma.Gift">Открыть на Dhamma.Gift<i class="gi i-ext" style="margin-left:5px;font-size:10px"></i></a></p>
+      <section class="sources dpd-pane" id="dpd-pane">
+        <div class="summary-results" id="summary-results"></div>
+        <div class="dpd-results" id="dpd-results"></div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<nav class="projrow" id="tab-container"><div class="in">
+  <a class="dg-link tab-link" href="" title="Искать это слово в текстах на Dhamma.Gift">Dhamma.gift</a>
+  <a href="javascript:void(0)" class="tab-link" aria-current="page">Словарь</a>
+  <a id="bold-def-link" class="tab-link" target="_blank" rel="noopener">Определения</a>
+  <a id="translations-link" class="tab-link" target="_blank" rel="noopener">Переводы</a>
+</div></nav>
+
+<footer class="pagefoot">
+  <span>Dict.Dhamma.Gift</span><span class="dot">·</span>
+  <a href="https://creativecommons.org/licenses/by-nc-sa/4.0" target="_blank" rel="noopener" title="CC BY-NC-SA 4.0">CC BY-NC-SA 4.0</a><span class="dot">·</span>
+  <a class="dpd-link" href="" target="_blank" title="Открыть на Dpdict.net">Powered by DPD</a>
+  <div class="sp">
+    <!-- Same contacts as dhamma.gift (search/js/home.js CONTACTS), GitHub pointing at this repo. -->
+    <a href="https://github.com/dhammagift/ddg-ui" target="_blank" rel="noopener" title="GitHub"><i class="fa-brands fa-github"></i></a>
+    <a href="mailto:agiftofdhamma@gmail.com" title="E-mail"><i class="fa-solid fa-at"></i></a>
+    <a href="https://m.youtube.com/channel/UCoyL5T0wMubqrj4OnKVOlMw" target="_blank" rel="noopener" title="YouTube"><i class="fa-brands fa-youtube"></i></a>
+    <a href="https://chat.whatsapp.com/ExExFBcvyhr33PdKJbsUXs" target="_blank" rel="noopener" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+    <a href="https://t.me/dhamma_gift" target="_blank" rel="noopener" title="Telegram"><i class="fa-brands fa-telegram"></i></a>
+  </div>
+</footer>
+</div>
+
+<!-- burger menu (dg-site.js) -->
+<aside class="panel" id="p-menu">
+  <div class="ph"><b>Меню</b>
+    <button class="rb" type="button" title="Закрыть" onclick="closePanels()"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div class="pb">
+    <button class="mrow first" type="button" onclick="closePanels();dgOpenFind()"><i class="gi i-find"></i><span>Найти на странице</span><kbd>Alt+F</kbd></button>
+    <button class="mrow" type="button" onclick="dgOpenCompass()"><i class="gi i-compass"></i><span>Компас</span><kbd>Alt+P</kbd></button>
+    <div class="grp">Вид</div>
+    <div class="set"><span class="lb">Язык</span>
+      <div class="seg big"><button type="button" aria-pressed="" onclick="changeLanguage('en')">En</button><button type="button" aria-pressed="true" onclick="changeLanguage('ru')">Ru</button></div></div>
+    <div class="set"><span class="lb">Тема</span>
+      <label class="seg big"><input type="checkbox" id="menu-theme-toggle"><span>день</span><span>ночь</span></label></div>
+    <div class="set"><span class="lb">Размер шрифта</span>
+      <div class="stepper big"><button type="button" onclick="decreaseFontSize()">−</button><span id="menu-font-size"></span><button type="button" onclick="increaseFontSize()">+</button></div></div>
+    <div class="grp">Ещё</div>
+    <button class="mrow first" type="button" onclick="openPanel('set')"><i class="gi i-gear"></i><span>Настройки</span><kbd>Alt+Shift+S</kbd></button>
+    <button class="mrow" type="button" onclick="closePanels();dgOpenHelp()"><i class="gi i-help"></i><span>Справка</span><kbd>Alt+H</kbd></button>
+  </div>
+</aside>
+
+<!-- settings panel -->
+<aside class="panel" id="p-set">
+  <div class="ph"><b>Настройки</b>
+    <a href="javascript:void(0)" class="phelp" onclick="dgOpenHelp()"><i class="gi i-help"></i>Справка</a>
+    <button class="rb" type="button" title="Закрыть" onclick="closePanels()"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div class="pb">
+    <div class="grp first">Вид</div>
+    <div class="set"><span class="lb">Язык интерфейса</span>
+      <div class="seg big"><button type="button" aria-pressed="" onclick="changeLanguage('en')">En</button><button type="button" aria-pressed="true" onclick="changeLanguage('ru')">Ru</button></div></div>
+    <div class="set"><span class="lb">Тема</span>
+      <label class="seg big"><input type="checkbox" id="theme-toggle"><span>день</span><span>ночь</span></label></div>
+    <div class="set"><span class="lb">Размер шрифта</span>
+      <div class="stepper big"><button type="button" id="font-size-down">−</button><span id="font-size-display"></span><button type="button" id="font-size-up">+</button></div></div>
+    <div class="set"><span class="lb">Шрифт<em>без засечек / с засечками</em></span>
+      <label class="seg"><input type="checkbox" id="sans-serif-toggle"><span>sans</span><span>serif</span></label></div>
+    <div class="set"><span class="lb">Ниггахита</span>
+      <label class="seg"><input type="checkbox" id="niggahita-toggle"><span>ṃ</span><span>ṁ</span></label></div>
+
+    <div class="grp">Что раскрывать сразу</div>
+    <div class="set"><span class="lb">Раздел грамматики</span><input class="sw" type="checkbox" id="grammar-toggle"></div>
+    <div class="set"><span class="lb">Раздел примеров</span><input class="sw" type="checkbox" id="example-toggle"></div>
+    <div class="set"><span class="lb">Сводка</span><input class="sw" type="checkbox" id="summary-toggle"></div>
+    <div class="set"><span class="lb">По одному разделу за раз<em>открытие нового закрывает прежний</em></span><input class="sw" type="checkbox" id="one-button-toggle" checked></div>
+
+    <div class="grp">Текст и звук</div>
+    <div class="set"><span class="lb">Символ сандхи ’</span><input class="sw" type="checkbox" id="sandhi-toggle"></div>
+    <div class="set"><span class="lb">Голос озвучки</span>
+      <label class="seg"><input type="checkbox" id="audio-toggle"><span>муж</span><span>жен</span></label></div>
+    <div class="set"><span class="lb">Показывать ссылки на проекты</span><input class="sw" type="checkbox" id="tabs-toggle"></div>
+
+    <div class="grp">Данные</div>
+    <div class="set"><span class="lb">История и избранное<em>хранится только в этом браузере</em></span>
+      <button class="rb act" type="button" id="clear-history-button" title="Очистить историю и избранное"><i class="fa-regular fa-trash-can"></i>очистить</button></div>
+    <div class="set"><span class="lb">Настройки<em>вернуть все значения к стандартным</em></span>
+      <button class="rb act" type="button" title="Сбросить все настройки" onclick="resetSettings()"><i class="gi i-reset"></i>сбросить</button></div>
+  </div>
+</aside>
+
+<!-- history panel (mobile) -->
+<aside class="panel hist-p" id="p-hist">
+  <div class="ph"><b>Избранное и история</b>
+    <button class="rb" type="button" title="Закрыть" onclick="closePanels()"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div class="pb"><div class="grp first">Избранное</div><ul id="fav-list"></ul><div class="grp">История</div><ul id="hist-list"></ul></div>
+</aside>
+
+<dialog id="help" class="helpdlg">
+  <div class="ph"><b>Справка</b><button class="rb" type="button" title="Закрыть" onclick="document.getElementById('help').close()"><i class="fa-solid fa-xmark"></i></button></div>
+  <div class="pb">
+    <h4>Ввод</h4>
+    <p>Пишите на пали с автоподсказками, в Velthuis или ищите по-русски. Двойной клик по любому слову в статье открывает его.</p>
+    <div class="vel"><span>aa → ā</span><span>ii → ī</span><span>uu → ū</span><span>"n → ṅ</span><span>~n → ñ</span><span>.t → ṭ</span><span>.d → ḍ</span><span>.n → ṇ</span><span>.m → ṃ</span><span>.l → ḷ</span></div>
+    <h4>Горячие клавиши</h4>
+    <p><kbd>/</kbd> фокус в поиск · <kbd>Alt+M</kbd> меню · <kbd>Alt+P</kbd> компас · <kbd>Alt+F</kbd> найти на странице · <kbd>Alt+S</kbd> другие словари · <kbd>Alt+Shift+S</kbd> настройки · <kbd>Alt+H</kbd> справка · <kbd>Alt+Q</kbd> в избранное · <kbd>Alt+R</kbd> озвучить · <kbd>Alt+T</kbd> тема · <kbd>Alt+−</kbd> <kbd>Alt+=</kbd> <kbd>Alt+0</kbd> размер шрифта · <kbd>Alt+1</kbd> Рус/Англ · <kbd>Alt+2</kbd> оглавление Dhamma.Gift · <kbd>Alt+3</kbd> это слово в поиске Dhamma.Gift</p>
+    <h4>Автоподсказки</h4>
+    <p>Слова из Четырёх Никай (DN, MN, SN, AN), части KN (Dhp, Iti, Ud, Snp) и всех разделов Винаи, редакция Mahāsaṅgīti.</p>
+    <h4>Приложения</h4>
+    <p><a href="https://chromewebstore.google.com/detail/dhammagift-search-and-wor/dnnogjdcmhbiobpnkhdbfnfjnjlikabd?hl=ru" target="_blank" rel="noopener">Расширение для браузера</a> (Chrome, Edge, Firefox), <a href="https://github.com/dhammagift/dpd-twa/releases" target="_blank" rel="noopener">приложение Android</a> или установите сайт из меню браузера. Затем выделите слово где угодно → «Поделиться» → Dict.DG.</p></div>
+</dialog>
+
+<div id="bubbleNotification" class="bubble-notification"></div>
+
+<script src="static/home.js?v=ui15"></script>
+<script src="static/dpd.js" defer></script>
+<script src="static/autopali.js" defer></script>
+<script src="static/extra.js?v=ui14"></script>
+<script src="static/sorter.js" defer></script>
+<script src="static/openDicts.js" defer></script>
+<script src="static/ui.js?v=ui8"></script>
+<script src="static/dg-site.js?v=ui9"></script>
+</body>
+
+</html>

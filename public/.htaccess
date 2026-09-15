@@ -1,0 +1,12 @@
+RewriteEngine On
+
+# Real files/directories (static assets, sw.js, manifest.json, /ru/, ...) are served as-is.
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Clean-path search, e.g. /kacchapa or /ru/kacchapa: serve the SPA shell, query string
+# (and any ?q= it already had) is passed through automatically. extra.js turns the path
+# segment into ?q= on load.
+RewriteRule ^ru/[^/]+/?$ ru/index.html [L]
+RewriteRule ^[^/]+/?$ index.html [L]
