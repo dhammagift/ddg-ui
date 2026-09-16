@@ -213,7 +213,6 @@
   };
   // Alt+H / Alt+S in extra.js call these names
   window.toggleDesktopHistoryBtn = window.toggleHistory = window.histToggle;
-  window.toggleDesktopSettingsBtn = window.toggleSettings = () => togglePanel('set');
 
   function openPanel(p) {
     closePanels();

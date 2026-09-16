@@ -207,7 +207,8 @@ document.addEventListener('keydown', function (event) {
   const run = (fn) => { event.preventDefault(); fn(); };
   const ru = !!window.isRu;
   if (event.shiftKey) {
-    if (code === 'KeyS') run(() => window.toggleSettings && window.toggleSettings());
+    // Everything lives in the burger menu now, so Alt+Shift+S is just a second way in (Alt+M).
+    if (code === 'KeyS') run(() => window.dgToggleMenu && window.dgToggleMenu());
     else if (code === 'KeyF') run(dgFind);
     return;
   }

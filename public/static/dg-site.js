@@ -54,39 +54,15 @@
   };
 
   // ---- burger menu ----------------------------------------------------------------------------
-  function syncMenu() {
-    const theme = document.getElementById('theme-toggle');
-    const menuTheme = document.getElementById('menu-theme-toggle');
-    if (theme && menuTheme) menuTheme.checked = theme.checked;
-    const size = document.getElementById('font-size-display');
-    const menuSize = document.getElementById('menu-font-size');
-    if (size && menuSize) menuSize.textContent = size.textContent;
-  }
-
+  // The menu now carries the whole settings panel (theme/font-size controls included), so the old
+  // "menu mirrors #p-set" syncing is gone with the second copy of those controls.
   window.dgToggleMenu = function () {
     const menu = document.getElementById('p-menu');
     if (!menu) return;
     if (menu.dataset.open === 'true') { window.closePanels(); return; }
-    syncMenu();
     // The search box autofocuses on load; leave it so its autocomplete list closes instead of
     // staying open over the page next to the menu.
     if (document.activeElement && document.activeElement.id === 'search-box') document.activeElement.blur();
     window.openPanel('menu');
   };
-
-  document.addEventListener('DOMContentLoaded', () => {
-    const menuTheme = document.getElementById('menu-theme-toggle');
-    if (menuTheme) {
-      menuTheme.addEventListener('change', () => {
-        const theme = document.getElementById('theme-toggle');
-        if (!theme) return;
-        theme.checked = menuTheme.checked;
-        theme.dispatchEvent(new Event('change'));
-      });
-    }
-    // The settings panel's stepper owns the font size; mirror its label (it changes on Alt+−/=/0 too).
-    const size = document.getElementById('font-size-display');
-    if (size) new MutationObserver(syncMenu).observe(size, { childList: true, characterData: true, subtree: true });
-    syncMenu();
-  });
 })();

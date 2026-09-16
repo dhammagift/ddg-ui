@@ -174,28 +174,9 @@
   <div class="pb">
     <button class="mrow first" type="button" onclick="closePanels();dgOpenFind()"><i class="gi i-find"></i><span>Find on the page</span><kbd>Alt+F</kbd></button>
     <button class="mrow" type="button" onclick="dgOpenCompass()"><i class="gi i-compass"></i><span>Compass</span><kbd>Alt+P</kbd></button>
+
     <div class="grp">Appearance</div>
     <div class="set"><span class="lb">Language</span>
-      <div class="seg big"><button type="button" aria-pressed="true" onclick="changeLanguage('en')">En</button><button type="button" aria-pressed="" onclick="changeLanguage('ru')">Ru</button></div></div>
-    <div class="set"><span class="lb">Theme</span>
-      <label class="seg big"><input type="checkbox" id="menu-theme-toggle"><span>day</span><span>night</span></label></div>
-    <div class="set"><span class="lb">Font size</span>
-      <div class="stepper big"><button type="button" onclick="decreaseFontSize()">−</button><span id="menu-font-size"></span><button type="button" onclick="increaseFontSize()">+</button></div></div>
-    <div class="grp">More</div>
-    <button class="mrow first" type="button" onclick="openPanel('set')"><i class="gi i-gear"></i><span>Settings</span><kbd>Alt+Shift+S</kbd></button>
-    <button class="mrow" type="button" onclick="closePanels();dgOpenHelp()"><i class="gi i-help"></i><span>Help</span><kbd>Alt+H</kbd></button>
-  </div>
-</aside>
-
-<!-- settings panel -->
-<aside class="panel" id="p-set">
-  <div class="ph"><b>Settings</b>
-    <a href="javascript:void(0)" class="phelp" onclick="dgOpenHelp()"><i class="gi i-help"></i>Help</a>
-    <button class="rb" type="button" title="Close" onclick="closePanels()"><i class="fa-solid fa-xmark"></i></button>
-  </div>
-  <div class="pb">
-    <div class="grp first">Appearance</div>
-    <div class="set"><span class="lb">Interface language</span>
       <div class="seg big"><button type="button" aria-pressed="true" onclick="changeLanguage('en')">En</button><button type="button" aria-pressed="" onclick="changeLanguage('ru')">Ru</button></div></div>
     <div class="set"><span class="lb">Theme</span>
       <label class="seg big"><input type="checkbox" id="theme-toggle"><span>day</span><span>night</span></label></div>
@@ -223,6 +204,8 @@
       <button class="rb act" type="button" id="clear-history-button" title="Clear history and favorites"><i class="fa-regular fa-trash-can"></i>clear</button></div>
     <div class="set"><span class="lb">Settings<em>return every value to default</em></span>
       <button class="rb act" type="button" title="Reset all settings" onclick="resetSettings()"><i class="gi i-reset"></i>reset</button></div>
+
+    <button class="mrow" type="button" onclick="closePanels();dgOpenHelp()"><i class="gi i-help"></i><span>Help</span><kbd>Alt+H</kbd></button>
   </div>
 </aside>
 
@@ -241,7 +224,7 @@
     <p>Type Pāḷi with autocomplete, in Velthuis, or search in English. Double-click any word in an entry to look it up.</p>
     <div class="vel"><span>aa → ā</span><span>ii → ī</span><span>uu → ū</span><span>"n → ṅ</span><span>~n → ñ</span><span>.t → ṭ</span><span>.d → ḍ</span><span>.n → ṇ</span><span>.m → ṃ</span><span>.l → ḷ</span></div>
     <h4>Hotkeys</h4>
-    <p><kbd>/</kbd> focus search · <kbd>Alt+M</kbd> menu · <kbd>Alt+P</kbd> compass · <kbd>Alt+F</kbd> find on the page · <kbd>Alt+S</kbd> other dictionaries · <kbd>Alt+Shift+S</kbd> settings · <kbd>Alt+H</kbd> help · <kbd>Alt+Q</kbd> to favorites · <kbd>Alt+R</kbd> read aloud · <kbd>Alt+T</kbd> theme · <kbd>Alt+−</kbd> <kbd>Alt+=</kbd> <kbd>Alt+0</kbd> font size · <kbd>Alt+1</kbd> English/Russian · <kbd>Alt+2</kbd> Dhamma.Gift contents · <kbd>Alt+3</kbd> this word in Dhamma.Gift search</p>
+    <p><kbd>/</kbd> focus search · <kbd>Alt+M</kbd> menu · <kbd>Alt+P</kbd> compass · <kbd>Alt+F</kbd> find on the page · <kbd>Alt+S</kbd> other dictionaries · <kbd>Alt+Shift+S</kbd> settings (the menu) · <kbd>Alt+H</kbd> help · <kbd>Alt+Q</kbd> to favorites · <kbd>Alt+R</kbd> read aloud · <kbd>Alt+T</kbd> theme · <kbd>Alt+−</kbd> <kbd>Alt+=</kbd> <kbd>Alt+0</kbd> font size · <kbd>Alt+1</kbd> English/Russian · <kbd>Alt+2</kbd> Dhamma.Gift contents · <kbd>Alt+3</kbd> this word in Dhamma.Gift search</p>
     <h4>Autosuggestions</h4>
     <p>Words from the Four Nikāyas (DN, MN, SN, AN), parts of the KN (Dhp, Iti, Ud, Snp) and all sections of the Vinaya, Mahāsaṅgīti edition.</p>
     <h4>Apps</h4>
@@ -253,11 +236,11 @@
 <script src="static/home.js?v=ui15"></script>
 <script src="static/dpd.js" defer></script>
 <script src="static/autopali.js" defer></script>
-<script src="static/extra.js?v=ui14"></script>
+<script src="static/extra.js?v=ui15"></script>
 <script src="static/sorter.js" defer></script>
 <script src="static/openDicts.js" defer></script>
-<script src="static/ui.js?v=ui8"></script>
-<script src="static/dg-site.js?v=ui11"></script>
+<script src="static/ui.js?v=ui9"></script>
+<script src="static/dg-site.js?v=ui12"></script>
 </body>
 
 </html>

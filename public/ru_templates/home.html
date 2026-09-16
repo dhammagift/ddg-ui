@@ -174,28 +174,9 @@
   <div class="pb">
     <button class="mrow first" type="button" onclick="closePanels();dgOpenFind()"><i class="gi i-find"></i><span>Найти на странице</span><kbd>Alt+F</kbd></button>
     <button class="mrow" type="button" onclick="dgOpenCompass()"><i class="gi i-compass"></i><span>Компас</span><kbd>Alt+P</kbd></button>
+
     <div class="grp">Вид</div>
     <div class="set"><span class="lb">Язык</span>
-      <div class="seg big"><button type="button" aria-pressed="" onclick="changeLanguage('en')">En</button><button type="button" aria-pressed="true" onclick="changeLanguage('ru')">Ru</button></div></div>
-    <div class="set"><span class="lb">Тема</span>
-      <label class="seg big"><input type="checkbox" id="menu-theme-toggle"><span>день</span><span>ночь</span></label></div>
-    <div class="set"><span class="lb">Размер шрифта</span>
-      <div class="stepper big"><button type="button" onclick="decreaseFontSize()">−</button><span id="menu-font-size"></span><button type="button" onclick="increaseFontSize()">+</button></div></div>
-    <div class="grp">Ещё</div>
-    <button class="mrow first" type="button" onclick="openPanel('set')"><i class="gi i-gear"></i><span>Настройки</span><kbd>Alt+Shift+S</kbd></button>
-    <button class="mrow" type="button" onclick="closePanels();dgOpenHelp()"><i class="gi i-help"></i><span>Справка</span><kbd>Alt+H</kbd></button>
-  </div>
-</aside>
-
-<!-- settings panel -->
-<aside class="panel" id="p-set">
-  <div class="ph"><b>Настройки</b>
-    <a href="javascript:void(0)" class="phelp" onclick="dgOpenHelp()"><i class="gi i-help"></i>Справка</a>
-    <button class="rb" type="button" title="Закрыть" onclick="closePanels()"><i class="fa-solid fa-xmark"></i></button>
-  </div>
-  <div class="pb">
-    <div class="grp first">Вид</div>
-    <div class="set"><span class="lb">Язык интерфейса</span>
       <div class="seg big"><button type="button" aria-pressed="" onclick="changeLanguage('en')">En</button><button type="button" aria-pressed="true" onclick="changeLanguage('ru')">Ru</button></div></div>
     <div class="set"><span class="lb">Тема</span>
       <label class="seg big"><input type="checkbox" id="theme-toggle"><span>день</span><span>ночь</span></label></div>
@@ -223,6 +204,8 @@
       <button class="rb act" type="button" id="clear-history-button" title="Очистить историю и избранное"><i class="fa-regular fa-trash-can"></i>очистить</button></div>
     <div class="set"><span class="lb">Настройки<em>вернуть все значения к стандартным</em></span>
       <button class="rb act" type="button" title="Сбросить все настройки" onclick="resetSettings()"><i class="gi i-reset"></i>сбросить</button></div>
+
+    <button class="mrow" type="button" onclick="closePanels();dgOpenHelp()"><i class="gi i-help"></i><span>Справка</span><kbd>Alt+H</kbd></button>
   </div>
 </aside>
 
@@ -241,7 +224,7 @@
     <p>Пишите на пали с автоподсказками, в Velthuis или ищите по-русски. Двойной клик по любому слову в статье открывает его.</p>
     <div class="vel"><span>aa → ā</span><span>ii → ī</span><span>uu → ū</span><span>"n → ṅ</span><span>~n → ñ</span><span>.t → ṭ</span><span>.d → ḍ</span><span>.n → ṇ</span><span>.m → ṃ</span><span>.l → ḷ</span></div>
     <h4>Горячие клавиши</h4>
-    <p><kbd>/</kbd> фокус в поиск · <kbd>Alt+M</kbd> меню · <kbd>Alt+P</kbd> компас · <kbd>Alt+F</kbd> найти на странице · <kbd>Alt+S</kbd> другие словари · <kbd>Alt+Shift+S</kbd> настройки · <kbd>Alt+H</kbd> справка · <kbd>Alt+Q</kbd> в избранное · <kbd>Alt+R</kbd> озвучить · <kbd>Alt+T</kbd> тема · <kbd>Alt+−</kbd> <kbd>Alt+=</kbd> <kbd>Alt+0</kbd> размер шрифта · <kbd>Alt+1</kbd> Рус/Англ · <kbd>Alt+2</kbd> оглавление Dhamma.Gift · <kbd>Alt+3</kbd> это слово в поиске Dhamma.Gift</p>
+    <p><kbd>/</kbd> фокус в поиск · <kbd>Alt+M</kbd> меню · <kbd>Alt+P</kbd> компас · <kbd>Alt+F</kbd> найти на странице · <kbd>Alt+S</kbd> другие словари · <kbd>Alt+Shift+S</kbd> настройки (то же меню) · <kbd>Alt+H</kbd> справка · <kbd>Alt+Q</kbd> в избранное · <kbd>Alt+R</kbd> озвучить · <kbd>Alt+T</kbd> тема · <kbd>Alt+−</kbd> <kbd>Alt+=</kbd> <kbd>Alt+0</kbd> размер шрифта · <kbd>Alt+1</kbd> Рус/Англ · <kbd>Alt+2</kbd> оглавление Dhamma.Gift · <kbd>Alt+3</kbd> это слово в поиске Dhamma.Gift</p>
     <h4>Автоподсказки</h4>
     <p>Слова из Четырёх Никай (DN, MN, SN, AN), части KN (Dhp, Iti, Ud, Snp) и всех разделов Винаи, редакция Mahāsaṅgīti.</p>
     <h4>Приложения</h4>
@@ -253,11 +236,11 @@
 <script src="static/home.js?v=ui15"></script>
 <script src="static/dpd.js" defer></script>
 <script src="static/autopali.js" defer></script>
-<script src="static/extra.js?v=ui14"></script>
+<script src="static/extra.js?v=ui15"></script>
 <script src="static/sorter.js" defer></script>
 <script src="static/openDicts.js" defer></script>
-<script src="static/ui.js?v=ui8"></script>
-<script src="static/dg-site.js?v=ui11"></script>
+<script src="static/ui.js?v=ui9"></script>
+<script src="static/dg-site.js?v=ui12"></script>
 </body>
 
 </html>
