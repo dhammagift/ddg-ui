@@ -54,6 +54,23 @@
   };
 
   // ---- burger menu ----------------------------------------------------------------------------
+  // Share, the same way the site's own drawer does it (dg-node's .dg-drawer-share): the native OS
+  // sheet where the browser has navigator.share, otherwise copy the link and say so.
+  window.dgShare = function () {
+    const url = location.href;
+    if (navigator.share) {
+      navigator.share({ title: document.title, url }).catch(() => { /* user cancelled */ });
+      return;
+    }
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(url).then(() => {
+        if (typeof showBubbleNotification === 'function') {
+          showBubbleNotification(window.isRu ? 'Ссылка скопирована' : 'Link copied');
+        }
+      }).catch(() => {});
+    }
+  };
+
   // The menu now carries the whole settings panel (theme/font-size controls included), so the old
   // "menu mirrors #p-set" syncing is gone with the second copy of those controls.
   window.dgToggleMenu = function () {
