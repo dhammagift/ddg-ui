@@ -39,7 +39,7 @@
   <link rel="stylesheet" href="static/dpd.css">
   <link rel="stylesheet" href="static/jquery-ui.min.css">
   <link rel="stylesheet" href="static/fa/fa.min.css">
-  <link rel="stylesheet" href="static/dg.css?v=ui17">
+  <link rel="stylesheet" href="static/dg.css?v=ui18">
   <script src="static/jquery-3.7.0.min.js"></script>
   <script src="static/jquery-ui.min.js"></script>
 </head>
@@ -169,6 +169,7 @@
 <!-- burger menu (dg-site.js) -->
 <aside class="panel" id="p-menu">
   <div class="ph"><b>Меню</b>
+    <button class="rb" type="button" title="Справка (Alt+H)" aria-label="Справка (Alt+H)" onclick="closePanels();dgOpenHelp()"><i class="gi i-help"></i></button>
     <button class="rb share" type="button" title="Поделиться" onclick="dgShare()"><i class="fa-solid fa-share-nodes"></i></button>
     <button class="rb" type="button" title="Закрыть" onclick="closePanels()"><i class="fa-solid fa-xmark"></i></button>
   </div>
@@ -206,7 +207,6 @@
     <div class="set"><span class="lb">Настройки<em>вернуть все значения к стандартным</em></span>
       <button class="rb act" type="button" title="Сбросить все настройки" onclick="resetSettings()"><i class="gi i-reset"></i>сбросить</button></div>
 
-    <button class="mrow" type="button" onclick="closePanels();dgOpenHelp()"><i class="gi i-help"></i><span>Справка</span><kbd>Alt+H</kbd></button>
   </div>
 </aside>
 

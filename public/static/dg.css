@@ -376,9 +376,10 @@ input.sw:focus-visible{outline:2px solid var(--dg-accent);outline-offset:2px}
    — the hidden checkbox still means "dark when checked", so saved themes and their highlight are
    untouched. */
 .seg-theme>span:nth-of-type(1){order:2}
-/* Share sits with Close on the right of the panel header (.ph pushes only its last child over). */
-.panel .ph .rb.share{margin-left:auto}
-.panel .ph .rb.share+.rb{margin-left:0}
+/* Icon buttons in a panel header (help / share / close) travel together on the right: .ph only
+   pushes its LAST child over, so the first of the group takes the auto margin instead. */
+.panel .ph .rb:first-of-type{margin-left:auto}
+.panel .ph .rb:first-of-type~.rb{margin-left:0}
 .rb.act{width:auto;padding:0 10px;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;font-size:11.5px;color:var(--dg-text-muted);margin-left:auto}
 .rb.act i{font-size:12px}
 .hist-p ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:1px}
