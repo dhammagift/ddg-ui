@@ -7,6 +7,14 @@
 // step with the settings panel, which stays the single place those values are saved.
 (function () {
   const SITE = location.hostname === 'dict.dhamma.gift' ? 'https://dhamma.gift' : '';
+  // The files borrowed from the site below are served with a one-year immutable cache (dg-node's
+  // CACHE_IMMUTABLE_YEAR) — a browser that already has a copy keeps it for a year. On the site
+  // itself that is safe, because its HTML tags get a ?v=<hash> stamp on every change; these lazy
+  // cross-origin loads cannot be reached by that rewriting. Without a stamp the dictionary kept
+  // the old copy of the find panel after it was fixed (owner, 2026-09-16). Bump this whenever the
+  // borrowed files change: the new URL is fetched at once, and the server's 24h tier for them
+  // (UNVERSIONED_LAZY_PATHS in dg-node) re-checks it afterwards.
+  const TOOLS_V = '?v=ui2';
   // Help opens the docs on the site serving this page (test.dhamma.gift/dict → test docs).
   window.dgOpenHelp = function () {
     window.open(SITE + (window.isRu ? '/ru' : '') + '/docs/dictionary/', '_blank');
@@ -26,8 +34,8 @@
   }
 
   window.dgOpenFind = function () {
-    load('js', SITE + '/assets/js/dg-page-find.js')
-      .then(() => load('js', SITE + '/assets/js/dg-page-find-ui.js'))
+    load('js', SITE + '/assets/js/dg-page-find.js' + TOOLS_V)
+      .then(() => load('js', SITE + '/assets/js/dg-page-find-ui.js' + TOOLS_V))
       .then(() => { if (window.DgPageFindUI) window.DgPageFindUI.open(); })
       .catch((e) => console.warn(e.message));
   };
@@ -36,7 +44,7 @@
     // quickModal.js sets window.isRu from the site's own URL rules on load; the dictionary's language
     // switch reads the same global, so keep the dictionary's value.
     const isRu = window.isRu;
-    Promise.all([load('css', SITE + '/assets/css/quick-modal.css'), load('js', SITE + '/assets/js/quickModal.js')])
+    Promise.all([load('css', SITE + '/assets/css/quick-modal.css' + TOOLS_V), load('js', SITE + '/assets/js/quickModal.js' + TOOLS_V)])
       .then(() => {
         window.isRu = isRu;
         if (typeof window.closePanels === 'function') window.closePanels();
