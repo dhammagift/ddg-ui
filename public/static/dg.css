@@ -357,11 +357,21 @@ input.sw:focus-visible{outline:2px solid var(--dg-accent);outline-offset:2px}
 .stepper button{width:27px;height:27px;border:1px solid var(--dg-border-strong);border-radius:50%;background:var(--dg-surface);color:var(--dg-text-2);font:inherit;font-size:13px;cursor:pointer;display:grid;place-items:center;padding:0}
 .stepper button:hover{border-color:var(--dg-accent);color:var(--dg-accent-ink)}
 .stepper span{min-width:40px;text-align:center;font-size:12.5px;color:var(--dg-text-muted);font-variant-numeric:tabular-nums}
-/* big variant: language/theme/font-size, a bit larger than the default seg/stepper (issue #1), same single-row layout as the rest */
-.seg.big{padding:3px}
-.seg.big>button,.seg.big>span{padding:7px 14px;font-size:13px}
-.stepper.big button{width:31px;height:31px;font-size:14px}
-.stepper.big span{min-width:46px;font-size:13px}
+/* issue #1: language/theme/font-size are the controls the owner compares against Dhamma.Gift's own
+   drawer, so they copy its .dg-segmented: label on its own muted line, control a full-width bar
+   bordered once with equal cells, active cell filled grey. Everything else stays the compact
+   label+control row above (the toggles especially, the owner asked to keep them). */
+.set:has(>.seg.big),.set:has(>.stepper.big){display:block}
+.set:has(>.seg.big)>.lb,.set:has(>.stepper.big)>.lb{margin-bottom:7px;font-size:12.8px;color:var(--dg-text-2)}
+.seg.big{width:100%;gap:0;padding:0;border:1px solid var(--dg-border);border-radius:var(--dg-radius);background:transparent;overflow:hidden}
+.seg.big>button,.seg.big>span{flex:1;min-width:0;padding:10px 6px;border-radius:0;font-size:.82rem;font-weight:600;text-align:center;box-shadow:none}
+.seg.big>button:hover{background:var(--dg-surface-hover)}
+.seg.big>button[aria-pressed=true],.seg.big>input:not(:checked)~span:nth-of-type(1),.seg.big>input:checked~span:nth-of-type(2){background:var(--dg-surface-active);color:var(--dg-text);box-shadow:none}
+.stepper.big{width:100%;gap:0;border:1px solid var(--dg-border);border-radius:var(--dg-radius);overflow:hidden}
+/* the "−"/"100%"/"+" cells are equal thirds, as in the drawer's own #dg-fontsize-ctrl */
+.stepper.big button{flex:1;width:auto;height:38px;border:0;border-radius:0;background:var(--dg-surface);font-size:1.2rem;font-weight:700}
+.stepper.big button:hover{background:var(--dg-surface-hover);border-color:transparent}
+.stepper.big span{flex:1;min-width:0;display:flex;align-items:center;justify-content:center;height:38px;font-size:.82rem;font-weight:600;color:var(--dg-text);background:var(--dg-surface-hover)}
 .rb.act{width:auto;padding:0 10px;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;font-size:11.5px;color:var(--dg-text-muted);margin-left:auto}
 .rb.act i{font-size:12px}
 .hist-p ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:1px}
