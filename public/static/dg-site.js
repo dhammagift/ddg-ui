@@ -14,7 +14,10 @@
   // the old copy of the find panel after it was fixed (owner, 2026-09-16). Bump this whenever the
   // borrowed files change: the new URL is fetched at once, and the server's 24h tier for them
   // (UNVERSIONED_LAZY_PATHS in dg-node) re-checks it afterwards.
-  const TOOLS_V = '?v=ui2';
+  // ui3: quickModal.js takes a host-provided settings opener (window.dgQuickSettings) and
+  // addresses the site's own icons/links through a base — the dictionary had no quick settings
+  // in the compass and its icons 404'd on the subdomain (ddg-ui #4, #5).
+  const TOOLS_V = '?v=ui3';
   // Help opens the docs on the site serving this page (test.dhamma.gift/dict → test docs).
   window.dgOpenHelp = function () {
     window.open(SITE + (window.isRu ? '/ru' : '') + '/docs/dictionary/', '_blank');
@@ -51,6 +54,20 @@
         if (typeof window.toggleQuickModal === 'function') window.toggleQuickModal();
       })
       .catch((e) => console.warn(e.message));
+  };
+
+  // The compass window asks the host page for a settings opener when there is no home.js (see
+  // quickModal.js): the dictionary's own menu already holds theme, font size and language, so the
+  // gear opens that instead of duplicating a second settings panel (ddg-ui #5).
+  window.dgQuickSettings = {
+    icon: '<img src="static/gear.svg" width="18" height="18" alt="">',
+    open: function () {
+      // Close the compass first: its modal sits above the dictionary's panels, so opening the menu
+      // underneath it looked like the gear did nothing.
+      if (typeof window.closePanels === 'function') window.closePanels();
+      if (typeof window.toggleQuickModal === 'function') window.toggleQuickModal();
+      if (typeof window.dgToggleMenu === 'function') window.dgToggleMenu();
+    }
   };
 
   // ---- burger menu ----------------------------------------------------------------------------
