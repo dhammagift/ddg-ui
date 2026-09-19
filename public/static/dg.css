@@ -497,4 +497,7 @@ body.dark-mode .dg-mark-rule{stroke:#16b394}
   margin:0 0 18px;padding:10px 14px;border:1px solid var(--dg-border);border-radius:var(--dg-radius);
   background:var(--dg-surface);color:var(--dg-text);font-size:.95rem}
 .dg-offline-invite-btns{display:flex;gap:8px;flex:0 0 auto;align-items:center}
+/* Pronunciation needs the network (audio is streamed from DPD); offline it is shown disabled
+   rather than silently doing nothing. Star, copy and link keep working. */
+body.is-offline #speakbtn{opacity:.35;pointer-events:none}
 .dg-offline-invite-btns .rb{white-space:nowrap}

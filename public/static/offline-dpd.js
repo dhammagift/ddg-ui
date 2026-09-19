@@ -163,6 +163,8 @@
         // dpd_i2h maps INFLECTED forms to headwords, so a word that is already the dictionary form
         // ("kacchapa") can be missing from it while sitting in dpd_ebts as its own entry.
         var heads = (i2h[key] || []).concat(ebts[key] ? [key] : (ebts[key + ' 1'] ? [key + ' 1'] : []));
+        // The direct probe often repeats what i2h already listed ("paṭicca 1" twice on screen).
+        heads = heads.filter(function (h, i) { return heads.indexOf(h) === i; });
         // i2h lists candidates alphabetically, not by relevance: for "nibbāna" it puts "nibba" (eaves)
         // first. A Pali form extends its lemma, so the longest headword the form starts with IS it.
         return heads.slice().sort(function (a, b) {
@@ -324,8 +326,17 @@
         });
     }
 
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wire);
-    else wire();
+    // One class for "we are offline", so the interface can stay honest about what still works
+    // (CSS greys out the pronounce button; star/copy/link need no network).
+    function paintOnline() {
+        if (document.body) document.body.classList.toggle('is-offline', navigator.onLine === false);
+    }
+    window.addEventListener('online', paintOnline);
+    window.addEventListener('offline', paintOnline);
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function () { wire(); paintOnline(); });
+    } else { wire(); paintOnline(); }
 
     // Keep what is already downloaded current, but never on a cold cache: nothing is fetched until
     // the reader asks for it.

@@ -560,6 +560,10 @@ function clearExternalSlots() {
 // The DPD slot already says "DPD — Digital Pāḷi Dictionary"; a badge inside the answer said it a
 // third time (owner). The offline state is marked once, next to that title.
 function markDpdOffline(on) {
+    // navigator.onLine can stay true while nothing actually reaches the network (captive portals,
+    // a dead uplink), so the interface follows what the last request DID, not what the flag says:
+    // the pronounce button is greyed out (dg.css body.is-offline) as soon as we answer offline.
+    document.body.classList.toggle('is-offline', !!on);
     const title = document.querySelector('#ext-slot-dpd .ext-dict-title');
     if (!title) return;
     let mark = title.querySelector('.ext-dict-offline');

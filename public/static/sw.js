@@ -26,7 +26,15 @@ const ASSETS = [
   'static/jquery-3.7.0.min.js', 'static/jquery-ui.min.js',
   'static/dpd.css', 'static/dg.css', 'static/jquery-ui.min.css', 'static/fa/fa.min.css',
   'static/sutta_words.txt', 'static/circle-notch.svg', 'static/open-link.svg',
-  'static/buddhadust-glossology.htm', 'static/manifest.json'
+  'static/buddhadust-glossology.htm', 'static/manifest.json',
+  // Masked SVG icons (dg.css .gi/.i-*) — without them the star/copy/link buttons render as blank
+  // squares offline, which is what made the word actions look missing.
+  'static/icons/book.svg', 'static/icons/compass.svg', 'static/icons/copy.svg', 'static/icons/ext.svg',
+  'static/icons/find.svg', 'static/icons/gear.svg', 'static/icons/help.svg', 'static/icons/history.svg',
+  'static/icons/link.svg', 'static/icons/list.svg', 'static/icons/menu.svg', 'static/icons/reset.svg',
+  'static/icons/star.svg', 'static/icons/theme.svg', 'static/icons/translit.svg',
+  // Font Awesome faces (the speaker, the keyboard, …) referenced from fa.min.css.
+  'static/fa/fa-solid-900.woff2', 'static/fa/fa-regular-400.woff2', 'static/fa/fa-brands-400.woff2'
 ];
 
 const urlsToCache = [SHELL_EN, SHELL_RU]
