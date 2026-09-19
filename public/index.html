@@ -1,1 +1,253 @@
-templates/home.html
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#149c7c">
+  <title>Dict.Dhamma.Gift — Pāḷi Multi-Dictionary</title>
+  <meta name="description" content="Dict.Dhamma.Gift (DDG) — a Pāḷi multi-dictionary combining DPD, Gandhari, PTS, Sanskrit and Sutta-Vinaya definitions in one place.">
+  <link rel="manifest" href="static/manifest.json">
+
+  <link rel="canonical" href="https://dict.dhamma.gift/">
+  <link rel="alternate" href="https://dict.dhamma.gift/ru/" hreflang="ru">
+  <link rel="alternate" href="https://dict.dhamma.gift/" hreflang="en">
+  <link rel="alternate" href="https://dict.dhamma.gift/" hreflang="x-default">
+
+  <link rel="icon" type="image/svg+xml" href="static/favicon.svg?v=ui26">
+  <link rel="icon" type="image/png" sizes="32x32" href="static/favicon-32.png?v=ui26">
+  <link rel="apple-touch-icon" href="static/apple-touch-icon.png?v=ui26">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Dict.Dhamma.Gift">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:url" content="https://dict.dhamma.gift/">
+  <meta property="og:title" content="Dict.Dhamma.Gift — Pāḷi Multi-Dictionary">
+  <meta property="og:description" content="Dict.Dhamma.Gift (DDG) — a Pāḷi multi-dictionary combining DPD, Gandhari, PTS, Sanskrit and Sutta-Vinaya definitions in one place.">
+  <meta property="og:image" content="https://dict.dhamma.gift/static/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Dict.Dhamma.Gift — Pāḷi Multi-Dictionary">
+  <meta name="twitter:description" content="Dict.Dhamma.Gift (DDG) — a Pāḷi multi-dictionary combining DPD, Gandhari, PTS, Sanskrit and Sutta-Vinaya definitions in one place.">
+  <meta name="twitter:image" content="https://dict.dhamma.gift/static/og-image.png">
+  <link rel="stylesheet" href="static/dpd.css">
+  <link rel="stylesheet" href="static/jquery-ui.min.css">
+  <link rel="stylesheet" href="static/icons-fa.css?v=ui24">
+  <link rel="stylesheet" href="static/dg.css?v=ui26">
+  <script src="static/jquery-3.7.0.min.js"></script>
+  <script src="static/jquery-ui.min.js"></script>
+</head>
+
+<body data-screen="start" data-hist="on">
+<script>
+  // Apply saved theme/rail state before first paint (avoids flash)
+  try {
+    if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode');
+    if (localStorage.getItem('desktopHistoryHidden') === 'true') document.body.dataset.hist = 'off';
+    if (/[?&]q=/.test(location.search)) document.body.dataset.screen = 'entry';
+  } catch (e) {}
+</script>
+
+<div class="frame">
+
+<div class="tbar"><div class="in">
+  <a href="javascript:void(0)" class="wordmark alogo" id="logo-link" title="Home / Change language (long press or right-click, Alt+1)">
+    <svg id="header-image" width="29" height="26" style="display:block;flex:none" viewBox="218 232 700 640" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="48" stroke-linejoin="miter"><path d="M410 381H282V600C282 690 330 721 372 721C420 721 462 690 462 612"/><path d="M608 690V545H738V380H855V292"/></g><circle cx="608" cy="712" r="38" fill="currentColor"/><path class="dg-mark-rule" d="M258 826.0H879" stroke-width="30"/></svg>
+    <b id="title-clear">Dict</b>
+    <span class="wm-lang" title="Switch language">Pāḷi → En/Ru</span>
+  </a>
+
+  <form class="shell" id="search-form">
+    <input class="search-box" type="search" name="search" id="search-box" placeholder="kacchapā, kacchapaa, tortoise"
+      aria-label="Pāḷi word, Velthuis or English" value="" autocomplete="off" inputmode="text" autocapitalize="off" autofocus>
+    <button class="clr" type="button" title="Clear" onclick="var s=document.getElementById('search-box');s.value='';s.focus()"><i class="gi i-fa-xmark"></i></button>
+    <span class="dict-dropdown-container">
+      <button class="rnd dict-dropdown-toggle" type="button" title="Look this word up in another dictionary" onclick="toggleDictDropdown(event)"><i class="gi i-book"></i></button>
+      <div class="dict-dropdown-menu-down"></div>
+    </span>
+    <button class="rnd go" type="submit" id="search-button" title="Search"><i class="gi i-fa-magnifying-glass"></i></button>
+  </form>
+
+  <!-- Owner: header keeps only word history and the burger; everything else lives in the menu. -->
+  <div class="hbtns">
+    <button class="rb" id="histbtn" type="button" aria-pressed="true" title="History: show / hide" onclick="histToggle()"><i class="gi i-history"></i></button>
+    <button class="rb" id="menubtn" type="button" title="Menu (Alt+M)" onclick="dgToggleMenu()"><i class="gi i-menu"></i></button>
+  </div>
+</div></div>
+
+<div class="page" id="main-pane">
+  <aside class="rail" id="history-pane">
+    <div class="rh">Favorites</div>
+    <ul id="rail-fav"></ul>
+    <div class="rh" style="padding-top:15px">History</div>
+    <ul id="rail-list"></ul>
+  </aside>
+
+  <div class="col">
+    <!-- start screen -->
+    <main class="screen" id="s-start">
+      <div class="start">
+      <div class="dg-offline-invite" id="dg-offline-invite" hidden>
+        <span>Download the offline mini-dictionary (~3.7 MB)? Short meanings will keep working with no network.</span>
+        <span class="dg-offline-invite-btns">
+          <button class="rb act" type="button" id="dg-offline-invite-yes">Download</button>
+          <button class="rb" type="button" id="dg-offline-invite-no">Not now</button>
+        </span>
+      </div>
+        <div class="start-head">
+          <div>
+          <h1>Pāḷi and Sanskrit dictionaries<button class="helpq" type="button" title="Help" onclick="dgOpenHelp()"><i class="gi i-help"></i></button></h1>
+          <p class="sub">One word, several sources: DPD, Sanskrit dictionaries, glossaries and definitions from the Suttas and Vinaya.</p>
+          </div>
+          <svg class="start-mark" width="96" height="88" viewBox="218 232 700 640" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="48" stroke-linejoin="miter"><path d="M410 381H282V600C282 690 330 721 372 721C420 721 462 690 462 612"/><path d="M608 690V545H738V380H855V292"/></g><circle cx="608" cy="712" r="38" fill="currentColor"/><path class="dg-mark-rule" d="M258 822.0H879" stroke-width="22"/></svg>
+        </div>
+        <div class="hows">
+          <div class="how"><b><i class="gi i-fa-arrow-up-right-from-square"></i>Dictionary on any site</b><p><a href="https://chromewebstore.google.com/detail/dhammagift-search-and-wor/dnnogjdcmhbiobpnkhdbfnfjnjlikabd" target="_blank" rel="noopener">Browser extension</a>, <a href="#" id="installLink" title="Chrome menu → Add to Home screen">Web</a> or <a href="https://github.com/dhammagift/dg-twa/releases/download/latest/dict-dhamma-gift.apk" target="_blank" rel="noopener">app</a>: select a word → Share → Dict.DG.</p></div>
+          <div class="how"><b><i class="gi i-fa-cloud-arrow-down"></i>Works offline</b><p>Short meanings with no network: <a href="#" id="offline-dl-link">download the mini-dictionary</a> (~3.7 MB).</p></div>
+          <div class="how"><b><i class="gi i-fa-table-columns"></i>Sortable tables</b><p>In the grammar dictionary any column header sorts: case, number, gender.</p></div>
+          <div class="how how-typing"><b><i class="gi i-fa-keyboard"></i>Four ways to type</b><p>Pāḷi with autocomplete, Velthuis (<code>kacchapaa</code>), English, Russian.</p></div>
+        </div>
+        <div class="recents" id="recents" hidden>
+          <h2>Recent</h2>
+          <div class="chips" id="chips"></div>
+        </div>
+        <div class="dictlist">
+          <h2>What is included</h2>
+          <ul>
+            <li><b>Buddhadust Glossology</b><em>comparative terms, Michael Olds</em></li>
+            <li><b>DPD</b><em>Digital Pāḷi Dictionary</em></li>
+            <li><b>Gandhari Dictionary</b><em>M. Cone</em></li>
+            <li><b>PTS Dictionary</b><em>Rhys Davids</em></li>
+            <li><b>Sanskrit</b><em>Monier-Williams, Shabda-Sagara and 30+ more</em></li>
+            <li><b>Sutta-Vinaya Definitions and Similes</b><span class="n">definitions from the Canon</span></li>
+            <li><b>Wisdom Library</b><em>reference on Indian teachings: Buddhism, Hinduism, Jainism</em></li>
+          </ul>
+        </div>
+      </div>
+    </main>
+
+    <!-- entry screen -->
+    <main class="screen" id="s-entry">
+      <div class="whead">
+        <h1 id="whead-word"></h1>
+        <div class="acts">
+          <button class="rb" id="favbtn" type="button" aria-pressed="false" title="Favorite: pins the word above history" onclick="favToggle()"><i class="gi i-star"></i></button>
+          <button class="rb" id="speakbtn" type="button" title="Pronounce" onclick="speakWord()"><i class="gi i-fa-volume-high"></i></button>
+          <button class="rb" type="button" title="Copy word" onclick="copyWord()"><i class="gi i-copy"></i></button>
+          <button class="rb" type="button" title="Copy link" onclick="copyLink()"><i class="gi i-link"></i></button>
+        </div>
+      </div>
+      <p class="meta"><span class="dg-stats skel" id="dg-stats" aria-live="polite"></span><a href="" class="dg-link" title="Search this word in the texts on Dhamma.Gift">Open on Dhamma.Gift<i class="gi i-ext" style="margin-left:5px;font-size:10px"></i></a></p>
+      <section class="sources dpd-pane" id="dpd-pane">
+        <div class="summary-results" id="summary-results"></div>
+        <div class="dpd-results" id="dpd-results"></div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<nav class="projrow" id="tab-container"><div class="in">
+  <a class="dg-link tab-link" href="" title="Search this word in the texts on Dhamma.Gift">Dhamma.gift</a>
+  <a href="javascript:void(0)" class="tab-link" aria-current="page">Dictionary</a>
+  <a id="bold-def-link" class="tab-link" target="_blank" rel="noopener">Definitions</a>
+  <a id="translations-link" class="tab-link" target="_blank" rel="noopener">Translations</a>
+</div></nav>
+
+<footer class="pagefoot">
+  <span>Dict.Dhamma.Gift</span><span class="dot">·</span>
+  <a href="https://creativecommons.org/licenses/by-nc-sa/4.0" target="_blank" rel="noopener" title="CC BY-NC-SA 4.0">CC BY-NC-SA 4.0</a><span class="dot">·</span>
+  <a class="dpd-link" href="" target="_blank" title="Open at Dpdict.net">Powered by DPD</a>
+  <div class="sp">
+    <!-- Same contacts as dhamma.gift (search/js/home.js CONTACTS), GitHub pointing at this repo. -->
+    <a href="https://github.com/dhammagift/ddg-ui" target="_blank" rel="noopener" title="GitHub"><i class="gi i-fa-github"></i></a>
+    <a href="mailto:agiftofdhamma@gmail.com" title="E-mail"><i class="gi i-fa-at"></i></a>
+    <a href="https://m.youtube.com/channel/UCoyL5T0wMubqrj4OnKVOlMw" target="_blank" rel="noopener" title="YouTube"><i class="gi i-fa-youtube"></i></a>
+    <a href="https://chat.whatsapp.com/ExExFBcvyhr33PdKJbsUXs" target="_blank" rel="noopener" title="WhatsApp"><i class="gi i-fa-whatsapp"></i></a>
+    <a href="https://t.me/dhamma_gift" target="_blank" rel="noopener" title="Telegram"><i class="gi i-fa-telegram"></i></a>
+  </div>
+</footer>
+</div>
+
+<!-- burger menu (dg-site.js) -->
+<aside class="panel" id="p-menu">
+  <div class="ph"><b>Menu</b>
+    <button class="rb" type="button" title="Help (Alt+H)" aria-label="Help (Alt+H)" onclick="closePanels();dgOpenHelp()"><i class="gi i-help"></i></button>
+    <button class="rb share" type="button" title="Share" onclick="dgShare()"><i class="gi i-fa-share-nodes"></i></button>
+    <button class="rb" type="button" title="Close" onclick="closePanels()"><i class="gi i-fa-xmark"></i></button>
+  </div>
+  <div class="pb">
+    <button class="mrow first" type="button" onclick="closePanels();dgOpenFind()"><i class="gi i-find"></i><span>Find on the page</span><kbd>Alt+F</kbd></button>
+    <button class="mrow" type="button" onclick="dgOpenCompass()"><i class="gi i-compass"></i><span>Compass</span><kbd>Alt+P</kbd></button>
+
+    <div class="grp">Appearance</div>
+    <div class="set"><span class="lb">Language</span>
+      <div class="seg big"><button type="button" aria-pressed="true" onclick="changeLanguage('en')">En</button><button type="button" aria-pressed="" onclick="changeLanguage('ru')">Ru</button></div></div>
+    <div class="set"><span class="lb">Theme</span>
+      <label class="seg big seg-theme"><input type="checkbox" id="theme-toggle"><span>day</span><span>night</span></label></div>
+    <div class="set"><span class="lb">Font size</span>
+      <div class="stepper big"><button type="button" id="font-size-down">−</button><span id="font-size-display"></span><button type="button" id="font-size-up">+</button></div></div>
+    <div class="set"><span class="lb">Font<em>sans-serif / serif</em></span>
+      <label class="seg"><input type="checkbox" id="sans-serif-toggle"><span>sans</span><span>serif</span></label></div>
+    <div class="set"><span class="lb">Niggahīta</span>
+      <label class="seg"><input type="checkbox" id="niggahita-toggle"><span>ṃ</span><span>ṁ</span></label></div>
+
+    <div class="grp">Expand right away</div>
+    <div class="set"><span class="lb">Grammar section</span><input class="sw" type="checkbox" id="grammar-toggle"></div>
+    <div class="set"><span class="lb">Examples section</span><input class="sw" type="checkbox" id="example-toggle"></div>
+    <div class="set"><span class="lb">Summary</span><input class="sw" type="checkbox" id="summary-toggle"></div>
+    <div class="set"><span class="lb">One section at a time<em>opening a section closes the previous one</em></span><input class="sw" type="checkbox" id="one-button-toggle" checked></div>
+
+    <div class="grp">Text and sound</div>
+    <div class="set"><span class="lb">Sandhi mark ’</span><input class="sw" type="checkbox" id="sandhi-toggle"></div>
+    <div class="set"><span class="lb">Voice</span>
+      <label class="seg"><input type="checkbox" id="audio-toggle"><span>male</span><span>female</span></label></div>
+    <div class="set"><span class="lb">Show project links</span><input class="sw" type="checkbox" id="tabs-toggle"></div>
+
+    <div class="grp">Data</div>
+    <div class="set"><span class="lb">Offline dictionary<em id="offline-dl-sub">short meanings with no network · ~2.7 MB</em></span>
+      <button class="rb act" type="button" id="offline-dl-btn" title="Download the offline mini-dictionary"><i class="gi i-fa-download"></i>download</button></div>
+    <div class="set"><span class="lb">History and favorites<em>stored only in this browser</em></span>
+      <button class="rb act" type="button" id="clear-history-button" title="Clear history and favorites"><i class="gi i-fa-trash-can"></i>clear</button></div>
+    <div class="set"><span class="lb">Settings<em>return every value to default</em></span>
+      <button class="rb act" type="button" title="Reset all settings" onclick="resetSettings()"><i class="gi i-reset"></i>reset</button></div>
+
+  </div>
+</aside>
+
+<!-- history panel (mobile) -->
+<aside class="panel hist-p" id="p-hist">
+  <div class="ph"><b>Favorites and history</b>
+    <button class="rb" type="button" title="Close" onclick="closePanels()"><i class="gi i-fa-xmark"></i></button>
+  </div>
+  <div class="pb"><div class="grp first">Favorites</div><ul id="fav-list"></ul><div class="grp">History</div><ul id="hist-list"></ul></div>
+</aside>
+
+<dialog id="help" class="helpdlg">
+  <div class="ph"><b>Help</b><button class="rb" type="button" title="Close" onclick="document.getElementById('help').close()"><i class="gi i-fa-xmark"></i></button></div>
+  <div class="pb">
+    <h4>Typing</h4>
+    <p>Type Pāḷi with autocomplete, in Velthuis, or search in English. Double-click any word in an entry to look it up.</p>
+    <div class="vel"><span>aa → ā</span><span>ii → ī</span><span>uu → ū</span><span>"n → ṅ</span><span>~n → ñ</span><span>.t → ṭ</span><span>.d → ḍ</span><span>.n → ṇ</span><span>.m → ṃ</span><span>.l → ḷ</span></div>
+    <h4>Hotkeys</h4>
+    <p><kbd>/</kbd> focus search · <kbd>Alt+M</kbd> menu · <kbd>Alt+P</kbd> compass · <kbd>Alt+F</kbd> find on the page · <kbd>Alt+S</kbd> other dictionaries · <kbd>Alt+Shift+S</kbd> settings (the menu) · <kbd>Alt+H</kbd> help · <kbd>Alt+Q</kbd> to favorites · <kbd>Alt+R</kbd> read aloud · <kbd>Alt+T</kbd> theme · <kbd>Alt+−</kbd> <kbd>Alt+=</kbd> <kbd>Alt+0</kbd> font size · <kbd>Alt+1</kbd> English/Russian · <kbd>Alt+2</kbd> Dhamma.Gift contents · <kbd>Alt+3</kbd> this word in Dhamma.Gift search</p>
+    <h4>Autosuggestions</h4>
+    <p>Words from the Four Nikāyas (DN, MN, SN, AN), parts of the KN (Dhp, Iti, Ud, Snp) and all sections of the Vinaya, Mahāsaṅgīti edition.</p>
+    <h4>Apps</h4>
+    <p><a href="https://chromewebstore.google.com/detail/dhammagift-search-and-wor/dnnogjdcmhbiobpnkhdbfnfjnjlikabd" target="_blank" rel="noopener">Browser extension</a> (Chrome, Edge, Firefox), <a href="https://github.com/dhammagift/dg-twa/releases/download/latest/dict-dhamma-gift.apk" target="_blank" rel="noopener">mobile app</a>, or install this site from the browser menu. Then select a word anywhere → Share → Dict.DG.</p></div>
+</dialog>
+
+<div id="bubbleNotification" class="bubble-notification"></div>
+
+<script src="static/home.js?v=ui15"></script>
+<script src="static/dpd.js" defer></script>
+<script src="static/autopali.js" defer></script>
+<script src="static/offline-dpd.js?v=ui29"></script>
+<script src="static/extra.js?v=ui24"></script>
+<script src="static/sorter.js" defer></script>
+<script src="static/openDicts.js" defer></script>
+<script src="static/ui.js?v=ui9"></script>
+<script src="static/dg-site.js?v=ui15"></script>
+</body>
+
+</html>
