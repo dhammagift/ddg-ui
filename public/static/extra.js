@@ -557,6 +557,21 @@ function clearExternalSlots() {
 // Offline answer: a short meaning from the bundled DPD (offline-dpd.js), clearly labelled so nobody
 // mistakes it for the full DPD article. Returns false when there is nothing to show — the caller
 // then keeps its own message.
+// The DPD slot already says "DPD — Digital Pāḷi Dictionary"; a badge inside the answer said it a
+// third time (owner). The offline state is marked once, next to that title.
+function markDpdOffline(on) {
+    const title = document.querySelector('#ext-slot-dpd .ext-dict-title');
+    if (!title) return;
+    let mark = title.querySelector('.ext-dict-offline');
+    if (!on) { if (mark) mark.remove(); return; }
+    if (!mark) {
+        mark = document.createElement('span');
+        mark.className = 'ext-dict-offline';
+        title.appendChild(mark);
+    }
+    mark.textContent = window.isRu ? 'офлайн мини' : 'offline mini';
+}
+
 async function renderOffline(query, resultsContainer, summaryContainer) {
     if (!resultsContainer || !window.dgOffline) return false;
     const ru = window.isRu;
@@ -571,10 +586,9 @@ async function renderOffline(query, resultsContainer, summaryContainer) {
         if (state !== 'ready') return false;  // nothing downloaded: the caller explains that
         resultsContainer.innerHTML = note(ru ? 'Нет в офлайн-словаре' : 'Not in the offline dictionary');
     } else {
-        // Owner: the long "short meaning … full entry needs a connection" line was grey noise —
-        // one badge is enough to say where this came from.
-        resultsContainer.innerHTML = note(ru ? 'DPD офлайн' : 'DPD offline') + entry;
+        resultsContainer.innerHTML = entry;
     }
+    markDpdOffline(true);
     resultsContainer.dataset.stale = 'false';
     if (summaryContainer) summaryContainer.innerHTML = '';
     return true;
@@ -642,6 +656,7 @@ async function handleClientSearch(rawQuery) {
         const currentLang = window.isRu ? 'ru' : 'en';
         const data = await fetchFromBackend(query, currentLang);
 
+        markDpdOffline(false);
         if (resultsContainer) {
             const rawHtml = data.dpd_html || '<div class="message">Ничего не найдено</div>';
             resultsContainer.innerHTML = typeof wrapApostrophesInHTML === 'function'

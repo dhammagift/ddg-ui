@@ -66,6 +66,7 @@
     }
 
     function download(onProgress) {
+        loaded = null;  // whatever was decided about the previous (empty) cache no longer holds
         return open().then(function (cache) {
             var done = 0;
             return FILES.reduce(function (chain, url) {
@@ -118,7 +119,9 @@
     // Reads the cached files and evaluates them: they are plain `var dpd_i2h = {...}` literals.
     function load() {
         if (window.dpd_i2h && window.dpd_ebts) return Promise.resolve(true);
-        if (loaded) return loaded;
+        // A failed attempt is not remembered: the first search before the download used to pin
+        // "not loaded" for the rest of the page's life, so the freshly downloaded data was ignored.
+        if (loaded) return loaded.then(function (ok) { if (!ok) loaded = null; return ok; });
         loaded = open().then(function (cache) {
             return Promise.all([SHARED[0], SHARED[1], EBTS_HERE].map(function (u) {
                 return cache.match(u).then(function (hit) { return hit ? hit.text() : null; });
@@ -171,7 +174,8 @@
         }
         var deco = window.dpd_deconstructor && window.dpd_deconstructor[key];
         if (deco) out += '<ul class="offline-dpd-list"><li><span class="pli-lang" lang="pi">' + deco + '</span></li></ul>';
-        return out ? unfold('<h3 class="dpd offline-dpd-head">' + word + '</h3>' + out) : '';
+        // No headword line of our own: the page already shows the word above the slots.
+        return out ? unfold(out) : '';
     }
 
     window.dgOffline = {
