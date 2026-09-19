@@ -33,7 +33,7 @@
   <meta name="twitter:image" content="https://dict.dhamma.gift/static/og-image.png">
   <link rel="stylesheet" href="static/dpd.css">
   <link rel="stylesheet" href="static/jquery-ui.min.css">
-  <link rel="stylesheet" href="static/fa/fa.min.css">
+  <link rel="stylesheet" href="static/icons-fa.css?v=ui24">
   <link rel="stylesheet" href="static/dg.css?v=ui24">
   <script src="static/jquery-3.7.0.min.js"></script>
   <script src="static/jquery-ui.min.js"></script>
@@ -61,12 +61,12 @@
   <form class="shell" id="search-form">
     <input class="search-box" type="search" name="search" id="search-box" placeholder="kacchapā, kacchapaa, tortoise"
       aria-label="Pāḷi word, Velthuis or English" value="" autocomplete="off" inputmode="text" autocapitalize="off" autofocus>
-    <button class="clr" type="button" title="Clear" onclick="var s=document.getElementById('search-box');s.value='';s.focus()"><i class="fa-solid fa-xmark"></i></button>
+    <button class="clr" type="button" title="Clear" onclick="var s=document.getElementById('search-box');s.value='';s.focus()"><i class="gi i-fa-xmark"></i></button>
     <span class="dict-dropdown-container">
       <button class="rnd dict-dropdown-toggle" type="button" title="Look this word up in another dictionary" onclick="toggleDictDropdown(event)"><i class="gi i-book"></i></button>
       <div class="dict-dropdown-menu-down"></div>
     </span>
-    <button class="rnd go" type="submit" id="search-button" title="Search"><i class="fa-solid fa-magnifying-glass"></i></button>
+    <button class="rnd go" type="submit" id="search-button" title="Search"><i class="gi i-fa-magnifying-glass"></i></button>
   </form>
 
   <!-- Owner: header keeps only word history and the burger; everything else lives in the menu. -->
@@ -103,10 +103,10 @@
           <svg class="start-mark" width="96" height="88" viewBox="218 232 700 640" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="48" stroke-linejoin="miter"><path d="M410 381H282V600C282 690 330 721 372 721C420 721 462 690 462 612"/><path d="M608 690V545H738V380H855V292"/></g><circle cx="608" cy="712" r="38" fill="currentColor"/><path class="dg-mark-rule" d="M258 822.0H879" stroke-width="22"/></svg>
         </div>
         <div class="hows">
-          <div class="how"><b><i class="fa-solid fa-arrow-up-right-from-square"></i>Dictionary on any site</b><p><a href="https://chromewebstore.google.com/detail/dhammagift-search-and-wor/dnnogjdcmhbiobpnkhdbfnfjnjlikabd" target="_blank" rel="noopener">Browser extension</a>, <a href="#" id="installLink" title="Chrome menu → Add to Home screen">Web</a> or <a href="https://github.com/dhammagift/dg-twa/releases/download/prod-latest/dict-dhamma-gift.apk" target="_blank" rel="noopener">app</a>: select a word → Share → Dict.DG.</p></div>
-          <div class="how"><b><i class="fa-solid fa-cloud-arrow-down"></i>Works offline</b><p>Short meanings with no network: <a href="#" id="offline-dl-link">download the mini-dictionary</a> (~3.7 MB).</p></div>
-          <div class="how"><b><i class="fa-solid fa-table-columns"></i>Sortable tables</b><p>In the grammar dictionary any column header sorts: case, number, gender.</p></div>
-          <div class="how how-typing"><b><i class="fa-solid fa-keyboard"></i>Four ways to type</b><p>Pāḷi with autocomplete, Velthuis (<code>kacchapaa</code>), English, Russian.</p></div>
+          <div class="how"><b><i class="gi i-fa-arrow-up-right-from-square"></i>Dictionary on any site</b><p><a href="https://chromewebstore.google.com/detail/dhammagift-search-and-wor/dnnogjdcmhbiobpnkhdbfnfjnjlikabd" target="_blank" rel="noopener">Browser extension</a>, <a href="#" id="installLink" title="Chrome menu → Add to Home screen">Web</a> or <a href="https://github.com/dhammagift/dg-twa/releases/download/prod-latest/dict-dhamma-gift.apk" target="_blank" rel="noopener">app</a>: select a word → Share → Dict.DG.</p></div>
+          <div class="how"><b><i class="gi i-fa-cloud-arrow-down"></i>Works offline</b><p>Short meanings with no network: <a href="#" id="offline-dl-link">download the mini-dictionary</a> (~3.7 MB).</p></div>
+          <div class="how"><b><i class="gi i-fa-table-columns"></i>Sortable tables</b><p>In the grammar dictionary any column header sorts: case, number, gender.</p></div>
+          <div class="how how-typing"><b><i class="gi i-fa-keyboard"></i>Four ways to type</b><p>Pāḷi with autocomplete, Velthuis (<code>kacchapaa</code>), English, Russian.</p></div>
         </div>
         <div class="recents" id="recents" hidden>
           <h2>Recent</h2>
@@ -133,7 +133,7 @@
         <h1 id="whead-word"></h1>
         <div class="acts">
           <button class="rb" id="favbtn" type="button" aria-pressed="false" title="Favorite: pins the word above history" onclick="favToggle()"><i class="gi i-star"></i></button>
-          <button class="rb" id="speakbtn" type="button" title="Pronounce" onclick="speakWord()"><i class="fa-solid fa-volume-high"></i></button>
+          <button class="rb" id="speakbtn" type="button" title="Pronounce" onclick="speakWord()"><i class="gi i-fa-volume-high"></i></button>
           <button class="rb" type="button" title="Copy word" onclick="copyWord()"><i class="gi i-copy"></i></button>
           <button class="rb" type="button" title="Copy link" onclick="copyLink()"><i class="gi i-link"></i></button>
         </div>
@@ -160,11 +160,11 @@
   <a class="dpd-link" href="" target="_blank" title="Open at Dpdict.net">Powered by DPD</a>
   <div class="sp">
     <!-- Same contacts as dhamma.gift (search/js/home.js CONTACTS), GitHub pointing at this repo. -->
-    <a href="https://github.com/dhammagift/ddg-ui" target="_blank" rel="noopener" title="GitHub"><i class="fa-brands fa-github"></i></a>
-    <a href="mailto:agiftofdhamma@gmail.com" title="E-mail"><i class="fa-solid fa-at"></i></a>
-    <a href="https://m.youtube.com/channel/UCoyL5T0wMubqrj4OnKVOlMw" target="_blank" rel="noopener" title="YouTube"><i class="fa-brands fa-youtube"></i></a>
-    <a href="https://chat.whatsapp.com/ExExFBcvyhr33PdKJbsUXs" target="_blank" rel="noopener" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
-    <a href="https://t.me/dhamma_gift" target="_blank" rel="noopener" title="Telegram"><i class="fa-brands fa-telegram"></i></a>
+    <a href="https://github.com/dhammagift/ddg-ui" target="_blank" rel="noopener" title="GitHub"><i class="gi i-fa-github"></i></a>
+    <a href="mailto:agiftofdhamma@gmail.com" title="E-mail"><i class="gi i-fa-at"></i></a>
+    <a href="https://m.youtube.com/channel/UCoyL5T0wMubqrj4OnKVOlMw" target="_blank" rel="noopener" title="YouTube"><i class="gi i-fa-youtube"></i></a>
+    <a href="https://chat.whatsapp.com/ExExFBcvyhr33PdKJbsUXs" target="_blank" rel="noopener" title="WhatsApp"><i class="gi i-fa-whatsapp"></i></a>
+    <a href="https://t.me/dhamma_gift" target="_blank" rel="noopener" title="Telegram"><i class="gi i-fa-telegram"></i></a>
   </div>
 </footer>
 </div>
@@ -173,8 +173,8 @@
 <aside class="panel" id="p-menu">
   <div class="ph"><b>Menu</b>
     <button class="rb" type="button" title="Help (Alt+H)" aria-label="Help (Alt+H)" onclick="closePanels();dgOpenHelp()"><i class="gi i-help"></i></button>
-    <button class="rb share" type="button" title="Share" onclick="dgShare()"><i class="fa-solid fa-share-nodes"></i></button>
-    <button class="rb" type="button" title="Close" onclick="closePanels()"><i class="fa-solid fa-xmark"></i></button>
+    <button class="rb share" type="button" title="Share" onclick="dgShare()"><i class="gi i-fa-share-nodes"></i></button>
+    <button class="rb" type="button" title="Close" onclick="closePanels()"><i class="gi i-fa-xmark"></i></button>
   </div>
   <div class="pb">
     <button class="mrow first" type="button" onclick="closePanels();dgOpenFind()"><i class="gi i-find"></i><span>Find on the page</span><kbd>Alt+F</kbd></button>
@@ -206,9 +206,9 @@
 
     <div class="grp">Data</div>
     <div class="set"><span class="lb">Offline dictionary<em id="offline-dl-sub">short meanings with no network · ~2.7 MB</em></span>
-      <button class="rb act" type="button" id="offline-dl-btn" title="Download the offline mini-dictionary"><i class="fa-solid fa-download"></i>download</button></div>
+      <button class="rb act" type="button" id="offline-dl-btn" title="Download the offline mini-dictionary"><i class="gi i-fa-download"></i>download</button></div>
     <div class="set"><span class="lb">History and favorites<em>stored only in this browser</em></span>
-      <button class="rb act" type="button" id="clear-history-button" title="Clear history and favorites"><i class="fa-regular fa-trash-can"></i>clear</button></div>
+      <button class="rb act" type="button" id="clear-history-button" title="Clear history and favorites"><i class="gi i-fa-trash-can"></i>clear</button></div>
     <div class="set"><span class="lb">Settings<em>return every value to default</em></span>
       <button class="rb act" type="button" title="Reset all settings" onclick="resetSettings()"><i class="gi i-reset"></i>reset</button></div>
 
@@ -218,13 +218,13 @@
 <!-- history panel (mobile) -->
 <aside class="panel hist-p" id="p-hist">
   <div class="ph"><b>Favorites and history</b>
-    <button class="rb" type="button" title="Close" onclick="closePanels()"><i class="fa-solid fa-xmark"></i></button>
+    <button class="rb" type="button" title="Close" onclick="closePanels()"><i class="gi i-fa-xmark"></i></button>
   </div>
   <div class="pb"><div class="grp first">Favorites</div><ul id="fav-list"></ul><div class="grp">History</div><ul id="hist-list"></ul></div>
 </aside>
 
 <dialog id="help" class="helpdlg">
-  <div class="ph"><b>Help</b><button class="rb" type="button" title="Close" onclick="document.getElementById('help').close()"><i class="fa-solid fa-xmark"></i></button></div>
+  <div class="ph"><b>Help</b><button class="rb" type="button" title="Close" onclick="document.getElementById('help').close()"><i class="gi i-fa-xmark"></i></button></div>
   <div class="pb">
     <h4>Typing</h4>
     <p>Type Pāḷi with autocomplete, in Velthuis, or search in English. Double-click any word in an entry to look it up.</p>

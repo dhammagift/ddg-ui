@@ -253,8 +253,8 @@
         var ready = current === 'ready';
         btn.disabled = false;
         btn.innerHTML = ready
-            ? '<i class="fa-regular fa-trash-can"></i>' + T.remove
-            : '<i class="fa-solid fa-download"></i>' + T.download;
+            ? '<i class="gi i-fa-trash-can"></i>' + T.remove
+            : '<i class="gi i-fa-download"></i>' + T.download;
         btn.title = ready ? T.titleRemove : T.titleDownload;
         if (sub) sub.textContent = ready ? T.subReady : T.sub;
         var invite = el('dg-offline-invite');

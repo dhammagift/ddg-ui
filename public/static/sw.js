@@ -24,7 +24,7 @@ const ASSETS = [
   'static/home.js', 'static/dpd.js', 'static/autopali.js', 'static/offline-dpd.js',
   'static/extra.js', 'static/sorter.js', 'static/openDicts.js', 'static/ui.js', 'static/dg-site.js',
   'static/jquery-3.7.0.min.js', 'static/jquery-ui.min.js',
-  'static/dpd.css', 'static/dg.css', 'static/jquery-ui.min.css', 'static/fa/fa.min.css',
+  'static/dpd.css', 'static/dg.css', 'static/jquery-ui.min.css', 'static/icons-fa.css',
   'static/sutta_words.txt', 'static/circle-notch.svg', 'static/open-link.svg',
   'static/buddhadust-glossology.htm', 'static/manifest.json',
   // Masked SVG icons (dg.css .gi/.i-*) — without them the star/copy/link buttons render as blank
@@ -33,8 +33,14 @@ const ASSETS = [
   'static/icons/find.svg', 'static/icons/gear.svg', 'static/icons/help.svg', 'static/icons/history.svg',
   'static/icons/link.svg', 'static/icons/list.svg', 'static/icons/menu.svg', 'static/icons/reset.svg',
   'static/icons/star.svg', 'static/icons/theme.svg', 'static/icons/translit.svg',
-  // Font Awesome faces (the speaker, the keyboard, …) referenced from fa.min.css.
-  'static/fa/fa-solid-900.woff2', 'static/fa/fa-regular-400.woff2', 'static/fa/fa-brands-400.woff2'
+  // The 15 Font Awesome shapes we actually use, generated as masks by dg-node's build-icons.js
+  // (no webfont: the full bundle was ~400 KB for 15 icons).
+  'static/icons/fa/arrow-up-right-from-square.svg', 'static/icons/fa/at.svg',
+  'static/icons/fa/cloud-arrow-down.svg', 'static/icons/fa/download.svg', 'static/icons/fa/github.svg',
+  'static/icons/fa/keyboard.svg', 'static/icons/fa/magnifying-glass.svg', 'static/icons/fa/share-nodes.svg',
+  'static/icons/fa/table-columns.svg', 'static/icons/fa/telegram.svg', 'static/icons/fa/trash-can.svg',
+  'static/icons/fa/volume-high.svg', 'static/icons/fa/whatsapp.svg', 'static/icons/fa/xmark.svg',
+  'static/icons/fa/youtube.svg'
 ];
 
 const urlsToCache = [SHELL_EN, SHELL_RU]

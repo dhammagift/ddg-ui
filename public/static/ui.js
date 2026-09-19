@@ -22,9 +22,9 @@
     const cur = w === currentWord() && B.dataset.screen === 'entry';
     const on = getFav().includes(w);
     const del = delType === 'hist'
-      ? `<button class="delmark" type="button" title="${T.removeHist}" data-delhist="${esc(w)}"><i class="fa-solid fa-xmark"></i></button>`
+      ? `<button class="delmark" type="button" title="${T.removeHist}" data-delhist="${esc(w)}"><i class="gi i-fa-xmark"></i></button>`
       : delType === 'fav'
-      ? `<button class="delmark" type="button" title="${T.unfav}" data-delfav="${esc(w)}"><i class="fa-solid fa-xmark"></i></button>`
+      ? `<button class="delmark" type="button" title="${T.unfav}" data-delfav="${esc(w)}"><i class="gi i-fa-xmark"></i></button>`
       : '';
     const star = withStar
       ? `<button class="favmark" type="button" aria-pressed="${on}" title="${on ? T.unfav : T.fav}" data-fav="${esc(w)}"><i class="fa-${on ? 'solid' : 'regular'} fa-star"></i></button>`
