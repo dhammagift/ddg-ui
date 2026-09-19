@@ -737,7 +737,7 @@ async function handleClientSearch(rawQuery) {
 }
 
 // Инициализация ссылок при загрузке
-//  updateLink('fdg-link', window.location.href.includes('/ru') ? 'https://dhamma.gift/ru/?p=-kn' : 'https://dhamma.gift?p=-kn');
+//  updateLink('fdg-link', window.location.href.includes('/ru') ? 'https://dhamma.gift/ru/' : 'https://dhamma.gift');
 // updateLink('dpd-link', window.location.href.includes('/ru') ? 'https://ru.dpdict.net' : 'https://dpdict.net');
 
 //и обновление при клике
@@ -746,12 +746,9 @@ document.addEventListener('click', (e) => {
   const dpd = e.target.closest('.dpd-link');
 
   if (dg) {
-    updateLink(
-      dg,
-      window.location.pathname.startsWith('/ru')
-        ? 'https://f.dhamma.gift/ru/?p=-kn'
-        : 'https://dhamma.gift?p=-kn'
-    );
+    // window.isRu, not pathname.startsWith('/ru'): under dhamma.gift/dict/ru/ the path starts
+    // with /dict. And the Russian link goes to dhamma.gift/ru/ — f.dhamma.gift does not resolve.
+    updateLink(dg, window.isRu ? 'https://dhamma.gift/ru/' : 'https://dhamma.gift');
     return;
   }
 

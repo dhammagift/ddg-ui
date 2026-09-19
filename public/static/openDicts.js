@@ -6,7 +6,7 @@ function createDropdowns() {
       pali: "Палийские словари",
       sanskrit: "Санскритские словари",
       other: "Другие ресурсы",
-      dGift: "https://dhamma.gift/ru/?p=-kn&q=",
+      dGift: "https://dhamma.gift/ru/?q=",
       dGiftHeader: "Dhamma.Gift",
       dGiftTitle: "Искать через Dhamma.Gift",
     },
@@ -14,7 +14,7 @@ function createDropdowns() {
       pali: "Pali Dictionaries",
       sanskrit: "Sanskrit Dictionaries",
       other: "Other Resources",
-      dGift: "https://dhamma.gift/?p=-kn&q=",
+      dGift: "https://dhamma.gift/?q=",
       dGiftHeader: "Dhamma.Gift",
       dGiftTitle: "Search with Dhamma.Gift",
 
