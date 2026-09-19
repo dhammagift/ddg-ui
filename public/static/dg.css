@@ -477,3 +477,16 @@ body.dark-mode .dg-mark-rule{stroke:#16b394}
 /* Accent rule under the word actions, echoing the rule under the mark */
 .whead .acts{position:relative;padding-bottom:7px}
 .whead .acts::after{content:"";position:absolute;left:8px;right:8px;bottom:0;height:1px;background:var(--dg-accent)}
+
+/* ——— Offline mini-dictionary (offline-dpd.js): the note above an offline answer, and the
+   invitation shown in the installed app until the dictionary is downloaded or declined. */
+.offline-dpd-note{margin:0 0 12px;padding:8px 12px;border-radius:8px;background:var(--dg-surface-hover);
+  color:var(--dg-text-2);font-size:.92rem;line-height:1.35}
+.offline-dpd-head{margin:0 0 6px}
+.offline-dpd-list{margin:0 0 10px;padding-left:20px}
+.offline-dpd-list li{margin:4px 0}
+.dg-offline-invite{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between;
+  margin:0 0 18px;padding:10px 14px;border:1px solid var(--dg-border);border-radius:var(--dg-radius);
+  background:var(--dg-surface);color:var(--dg-text);font-size:.95rem}
+.dg-offline-invite-btns{display:flex;gap:8px;flex:0 0 auto;align-items:center}
+.dg-offline-invite-btns .rb{white-space:nowrap}

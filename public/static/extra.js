@@ -17,6 +17,16 @@ function getAppBase() {
     return '/';
 }
 
+// Service worker, registered with an EXPLICIT scope. It used to be an inline
+// navigator.serviceWorker.register('static/sw.js') in the page: a relative URL gives the worker
+// the scope of its own folder (/static/), so it controlled no navigation and the app never opened
+// offline. The scope is the install base, so this line also works under dhamma.gift/dict/ (where
+// the Service-Worker-Allowed header is not set — the registration simply fails and is ignored).
+if ('serviceWorker' in navigator) {
+    const swBase = getAppBase();
+    navigator.serviceWorker.register(swBase + 'static/sw.js', { scope: swBase }).catch(() => {});
+}
+
 // Clean-path search: dict.dhamma.gift/kacchapa or /ru/kacchapa (and the same one folder
 // deeper, e.g. dhamma.gift/dict/kacchapa) search for kacchapa exactly like ?q=kacchapa,
 // without rewriting the address bar. The install base (root vs. a subfolder) is read
@@ -525,6 +535,48 @@ function updateLink(el, baseUrl) {
   el.href = url.toString();
 }
 
+// The six other dictionaries are only filled after a successful DPD hit, so without this they
+// would keep showing the PREVIOUS word offline. Was the else-branch below, now shared with it.
+function clearExternalSlots() {
+    ['tripitaka', 'gandhari', 'pts', 'buddhadust', 'wisdomlib'].forEach((code) => {
+        const slot = document.getElementById('ext-slot-' + code);
+        const c = slot ? slot.querySelector('.ext-dict-content') : null;
+        if (c) c.innerHTML = '';
+    });
+    const sanskritSlot = document.getElementById('ext-slot-sanskrit');
+    const sc = sanskritSlot ? sanskritSlot.querySelector('.ext-dict-content') : null;
+    const res = sc ? sc.querySelector('#sanskrit-results') : null;
+    if (res) res.innerHTML = '';
+}
+
+// Offline answer: a short meaning from the bundled DPD (offline-dpd.js), clearly labelled so nobody
+// mistakes it for the full DPD article. Returns false when there is nothing to show — the caller
+// then keeps its own message.
+async function renderOffline(query, resultsContainer, summaryContainer) {
+    if (!resultsContainer || !window.dgOffline) return false;
+    const ru = window.isRu;
+    const note = (text) => `<div class="offline-dpd-note">${text}</div>`;
+    let entry = '';
+    try {
+        if (await window.dgOffline.load()) entry = window.dgOffline.lookup(query);
+    } catch (e) { /* cache unavailable — fall through to the "not downloaded" line */ }
+
+    if (!entry) {
+        const state = await window.dgOffline.state().catch(() => 'none');
+        if (state !== 'ready') return false;  // nothing downloaded: the caller explains that
+        resultsContainer.innerHTML = note(ru
+            ? `«${query}» нет в офлайн мини-словаре.`
+            : `“${query}” is not in the offline mini-dictionary.`);
+    } else {
+        resultsContainer.innerHTML = note(ru
+            ? 'Офлайн — краткое значение из встроенного DPD. Полная статья — при подключении.'
+            : 'Offline — short meaning from the built-in DPD. The full entry needs a connection.') + entry;
+    }
+    resultsContainer.dataset.stale = 'false';
+    if (summaryContainer) summaryContainer.innerHTML = '';
+    return true;
+}
+
 async function handleClientSearch(rawQuery) {
     const query = cleanQueryParam(rawQuery);
     if (!query) return;
@@ -566,6 +618,22 @@ async function handleClientSearch(rawQuery) {
 
     // Вызов единого централизованного менеджера словарей
     loadExternalDictionaries(query);
+
+    // No connection: skip a doomed request to dpdict.net (and seven doomed iframes) and answer from
+    // the offline mini-dictionary straight away.
+    if (navigator.onLine === false) {
+        const shown = await renderOffline(query, resultsContainer, summaryContainer);
+        if (!shown && resultsContainer) {
+            resultsContainer.innerHTML = `
+                <div class="offline-dpd-note">${window.isRu
+                    ? 'Нет соединения, а офлайн мини-словарь ещё не скачан.'
+                    : 'No connection, and the offline mini-dictionary has not been downloaded yet.'}</div>
+            `;
+            resultsContainer.dataset.stale = 'false';
+        }
+        clearExternalSlots();
+        return;
+    }
 
     try {
         const currentLang = window.isRu ? 'ru' : 'en';
@@ -623,48 +691,24 @@ async function handleClientSearch(rawQuery) {
             // If opened via a #ext-slot-<code> share link, expand/scroll to that dict.
             if (location.hash) setTimeout(focusDictFromHash, 60);
         } else {
-            if (tripitakaSlot) {
-                const c = tripitakaSlot.querySelector('.ext-dict-content');
-                if (c) c.innerHTML = '';
-            }
-            if (gandhariSlot) {
-                const c = gandhariSlot.querySelector('.ext-dict-content');
-                if (c) c.innerHTML = '';
-            }
-            if (ptsSlot) {
-                const c = ptsSlot.querySelector('.ext-dict-content');
-                if (c) c.innerHTML = '';
-            }
- const buddhadustSlot = document.getElementById('ext-slot-buddhadust');
-            if (buddhadustSlot) {
-                const c = buddhadustSlot.querySelector('.ext-dict-content');
-                if (c) c.innerHTML = '';
-            }
-            
-          
-            const wisdomlibSlot = document.getElementById('ext-slot-wisdomlib');
-            if (wisdomlibSlot) {
-                const c = wisdomlibSlot.querySelector('.ext-dict-content');
-                if (c) c.innerHTML = '';
-            }
-            const sanskritSlot = document.getElementById('ext-slot-sanskrit');
-            if (sanskritSlot) {
-                const c = sanskritSlot.querySelector('.ext-dict-content');
-                if (c) {
-                    const res = c.querySelector('#sanskrit-results');
-                    if (res) res.innerHTML = '';
-                }
-            }
+            clearExternalSlots();
         }
 
     } catch (error) {
-        if (resultsContainer) {
+        // A failed DPD request is most often no connection: answer from the offline mini-dictionary
+        // if it is downloaded, and only otherwise show the error (bilingual now — it was Russian
+        // even on the English page).
+        const shown = await renderOffline(query, resultsContainer, summaryContainer);
+        if (!shown && resultsContainer) {
             resultsContainer.innerHTML = `
                 <div style="color: #c08552; padding: 20px; text-align: center;">
-                    Ошибка загрузки словаря: ${error.message}.<br>Проверьте соединение или CORS.
+                    ${window.isRu
+                        ? `Ошибка загрузки словаря: ${error.message}.<br>Проверьте соединение.`
+                        : `Could not load the dictionary: ${error.message}.<br>Check the connection.`}
                 </div>
             `;
         }
+        clearExternalSlots();
     }
 }
 

@@ -9,11 +9,6 @@
   <title>Dict.Dhamma.Gift — Пали Мультисловарь</title>
   <meta name="description" content="Dict.Dhamma.Gift (DDG) — мультисловарь пали, объединяющий DPD, Гандхари, PTS, санскрит и определения Sutta-Vinaya в одном месте.">
   <link rel="manifest" href="static/manifest-ru.json">
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('static/sw.js');
-    }
-  </script>
 
   <link rel="canonical" href="https://dict.dhamma.gift/ru/">
   <link rel="alternate" href="https://dict.dhamma.gift/ru/" hreflang="ru">
@@ -39,7 +34,7 @@
   <link rel="stylesheet" href="static/dpd.css">
   <link rel="stylesheet" href="static/jquery-ui.min.css">
   <link rel="stylesheet" href="static/fa/fa.min.css">
-  <link rel="stylesheet" href="static/dg.css?v=ui18">
+  <link rel="stylesheet" href="static/dg.css?v=ui19">
   <script src="static/jquery-3.7.0.min.js"></script>
   <script src="static/jquery-ui.min.js"></script>
 </head>
@@ -93,6 +88,13 @@
     <!-- start screen -->
     <main class="screen" id="s-start">
       <div class="start">
+      <div class="dg-offline-invite" id="dg-offline-invite" hidden>
+        <span>Скачать офлайн мини-словарь (~4,8 МБ)? Краткие значения будут работать без интернета.</span>
+        <span class="dg-offline-invite-btns">
+          <button class="rb act" type="button" id="dg-offline-invite-yes">Скачать</button>
+          <button class="rb" type="button" id="dg-offline-invite-no">Не сейчас</button>
+        </span>
+      </div>
         <div class="start-head">
           <div>
           <h1>Словари Pāḷi и Sanskrit<button class="helpq" type="button" title="Справка" onclick="dgOpenHelp()"><i class="gi i-help"></i></button></h1>
@@ -102,7 +104,7 @@
         </div>
         <div class="hows">
           <div class="how"><b><i class="fa-solid fa-keyboard"></i>Четыре способа ввода</b><p>Пали с автоподсказками, Velthuis (<code>kacchapaa</code>), английский, русский.</p></div>
-          <div class="how"><b><i class="fa-solid fa-arrow-up-right-from-square"></i>Словарь на любом сайте</b><p><a href="https://chromewebstore.google.com/detail/dhammagift-search-and-wor/dnnogjdcmhbiobpnkhdbfnfjnjlikabd?hl=ru" target="_blank" rel="noopener">Расширение для браузера</a>, <a href="#" id="installLink" title="Меню Chrome Android → Добавить на главную">Web</a> и <a href="https://github.com/dhammagift/dg-twa/releases/download/prod-latest/dict-dhamma-gift.apk" target="_blank" rel="noopener">Android</a>: выделите слово → «Поделиться» → Dict.DG.</p></div>
+          <div class="how"><b><i class="fa-solid fa-arrow-up-right-from-square"></i>Словарь на любом сайте</b><p><a href="https://chromewebstore.google.com/detail/dhammagift-search-and-wor/dnnogjdcmhbiobpnkhdbfnfjnjlikabd?hl=ru" target="_blank" rel="noopener">Расширение для браузера</a>, <a href="#" id="installLink" title="Меню Chrome Android → Добавить на главную">Web</a> и <a href="https://github.com/dhammagift/dg-twa/releases/download/prod-latest/dict-dhamma-gift.apk" target="_blank" rel="noopener">Android</a>: выделите слово → «Поделиться» → Dict.DG. Работает и офлайн: <a href="#" id="offline-dl-link">скачать мини-словарь</a> (~4,8 МБ).</p></div>
           <div class="how"><b><i class="fa-solid fa-table-columns"></i>Таблицы сортируются</b><p>В словаре грамматики любой столбец кликается: падеж, число, род.</p></div>
         </div>
         <div class="recents" id="recents" hidden>
@@ -202,6 +204,8 @@
     <div class="set"><span class="lb">Показывать ссылки на проекты</span><input class="sw" type="checkbox" id="tabs-toggle"></div>
 
     <div class="grp">Данные</div>
+    <div class="set"><span class="lb">Офлайн-словарь<em id="offline-dl-sub">краткие значения без интернета · ~4,8 МБ</em></span>
+      <button class="rb act" type="button" id="offline-dl-btn" title="Скачать офлайн мини-словарь"><i class="fa-solid fa-download"></i>скачать</button></div>
     <div class="set"><span class="lb">История и избранное<em>хранится только в этом браузере</em></span>
       <button class="rb act" type="button" id="clear-history-button" title="Очистить историю и избранное"><i class="fa-regular fa-trash-can"></i>очистить</button></div>
     <div class="set"><span class="lb">Настройки<em>вернуть все значения к стандартным</em></span>
@@ -237,7 +241,8 @@
 <script src="static/home.js?v=ui15"></script>
 <script src="static/dpd.js" defer></script>
 <script src="static/autopali.js" defer></script>
-<script src="static/extra.js?v=ui15"></script>
+<script src="static/offline-dpd.js?v=ui19"></script>
+<script src="static/extra.js?v=ui19"></script>
 <script src="static/sorter.js" defer></script>
 <script src="static/openDicts.js" defer></script>
 <script src="static/ui.js?v=ui9"></script>

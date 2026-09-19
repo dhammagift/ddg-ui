@@ -10,3 +10,10 @@ RewriteRule ^ - [L]
 # segment into ?q= on load.
 RewriteRule ^ru/[^/]+/?$ ru/index.html [L]
 RewriteRule ^[^/]+/?$ index.html [L]
+
+# The service worker must control the whole app, not just /static/ where the file lives.
+# Without this header a registration with { scope: '/' } is rejected (see extra.js).
+<Files "sw.js">
+  Header set Service-Worker-Allowed "/"
+  Header set Cache-Control "no-cache"
+</Files>
