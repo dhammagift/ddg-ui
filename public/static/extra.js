@@ -25,6 +25,11 @@ function getAppBase() {
 if ('serviceWorker' in navigator) {
     const swBase = getAppBase();
     navigator.serviceWorker.register(swBase + 'static/sw.js', { scope: swBase }).catch(() => {});
+    // Clean up the registrations the old inline script left behind (scope .../static/, controlling
+    // nothing): a browser that ever opened this site still carries one, and under /dict/ two.
+    navigator.serviceWorker.getRegistrations().then((regs) => {
+        regs.forEach((reg) => { if (/\/static\/$/.test(reg.scope)) reg.unregister(); });
+    }).catch(() => {});
 }
 
 // Clean-path search: dict.dhamma.gift/kacchapa or /ru/kacchapa (and the same one folder
