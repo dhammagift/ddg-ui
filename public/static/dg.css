@@ -166,8 +166,11 @@ body[data-screen=start] #s-start,body[data-screen=entry] #s-entry{display:block}
 .chips a{border:1px solid var(--dg-border);background:var(--dg-surface);border-radius:999px;font-size:13px;color:var(--dg-text-2);padding:4px 12px;text-decoration:none;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis;transition:all .15s var(--dg-ease)}
 .chips a:hover{border-color:var(--dg-accent);color:var(--dg-accent-ink);text-decoration:none}
 .dictlist{margin:26px 0 0}
-.dictlist ul{list-style:none;margin:0;padding:0;border:1px solid var(--dg-border);border-radius:var(--dg-radius);overflow:hidden}
-.dictlist li+li{border-top:1px solid var(--dg-border)}
+/* Hairlines are divided by --dg-zoom: the page zooms with CSS zoom (home.js setFontSize), and a
+   plain 1px border becomes 0.909px at 110% — the renderer then drops or doubles it row by row, which
+   is the ragged right edge the list used to show. */
+.dictlist ul{list-style:none;margin:0;padding:0;border:calc(1px / var(--dg-zoom, 1)) solid var(--dg-border);border-radius:var(--dg-radius)}
+.dictlist li+li{border-top:calc(1px / var(--dg-zoom, 1)) solid var(--dg-border)}
 .dictlist li{display:grid;grid-template-columns:minmax(0,auto) minmax(0,1fr) max-content;align-items:baseline;column-gap:14px;padding:10px 14px;font-size:13.5px}
 .dictlist li b{font-weight:600;color:var(--dg-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .dictlist li em{font-style:normal;color:var(--dg-text-muted);font-size:12.5px;text-align:right;justify-self:end;min-width:0;text-wrap:pretty}
