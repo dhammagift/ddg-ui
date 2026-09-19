@@ -44,7 +44,9 @@
     var EBTS_HERE = isRu ? EBTS_RU : EBTS_EN;
 
     // Compressed transfer sizes, measured on the live server — what the reader actually waits for.
-    var SIZE_MB = isRu ? '4,8' : '2.7';
+    // Dictionary data plus the app itself (both language shells and their assets, ~1.2 MB): the
+    // download caches everything, so the number has to cover everything.
+    var SIZE_MB = isRu ? '5,8' : '3.7';
 
     var loaded = null; // load() promise, so a second lookup does not inject the scripts twice
 
