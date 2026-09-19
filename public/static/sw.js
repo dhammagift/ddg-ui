@@ -16,26 +16,22 @@ const SHELL_RU = BASE + 'ru/';
 
 // Everything the shell needs to boot with no network. Versioned query strings are left off on
 // purpose: fetches are matched with ignoreSearch below.
-const urlsToCache = [
-  SHELL_EN,
-  SHELL_RU,
-  BASE + 'static/home.js',
-  BASE + 'static/dpd.js',
-  BASE + 'static/autopali.js',
-  BASE + 'static/offline-dpd.js',
-  BASE + 'static/extra.js',
-  BASE + 'static/sorter.js',
-  BASE + 'static/openDicts.js',
-  BASE + 'static/ui.js',
-  BASE + 'static/dg-site.js',
-  BASE + 'static/jquery-3.7.0.min.js',
-  BASE + 'static/jquery-ui.min.js',
-  BASE + 'static/dpd.css',
-  BASE + 'static/dg.css',
-  BASE + 'static/jquery-ui.min.css',
-  BASE + 'static/fa/fa.min.css',
-  BASE + 'static/sutta_words.txt'
+//
+// BOTH languages, every file twice: the Russian page asks for its own copies (/ru/static/…, a
+// symlink to the same files) — without them switching the language offline opened an unstyled,
+// scriptless page.
+const ASSETS = [
+  'static/home.js', 'static/dpd.js', 'static/autopali.js', 'static/offline-dpd.js',
+  'static/extra.js', 'static/sorter.js', 'static/openDicts.js', 'static/ui.js', 'static/dg-site.js',
+  'static/jquery-3.7.0.min.js', 'static/jquery-ui.min.js',
+  'static/dpd.css', 'static/dg.css', 'static/jquery-ui.min.css', 'static/fa/fa.min.css',
+  'static/sutta_words.txt', 'static/circle-notch.svg', 'static/open-link.svg',
+  'static/buddhadust-glossology.htm', 'static/manifest.json'
 ];
+
+const urlsToCache = [SHELL_EN, SHELL_RU]
+  .concat(ASSETS.map((a) => SHELL_EN + a))
+  .concat(ASSETS.map((a) => SHELL_RU + a));
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
@@ -78,6 +74,19 @@ self.addEventListener('fetch', (event) => {
       .then((resp) => { cacheCopy(request, resp); return resp; })
       // ignoreSearch: the page asks for static/extra.js?v=ui15 while the precache holds the bare path.
       .catch(() => caches.match(request, { ignoreSearch: true }))
+  );
+});
+
+// The offline download (offline-dpd.js) asks for the whole app to be cached in one go, so the
+// reader does not have to have visited each page for it to work offline.
+self.addEventListener('message', (event) => {
+  if (!event.data || event.data.dgPrecacheAll !== true) return;
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then((cache) => Promise.allSettled(urlsToCache.map((u) => cache.add(u))))
+      .then(() => {
+        if (event.source && event.source.postMessage) event.source.postMessage({ dgPrecacheDone: true });
+      })
   );
 });
 

@@ -86,6 +86,22 @@
         });
     }
 
+    // "Download" means the whole app, not just the data: ask the service worker to cache both
+    // language shells and their assets now (owner: «нужно кешировать все и сразу»), so switching the
+    // language offline works without having visited that page before.
+    function precacheApp() {
+        var sw = navigator.serviceWorker;
+        if (!sw || !sw.controller) return Promise.resolve(false);
+        sw.controller.postMessage({ dgPrecacheAll: true });
+        return new Promise(function (resolve) {
+            var done = function (e) {
+                if (e.data && e.data.dgPrecacheDone) { sw.removeEventListener('message', done); resolve(true); }
+            };
+            sw.addEventListener('message', done);
+            setTimeout(function () { sw.removeEventListener('message', done); resolve(false); }, 30000);
+        });
+    }
+
     function remove() {
         loaded = null;
         return window.caches ? caches.delete(CACHE) : Promise.resolve(false);
@@ -181,6 +197,7 @@
     window.dgOffline = {
         state: state,
         download: download,
+        precacheApp: precacheApp,
         remove: remove,
         load: load,
         lookup: lookup,
@@ -228,6 +245,8 @@
             if (btn) btn.innerHTML = T.downloading + ' ' + Math.round(share * 100) + '%';
         }).then(function () {
             loaded = null;            // pick up the freshly cached files on the next lookup
+            precacheApp();            // not awaited: under dhamma.gift/dict/ the controller is the
+                                      // main site's worker, which knows nothing about this message
             return state().then(paint);
         }).catch(function () {
             return state().then(function (current) {
