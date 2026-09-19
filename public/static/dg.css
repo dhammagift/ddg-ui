@@ -441,6 +441,9 @@ body[data-hist=on] .rail{animation:rail-in .34s var(--dg-ease) both}
   .rail{display:none}
   .helpq{display:grid}
   .hows{grid-template-columns:1fr}
+  /* Four cards stacked are too much on a phone: the typing hints are the least urgent one
+     (owner, hidden until the row earns its space back). */
+  .how-typing{display:none}
   .dictlist li{column-gap:8px;padding:9px 12px;align-items:start}
   .dictlist li em{font-size:11.5px}
   .whead h1{font-size:25px}
