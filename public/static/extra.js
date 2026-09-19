@@ -569,13 +569,11 @@ async function renderOffline(query, resultsContainer, summaryContainer) {
     if (!entry) {
         const state = await window.dgOffline.state().catch(() => 'none');
         if (state !== 'ready') return false;  // nothing downloaded: the caller explains that
-        resultsContainer.innerHTML = note(ru
-            ? `«${query}» нет в офлайн мини-словаре.`
-            : `“${query}” is not in the offline mini-dictionary.`);
+        resultsContainer.innerHTML = note(ru ? 'Нет в офлайн-словаре' : 'Not in the offline dictionary');
     } else {
-        resultsContainer.innerHTML = note(ru
-            ? 'Офлайн — краткое значение из встроенного DPD. Полная статья — при подключении.'
-            : 'Offline — short meaning from the built-in DPD. The full entry needs a connection.') + entry;
+        // Owner: the long "short meaning … full entry needs a connection" line was grey noise —
+        // one badge is enough to say where this came from.
+        resultsContainer.innerHTML = note(ru ? 'DPD офлайн' : 'DPD offline') + entry;
     }
     resultsContainer.dataset.stale = 'false';
     if (summaryContainer) summaryContainer.innerHTML = '';
@@ -631,8 +629,8 @@ async function handleClientSearch(rawQuery) {
         if (!shown && resultsContainer) {
             resultsContainer.innerHTML = `
                 <div class="offline-dpd-note">${window.isRu
-                    ? 'Нет соединения, а офлайн мини-словарь ещё не скачан.'
-                    : 'No connection, and the offline mini-dictionary has not been downloaded yet.'}</div>
+                    ? 'Нет сети, офлайн-словарь не скачан'
+                    : 'No network, the offline dictionary is not downloaded'}</div>
             `;
             resultsContainer.dataset.stale = 'false';
         }
