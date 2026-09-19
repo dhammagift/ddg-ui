@@ -643,8 +643,8 @@ async function handleClientSearch(rawQuery) {
         if (!shown && resultsContainer) {
             resultsContainer.innerHTML = `
                 <div class="offline-dpd-note">${window.isRu
-                    ? 'Нет сети, офлайн-словарь не скачан'
-                    : 'No network, the offline dictionary is not downloaded'}</div>
+                    ? 'Нет сети, офлайн-словарь не скачан — скачать при подключении к сети'
+                    : 'No network, the offline dictionary is not downloaded — download it once online'}</div>
             `;
             resultsContainer.dataset.stale = 'false';
         }
@@ -718,11 +718,13 @@ async function handleClientSearch(rawQuery) {
         // even on the English page).
         const shown = await renderOffline(query, resultsContainer, summaryContainer);
         if (!shown && resultsContainer) {
+            // The offline dictionary would have answered this — say so, the reader has no other
+            // way to learn it exists.
             resultsContainer.innerHTML = `
                 <div style="color: #c08552; padding: 20px; text-align: center;">
                     ${window.isRu
-                        ? `Ошибка загрузки словаря: ${error.message}.<br>Проверьте соединение.`
-                        : `Could not load the dictionary: ${error.message}.<br>Check the connection.`}
+                        ? `Ошибка загрузки словаря: ${error.message}.<br>Проверьте соединение. Офлайн-словарь можно скачать при подключении к сети.`
+                        : `Could not load the dictionary: ${error.message}.<br>Check the connection. The offline dictionary can be downloaded once you are online.`}
                 </div>
             `;
         }
