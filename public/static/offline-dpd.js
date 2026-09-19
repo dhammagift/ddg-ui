@@ -213,16 +213,35 @@
         titleDownload: 'Скачать офлайн мини-словарь', titleRemove: 'Удалить офлайн мини-словарь',
         sub: 'краткие значения без интернета · ~' + SIZE_MB + ' МБ',
         subReady: 'скачан, работает без интернета',
-        failed: 'Не удалось скачать. Проверьте соединение и попробуйте ещё раз.'
+        failed: 'Не удалось скачать. Проверьте соединение и попробуйте ещё раз.',
+        bubbleStart: 'Скачиваю офлайн-словарь…',
+        bubbleDone: 'Офлайн-словарь скачан',
+        bubbleHave: 'Офлайн-словарь уже скачан',
+        bubbleFail: 'Не удалось скачать словарь'
     } : {
         download: 'download', remove: 'delete', downloading: 'loading',
         titleDownload: 'Download the offline mini-dictionary', titleRemove: 'Delete the offline mini-dictionary',
         sub: 'short meanings with no network · ~' + SIZE_MB + ' MB',
         subReady: 'downloaded, works with no network',
-        failed: 'Download failed. Check the connection and try again.'
+        failed: 'Download failed. Check the connection and try again.',
+        bubbleStart: 'Downloading the offline dictionary…',
+        bubbleDone: 'Offline dictionary downloaded',
+        bubbleHave: 'The offline dictionary is already downloaded',
+        bubbleFail: 'Could not download the dictionary'
     };
 
     function el(id) { return document.getElementById(id); }
+
+    // The site's own bubble (#bubbleNotification, openDicts.js showBubbleNotification) — but this
+    // one stays up while the download runs instead of hiding after two seconds.
+    function bubble(text, hideAfterMs) {
+        var node = el('bubbleNotification');
+        if (!node) return;
+        node.textContent = text;
+        node.classList.add('show');
+        clearTimeout(bubble.timer);
+        if (hideAfterMs) bubble.timer = setTimeout(function () { node.classList.remove('show'); }, hideAfterMs);
+    }
 
     function paint(current) {
         var btn = el('offline-dl-btn'), sub = el('offline-dl-sub');
@@ -241,14 +260,19 @@
     function runDownload() {
         var btn = el('offline-dl-btn'), sub = el('offline-dl-sub');
         if (btn) { btn.disabled = true; btn.innerHTML = T.downloading + ' 0%'; }
+        bubble(T.bubbleStart + ' 0%');
         return download(function (share) {
-            if (btn) btn.innerHTML = T.downloading + ' ' + Math.round(share * 100) + '%';
+            var pct = Math.round(share * 100) + '%';
+            if (btn) btn.innerHTML = T.downloading + ' ' + pct;
+            bubble(T.bubbleStart + ' ' + pct);
         }).then(function () {
+            bubble(T.bubbleDone, 2500);
             loaded = null;            // pick up the freshly cached files on the next lookup
             precacheApp();            // not awaited: under dhamma.gift/dict/ the controller is the
                                       // main site's worker, which knows nothing about this message
             return state().then(paint);
         }).catch(function () {
+            bubble(T.bubbleFail, 3500);
             return state().then(function (current) {
                 paint(current);                       // paint() rewrites the sub line, so say it after
                 if (sub && current !== 'ready') sub.textContent = T.failed;
@@ -270,7 +294,11 @@
         if (link) {
             link.addEventListener('click', function (e) {
                 e.preventDefault();
-                state().then(function (current) { if (current !== 'ready') runDownload(); else paint(current); });
+                state().then(function (current) {
+                    // From the card there is no button to watch, so the bubble is the only feedback.
+                    if (current === 'ready') { bubble(T.bubbleHave, 2500); paint(current); return; }
+                    runDownload();
+                });
             });
         }
         var invite = el('dg-offline-invite');
