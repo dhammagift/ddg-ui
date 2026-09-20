@@ -31,16 +31,16 @@
   ],
   "shortcuts": [
     {
-      "name": "Оглавление",
-      "short_name": "Оглавление",
-      "url": "/static/openDG.html?url=https://dhamma.gift/ru/toc",
-      "icons": [{ "src": "/static/shortcuts/toc.png", "type": "image/png", "sizes": "192x192" }]
-    },
-    {
       "name": "Избранное и история",
       "short_name": "Избранное и история",
       "url": "/static/openDG.html?url=https://dhamma.gift/ru/4as",
       "icons": [{ "src": "/static/shortcuts/favorites.png", "type": "image/png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Оглавление",
+      "short_name": "Оглавление",
+      "url": "/static/openDG.html?url=https://dhamma.gift/ru/toc",
+      "icons": [{ "src": "/static/shortcuts/toc.png", "type": "image/png", "sizes": "192x192" }]
     },
     {
       "name": "Dharmamitra.org",
