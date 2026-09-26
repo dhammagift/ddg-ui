@@ -228,6 +228,36 @@
   function togglePanel(p) { $('p-' + p).dataset.open === 'true' ? closePanels() : openPanel(p); }
   window.openPanel = openPanel; window.closePanels = closePanels;
 
+  // Swipe closes a panel like the sheets of dhamma.gift (dg-apps#27): down on a phone, where the panel is a bottom sheet (dg.css, max-width 767.98px),
+  // to the right on a wide screen, where it is a side panel. Touch only. A move across the direction is the panel's own scroll (a list that is
+  // not at its top is a scroll too); the panel follows the finger, and on release the CSS transition carries it out or back. The history
+  // dropdown of the phone is not a sheet and is left alone.
+  const phone = window.matchMedia('(max-width: 767.98px)');
+  document.querySelectorAll('aside.panel').forEach((panel) => {
+    let x0 = 0, y0 = 0, t0 = 0, d = 0, on = false, drag = false, down = false, scroller = null;
+    const end = (close) => { drag = on = false; panel.style.transition = ''; panel.style.transform = ''; if (close) closePanels(); };
+    panel.addEventListener('touchstart', (e) => {
+      on = e.touches.length === 1 && !B.classList.contains('hist-open'); drag = false; if (!on) return;
+      down = phone.matches; x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; t0 = Date.now(); d = 0; scroller = null;
+      for (let n = e.target; n && n !== panel; n = n.parentElement) { if (n.scrollHeight > n.clientHeight + 1 && /(auto|scroll)/.test(getComputedStyle(n).overflowY)) { scroller = n; break; } }
+    }, { passive: true });
+    panel.addEventListener('touchmove', (e) => {
+      if (!on) return;
+      const x = e.touches[0].clientX, y = e.touches[0].clientY, along = down ? y - y0 : x - x0, across = down ? x - x0 : y - y0;
+      d = along;
+      if (!drag) {
+        if (Math.abs(across) > 8 && Math.abs(across) > Math.abs(along)) { on = false; return; }
+        if (along < 0 || (down && scroller && scroller.scrollTop > 0)) { x0 = x; y0 = y; t0 = Date.now(); d = 0; return; }
+        if (along < 8) return;
+        drag = true; panel.style.transition = 'none';
+      }
+      e.preventDefault();
+      panel.style.transform = (down ? 'translateY(' : 'translateX(') + Math.max(0, d) + 'px)';
+    }, { passive: false });
+    panel.addEventListener('touchend', () => { if (!drag) { on = false; return; } end(d > 80 || (d > 30 && d / Math.max(1, Date.now() - t0) > 0.5)); });
+    panel.addEventListener('touchcancel', () => { if (drag) end(false); });
+  });
+
   document.addEventListener('pointerdown', (e) => {
     if (B.classList.contains('pnopen') && !e.target.closest('.panel') && !e.target.closest('.hbtns')) closePanels();
   });
