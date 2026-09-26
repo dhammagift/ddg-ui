@@ -504,3 +504,17 @@ body.dark-mode .dg-mark-rule{stroke:#16b394}
    rather than silently doing nothing. Star, copy and link keep working. */
 body.is-offline #speakbtn{opacity:.35;pointer-events:none}
 .dg-offline-invite-btns .rb{white-space:nowrap}
+
+/* The mark plays (.dg-play): the hook is drawn, the dot drops, the stair grows out of it, the teal line comes last — the same
+   motion as the app's launch screen, but quicker. The start screen's big mark plays as the page loads; the header mark plays
+   when the logo is clicked (dg-logo.js). Nothing is hidden until then, so without the class (or without JS) the mark is just there. */
+.dg-play .hk,.dg-play .st,.dg-play .ul{stroke-dasharray:1;stroke-dashoffset:1}
+.dg-play .hk{animation:dgm-hk 1.3s cubic-bezier(.22,.61,.36,1) both}
+.dg-play .st{animation:dgm-st 1.3s cubic-bezier(.22,.61,.36,1) both}
+.dg-play .ul{animation:dgm-ul 1.3s cubic-bezier(.22,.61,.36,1) both}
+.dg-play .dt{transform-box:fill-box;transform-origin:50% 50%;animation:dgm-dt 1.3s cubic-bezier(.22,.61,.36,1) both}
+@keyframes dgm-hk{0%{stroke-dashoffset:1}32%,100%{stroke-dashoffset:0}}
+@keyframes dgm-st{0%,16%{stroke-dashoffset:1}48%,100%{stroke-dashoffset:0}}
+@keyframes dgm-ul{0%,36%{stroke-dashoffset:1}66%,100%{stroke-dashoffset:0}}
+@keyframes dgm-dt{0%,6%{transform:translateY(-140px) scale(.4);opacity:0}24%{transform:translateY(12px) scale(1.15);opacity:1}32%,100%{transform:none;opacity:1}}
+@media(prefers-reduced-motion:reduce){.dg-play .hk,.dg-play .st,.dg-play .ul{animation:none;stroke-dasharray:none;stroke-dashoffset:0}.dg-play .dt{animation:none}}

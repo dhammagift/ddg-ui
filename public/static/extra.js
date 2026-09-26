@@ -2479,6 +2479,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const base = typeof getAppBase === 'function' ? getAppBase() : '/';
             const targetUrl = window.isRu ? base.replace(/\/$/, '') + '/ru/' : base;
 
+            // Already on the start screen: nothing to reload, the mark just plays. Anywhere else the page goes home and plays there.
+            const onStart = document.body.dataset.screen === 'start' && !location.search;
+            if (typeof dgMarkClicked === 'function') dgMarkClicked(!onStart);
+            if (onStart) { if (searchBox) searchBox.focus(); return; }
             window.location.href = targetUrl;
         });
 
