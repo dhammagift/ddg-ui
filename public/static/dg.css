@@ -438,7 +438,6 @@ body[data-hist=on] .rail{animation:rail-in .34s var(--dg-ease) both}
   .shell{padding:4px 5px 4px 12px;gap:5px}
   .shell .rnd{width:31px;height:31px}
   .dict-dropdown-menu-down,.dict-dropdown-menu{left:10px!important;right:10px!important;width:auto}
-  .ui-autocomplete.ui-menu{left:10px!important;right:10px!important;width:auto!important}
   .page{padding:4px 15px 0;grid-template-columns:minmax(0,1fr)}
   .whead{padding-top:6px}
   .rail{display:none}

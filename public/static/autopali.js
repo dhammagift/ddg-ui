@@ -97,9 +97,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
             $("#search-box").autocomplete({
                 autoFocus: false,
+                // The list hangs under the whole search field (below it, a small gap; above it when there is no room below).
                 position: {
-                    my: "left bottom",
-                    at: "left top",
+                    my: "left top+6",
+                    at: "left bottom",
+                    of: "#search-form",
                     collision: "flip"
                 },
                 minLength: 0,
@@ -246,6 +248,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     $(this).autocomplete("close");
                 }
             }).autocomplete("widget").addClass("fixed-height");
+            // ...and as wide as the field: the left and right edges line up with it (the plugin makes the list as wide as the input inside).
+            $("#search-box").autocomplete("instance")._resizeMenu = function () {
+                this.menu.element.outerWidth($("#search-form").outerWidth());
+            };
         }
     });
 });

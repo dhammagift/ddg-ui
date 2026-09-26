@@ -5,7 +5,7 @@
 // same files also run under dhamma.gift/dict/. The page registers with an explicit scope (extra.js);
 // without it the worker's scope was /static/ and it controlled no navigation at all — offline the
 // app did not open at all.
-const CACHE_NAME = 'ddg-pwa-v5';
+const CACHE_NAME = 'ddg-pwa-v6';
 // The offline mini-dictionary lives in its own bucket (offline-dpd.js). activate() must not sweep
 // it away, or updating this worker would silently delete a ~15 MB download.
 const KEEP_CACHES = ['ddg-dict'];
