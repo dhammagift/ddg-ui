@@ -330,6 +330,7 @@ body.dark-mode .dict-iframe-invert{filter:invert(1) hue-rotate(180deg)}
 
 /* ── panels (settings, mobile history) ─────────────────────── */
 body.pnopen::after{content:"";position:fixed;inset:0;background:rgba(27,29,25,.34);z-index:60;animation:fade-in .2s var(--dg-ease)}
+body.pnopen{overflow:hidden}/* the side panel is fixed; an unlocked background can still scroll/rubber-band behind it (same class of bug as dg-node #51 - see home.css's "white edge"/settings-drift comments) */
 @keyframes fade-in{from{opacity:0}to{opacity:1}}
 .panel{position:fixed;top:0;right:0;bottom:0;width:330px;max-width:calc(88vw / var(--dg-zoom, 1));background:var(--dg-surface);border-left:1px solid var(--dg-border);z-index:61;display:flex;flex-direction:column;transform:translateX(102%);transition:transform .24s var(--dg-ease);box-shadow:-10px 0 34px var(--dg-shadow);visibility:hidden}
 .panel[data-open=true]{transform:none;visibility:visible}
@@ -453,8 +454,14 @@ body[data-hist=on] .rail{animation:rail-in .34s var(--dg-ease) both}
   #dpd-results table.inflection th,#dpd-results table.inflection td{padding:6px 7px;font-size:12.5px}
   .projrow .in{padding:0 14px}
   .pagefoot{padding:16px 15px 34px}
-  /* settings stays a bottom sheet */
-  .panel{top:auto;left:0;width:auto;max-width:none;border-left:0;border-top:1px solid var(--dg-border);border-radius:16px 16px 0 0;max-height:82vh;transform:translateY(102%);box-shadow:0 -10px 34px var(--dg-shadow)}
+  /* settings stays a bottom sheet. top:18vh, not top:auto: auto asks the browser to solve
+     top from height+bottom, and with document.documentElement.style.zoom set (the page's own
+     "Font size" control, home.js) Chromium solves that equation in the zoomed coordinate space
+     while getBoundingClientRect() reports back in physical px — the header ends up computed
+     dozens of px above the true viewport top, hidden, its close button unreachable (issue
+     dg-apps#38, reproduced at Font size 130%). 18vh = 100vh-82vh, the same position auto was
+     meant to compute, just as a plain vh value the zoomed/physical mismatch cannot touch. */
+  .panel{top:18vh;left:0;width:auto;max-width:none;border-left:0;border-top:1px solid var(--dg-border);border-radius:16px 16px 0 0;max-height:82vh;transform:translateY(102%);box-shadow:0 -10px 34px var(--dg-shadow)}
   .panel[data-open=true]{transform:none}
   /* history opens as a top dropdown, like the resources menu (no dark scrim) */
   body.pnopen.hist-open::after{display:none}
