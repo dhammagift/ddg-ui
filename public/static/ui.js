@@ -164,7 +164,8 @@
     const r = tip.getBoundingClientRect();
     let shift = Math.min(0, innerWidth - 8 - r.right);
     if (r.left + shift < 8) shift = 8 - r.left;
-    tip.style.left = shift + 'px';
+    // screen px -> style px under the page zoom (dg-apps#40)
+    tip.style.left = shift / (parseFloat(document.documentElement.style.zoom) || 1) + 'px';
   }
 
   document.addEventListener('click', (e) => {

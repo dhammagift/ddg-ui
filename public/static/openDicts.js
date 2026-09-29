@@ -114,7 +114,10 @@ function toggleDictDropdown(event) {
 
   if (isShowing) {
     // 1. Динамическое позиционирование относительно координат кнопки
-    const rect = button.getBoundingClientRect();
+    // Rects/innerHeight are screen px; style px get multiplied by the page zoom again (dg-apps#40).
+    const z = parseFloat(document.documentElement.style.zoom) || 1;
+    const br = button.getBoundingClientRect();
+    const rect = { left: br.left / z, top: br.top / z, bottom: br.bottom / z };
     const isDown = dropdown.classList.contains('dict-dropdown-menu-down');
 
     // Привязываем левый край к кнопке
@@ -126,13 +129,13 @@ function toggleDictDropdown(event) {
       dropdown.style.bottom = 'auto';
     } else {
       // Меню выпадает ВВЕРХ (из футера)
-      dropdown.style.bottom = `${window.innerHeight - rect.top + 5}px`;
+      dropdown.style.bottom = `${window.innerHeight / z - rect.top + 5}px`;
       dropdown.style.top = 'auto';
     }
 
     // 2. Проверка, чтобы меню не уходило за правый край экрана
     const dropdownWidth = 260; // min-width из CSS
-    if (rect.left + dropdownWidth > window.innerWidth) {
+    if (rect.left + dropdownWidth > window.innerWidth / z) {
       dropdown.style.left = 'auto';
       dropdown.style.right = '10px';
     } else {
@@ -189,7 +192,10 @@ function adjustDropdownHeight(container, dropdown) {
 
 
 function adjustDropdownHeight(container, dropdown) {
-  const rect = container.getBoundingClientRect();
+  const z = parseFloat(document.documentElement.style.zoom) || 1;
+  const cr = container.getBoundingClientRect();
+  const rect = { top: cr.top / z, bottom: cr.bottom / z };
+  const vh = window.innerHeight / z; // CSS px under the page zoom
   const margin = 8;
   const padding = 16;
   
@@ -197,14 +203,14 @@ function adjustDropdownHeight(container, dropdown) {
   const headerHeight = 70; // Высота верхней шапки (для меню снизу)
   const footerHeight = 60; // 👈 Высота нижней панели (для меню сверху)
 
-  const maxVhHeight = window.innerHeight * 0.7;
+  const maxVhHeight = vh * 0.7;
 
   let availableSpace;
 
   // Логика для меню, которое выпадает ВНИЗ (из Хедера)
   if (dropdown.classList.contains('dict-dropdown-menu-down')) {
     // Высота экрана - (позиция кнопки + отступ) - ВЫСОТА ФУТЕРА
-    availableSpace = window.innerHeight - rect.bottom - margin - padding - footerHeight;
+    availableSpace = vh - rect.bottom - margin - padding - footerHeight;
   } 
   // Логика для меню, которое выпадает ВВЕРХ (из Футера)
   else {
