@@ -108,10 +108,10 @@ const BASE_FONT_SIZE = 15; // matches body{font-size} in dg.css
 
 function loadFontSize() {
     fontSize = localStorage.getItem("fontSize");
-    if (fontSize === null) {
-        bodyStyle = window.getComputedStyle(document.body);
-        fontSize = parseInt(bodyStyle.getPropertyValue('font-size'), 10);
-    }
+    // No saved choice: 110%, not 100% (dg-apps#38/#39 — "сделать в приложении по умолчанию 110% от
+    // текущих 100%, но чтобы шторки и другие элементы окна не поехали"). Anyone who already picked a
+    // size (including 100% on purpose) keeps it; this only moves the untouched default.
+    if (fontSize === null) fontSize = BASE_FONT_SIZE * 1.1;
     setFontSize()
 }
 
