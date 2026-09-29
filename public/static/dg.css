@@ -211,7 +211,10 @@ body[data-screen=start] #s-start,body[data-screen=entry] #s-entry{display:block}
 .ext-dict-header{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 2px;margin:0;font-size:15px;font-weight:600;color:var(--dg-navy-ink);letter-spacing:-.01em;border:0;cursor:pointer;user-select:none}
 .ext-dict-header:hover{color:var(--dg-accent-ink)}
 .ext-dict-header>div:first-child{display:flex;align-items:center;gap:10px;min-width:0}
-.ext-dict-toggle-icon{display:inline-block;width:12px;font-size:9px;color:var(--dg-text-muted);flex:none;text-align:center}
+/* dg-apps#38: "нужно поправить стили раскрывающих треугольников" — 9px, --dg-text-muted read as
+   barely-there gray flecks next to 15px bold titles (see the issue's own circled screenshot). Sized
+   and colored to actually read as a control, not a stray character. */
+.ext-dict-toggle-icon{display:inline-block;width:14px;font-size:12px;color:var(--dg-text-2);flex:none;text-align:center}
 .ext-dict-title{font-weight:600}
 .ext-dict-header[data-dictcode=dpd] .ext-dict-title::after{content:"Digital Pāḷi Dictionary";margin-left:10px;font-size:11.5px;font-weight:400;color:var(--dg-text-muted)}
 .ext-dict-header-right{display:flex;align-items:center;gap:1px;opacity:0;transition:opacity .15s var(--dg-ease)}
