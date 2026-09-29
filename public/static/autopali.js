@@ -50,6 +50,11 @@ document.addEventListener('DOMContentLoaded', function() {
   $.ajax({
         url: "./static/sutta_words.txt",
         dataType: "text",
+        // dg-apps#42: broken autosuggestions in the apps (fine on the site) — the app's WebView has
+        // no Content-Type header to read the charset from on this request, so it fell back to
+        // Latin-1 and every diacritic (ā, ṭ, ñ...) came out as "Ä" plus a stray control character.
+        // overrideMimeType forces UTF-8 regardless of what header (if any) the response carries.
+        mimeType: "text/plain; charset=utf-8",
         success: function(data) {
             var accentMap = {
                 "ā": "a",
