@@ -23,7 +23,7 @@
   --dg-border:#e7e5de;--dg-border-strong:#d7d4c9;
   --dg-text:#1b1d19;--dg-text-2:#5c6058;--dg-text-muted:#6e716a;
   --dg-navy:#243448;--dg-navy-2:#1b2836;--dg-navy-ink:#2f4a63;
-  --dg-accent:#149c7c;--dg-accent-ink:#0f7c63;--dg-accent-dark:#0f7c63;--dg-accent-bg:#dff3ec;--dg-on-accent-bg:#0c6a55;
+  --dg-accent:#149c7c;--dg-accent-ink:#0f7c63;--dg-accent-dark:#149c7c;--dg-accent-bg:#dff3ec;--dg-on-accent-bg:#0c6a55;
   --dg-match:#a8341c;--dg-tblue:#3434be;
   --dg-font:"Lato","Noto Sans","Helvetica Neue",Arial,sans-serif;--dg-font-mono:ui-monospace,Menlo,Consolas,monospace;
   --dg-radius:10px;--dg-ease:cubic-bezier(.22,.68,0,1);
@@ -39,7 +39,7 @@ body.dark-mode{
   --dg-border:#2c2c2c;--dg-border-strong:#3b3b3b;
   --dg-text:#dddddd;--dg-text-2:#a8a8a8;--dg-text-muted:#8a8a8a;
   --dg-navy:#1b2836;--dg-navy-2:#131c26;--dg-navy-ink:#a9c4dc;
-  --dg-accent:#136857;--dg-accent-ink:#09967a;--dg-accent-dark:#025242;--dg-accent-bg:#12241f;--dg-on-accent-bg:#16b394;
+  --dg-accent:#09967a;--dg-accent-ink:#09967a;--dg-accent-dark:#09967a;--dg-accent-bg:#12241f;--dg-on-accent-bg:#16b394;
   --dg-match:#ff6b45;--dg-tblue:#8f8fe8;
   --dg-shadow:rgba(0,0,0,.5);
   --light:var(--dg-text);--dark:var(--dg-page);
@@ -353,17 +353,21 @@ body.pnopen{overflow:hidden}/* the side panel is fixed; an unlocked background c
 .grp{margin:16px 0 6px;font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--dg-text-muted)}
 .grp.first{margin-top:4px}
 .grp+.set{border-top:0}
-/* switch = native checkbox, repainted */
-input.sw{-webkit-appearance:none;appearance:none;width:38px;height:22px;margin:0;border:0;border-radius:999px;background:var(--dg-border-strong);cursor:pointer;flex:none;position:relative;transition:background .16s var(--dg-ease)}
+/* switch = native checkbox, repainted. Off is a grey mixed from --dg-text-muted, not
+   --dg-border-strong: the latter is invisible on the dark surface (one green per theme, owner
+   2026-10-02 — same as dhamma.gift's .dg-tgl). */
+input.sw{-webkit-appearance:none;appearance:none;width:38px;height:22px;margin:0;border:0;border-radius:999px;background:color-mix(in srgb,var(--dg-text-muted) 40%,var(--dg-surface));cursor:pointer;flex:none;position:relative;transition:background .16s var(--dg-ease)}
 input.sw::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .16s var(--dg-ease);box-shadow:0 1px 3px rgba(27,29,25,.28)}
 input.sw:checked{background:var(--dg-accent)}
 input.sw:checked::after{transform:translateX(16px)}
 input.sw:focus-visible{outline:2px solid var(--dg-accent);outline-offset:2px}
-/* segmented control: two labels around a hidden checkbox (unchecked = first) */
+/* segmented control: two labels around a hidden checkbox (unchecked = first).
+   Chosen = the same green as the switches (was a neutral surface fill: on the dark theme it was
+   indistinguishable from the neighbouring labels). */
 .seg{display:flex;gap:2px;background:var(--dg-surface-hover);border-radius:999px;padding:2px;flex:none;position:relative;cursor:pointer}
 .seg input{position:absolute;opacity:0;width:0;height:0;margin:0}
 .seg>button,.seg>span{border:0;background:none;font:inherit;font-size:12px;color:var(--dg-text-2);padding:4px 10px;border-radius:999px;cursor:pointer;line-height:1.35}
-.seg>button[aria-pressed=true],.seg>input:not(:checked)~span:nth-of-type(1),.seg>input:checked~span:nth-of-type(2){background:var(--dg-surface);color:var(--dg-text);font-weight:600;box-shadow:0 1px 3px rgba(27,29,25,.12)}
+.seg>button[aria-pressed=true],.seg>input:not(:checked)~span:nth-of-type(1),.seg>input:checked~span:nth-of-type(2){background:var(--dg-accent);color:#fff;font-weight:600}
 .seg>input:focus-visible~span{outline:2px solid var(--dg-accent);outline-offset:1px}
 .stepper{display:flex;align-items:center;gap:4px;flex:none}
 .stepper button{width:27px;height:27px;border:1px solid var(--dg-border-strong);border-radius:50%;background:var(--dg-surface);color:var(--dg-text-2);font:inherit;font-size:13px;cursor:pointer;display:grid;place-items:center;padding:0}
@@ -371,14 +375,14 @@ input.sw:focus-visible{outline:2px solid var(--dg-accent);outline-offset:2px}
 .stepper span{min-width:40px;text-align:center;font-size:12.5px;color:var(--dg-text-muted);font-variant-numeric:tabular-nums}
 /* issue #1: language/theme/font-size are the controls the owner compares against Dhamma.Gift's own
    drawer, so they copy its .dg-segmented: label on its own muted line, control a full-width bar
-   bordered once with equal cells, active cell filled grey. Everything else stays the compact
-   label+control row above (the toggles especially, the owner asked to keep them). */
+   bordered once with equal cells, active cell in the same green as the switches. Everything else
+   stays the compact label+control row above (the toggles especially, the owner asked to keep them). */
 .set:has(>.seg.big),.set:has(>.stepper.big){display:block}
 .set:has(>.seg.big)>.lb,.set:has(>.stepper.big)>.lb{margin-bottom:7px;font-size:12.8px;color:var(--dg-text-2)}
 .seg.big{width:100%;gap:0;padding:0;border:1px solid var(--dg-border);border-radius:var(--dg-radius);background:transparent;overflow:hidden}
 .seg.big>button,.seg.big>span{flex:1;min-width:0;padding:10px 6px;border-radius:0;font-size:.82rem;font-weight:600;text-align:center;box-shadow:none}
-.seg.big>button:hover{background:var(--dg-surface-hover)}
-.seg.big>button[aria-pressed=true],.seg.big>input:not(:checked)~span:nth-of-type(1),.seg.big>input:checked~span:nth-of-type(2){background:var(--dg-surface-active);color:var(--dg-text);box-shadow:none}
+.seg.big>button:not([aria-pressed=true]):hover{background:var(--dg-surface-hover)}
+.seg.big>button[aria-pressed=true],.seg.big>input:not(:checked)~span:nth-of-type(1),.seg.big>input:checked~span:nth-of-type(2){background:var(--dg-accent);color:#fff;box-shadow:none}
 .stepper.big{width:100%;gap:0;border:1px solid var(--dg-border);border-radius:var(--dg-radius);overflow:hidden}
 /* the "−"/"100%"/"+" cells are equal thirds, as in the drawer's own #dg-fontsize-ctrl */
 .stepper.big button{flex:1;width:auto;height:38px;border:0;border-radius:0;background:var(--dg-surface);font-size:1.2rem;font-weight:700}
