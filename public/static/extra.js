@@ -2044,7 +2044,7 @@ function appendTripitaka(query) {
     const currentTheme = localStorage.getItem('theme') === 'dark' ? 'dark' : 'light';
     
     // Передаем динамическую тему в URL
-    appendIframeDict('tripitaka', 'Sutta-Vinaya Definitions and Similies', `https://tripitaka-mcp.com/read/embed/define?term=${encodeURIComponent(query)}&sources=an,dn,mn,sn,iti,ud,snp,dhp,vinaya&theme=${currentTheme}&link_base=${linkBase}`, true, false);
+    appendIframeDict('tripitaka', 'Sutta-Vinaya Definitions and Similies', `https://tripitaka-mcp.com/read/embed/define?term=${encodeURIComponent(query)}&sources=an,dn,mn,sn,iti,ud,snp,dhp,vinaya&theme=${currentTheme}&link_base=${linkBase}`, false, false); // same sandbox as the other external dictionaries; no inversion: the embed has its own dark theme
 }
 
 async function appendBuddhadust(query) {
