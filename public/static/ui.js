@@ -191,15 +191,20 @@
   window.favToggle = () => { const w = currentWord(); if (w) favSet(w); };
 
   // ---- word actions ------------------------------------------------------
-  // The big speaker button plays the audio of the FIRST DPD entry's own play button
-  // (its data-headword is the dictionary lemma, e.g. "satta" for a search of "satto" —
-  // audio only exists for lemmas, so reusing currentWord() directly 404s for inflected forms).
-  window.speakWord = () => {
+  // The big speaker button reads exactly what was searched (inflected forms, compounds, whole
+  // phrases) with the Dhamma.Gift voice. If that service is down: the FIRST DPD entry's recording
+  // (its data-headword is the lemma, e.g. "satta" for "satto": DPD audio only exists for lemmas).
+  const dpdSpeak = (w) => {
     const firstPlay = document.querySelector('#dpd-results .dpd-button.play');
     const headword = firstPlay?.getAttribute('data-headword');
-    if (headword && typeof playAudio === 'function') { playAudio(headword, firstPlay.getAttribute('data-gender')); return; }
+    if (headword && typeof playAudio === 'function') playAudio(headword, firstPlay.getAttribute('data-gender'));
+    else if (w && typeof playAudio === 'function') playAudio(w);
+  };
+  window.speakWord = () => {
     const w = currentWord();
-    if (w && typeof playAudio === 'function') playAudio(w);
+    if (!w) return;
+    if (typeof window.dgSpeak !== 'function') return dpdSpeak(w);
+    window.dgSpeak(w).then(ok => ok || dpdSpeak(w)).catch(() => dpdSpeak(w));
   };
   window.copyWord = () => { const w = currentWord(); if (w) navigator.clipboard.writeText(w).then(() => notify(T.copied)); };
   window.copyLink = () => navigator.clipboard.writeText(location.href).then(() => notify(T.linkCopied));

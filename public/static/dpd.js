@@ -1,3 +1,38 @@
+// Pali through the Dhamma.Gift voice (Piper + our IAST->IPA rules) for the big speaker button: any word,
+// compound or phrase, not only the DPD lemmas that have a recording. Same service as the DG reader; f2 is
+// public with CORS, the same-origin proxy is the fallback. The play buttons inside DPD entries keep DPD's
+// own recordings (owner: that is their area).
+const DG_TTS_URLS = [window.DG_TTS_URL || 'https://f2.dhamma.gift/api/tts/pali', '/api/tts/pali'];
+const DG_TTS_RATE = 0.875;  // the reader's default Pali pace
+const dgTtsCache = new Map();  // text -> object URL of the mp3
+
+// A silent clip played inside the click unlocks the element, so it may still play once synthesis
+// returns a few seconds later (iOS refuses audio started outside the tap otherwise).
+const SILENCE = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YQAAAAA=';
+
+async function dgSpeak(text) {
+    const audio = new Audio(SILENCE);
+    audio.play().catch(() => {});
+    let url = dgTtsCache.get(text);
+    for (const api of url ? [] : DG_TTS_URLS) {
+        try {
+            const r = await fetch(api, { method: 'POST', headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({ text, rate: DG_TTS_RATE }) });
+            if (!r.ok) continue;
+            const b64 = (await r.json()).audioContent;
+            url = URL.createObjectURL(new Blob([Uint8Array.from(atob(b64), c => c.charCodeAt(0))], { type: 'audio/mpeg' }));
+            dgTtsCache.set(text, url);
+            break;
+        } catch (e) {}
+    }
+    if (!url) return false;
+    audio.src = url;
+    await audio.play();
+    return true;
+}
+
+window.dgSpeak = dgSpeak;
+
 function playAudio(headword, gender) {
     if (!headword) return;
     
