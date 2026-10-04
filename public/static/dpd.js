@@ -2,7 +2,7 @@
 // compound or phrase, not only the DPD lemmas that have a recording. Same service as the DG reader; f2 is
 // public with CORS, the same-origin proxy is the fallback. The play buttons inside DPD entries keep DPD's
 // own recordings (owner: that is their area).
-const DG_TTS_URLS = [window.DG_TTS_URL || 'https://f2.dhamma.gift/api/tts/pali', '/api/tts/pali'];
+const DG_TTS_URLS = [window.DG_TTS_URL || 'https://api.dhamma.gift/api/tts/pali', '/api/tts/pali'];
 const DG_TTS_RATE = 0.875;  // the reader's default Pali pace
 const dgTtsCache = new Map();  // text -> object URL of the mp3
 
