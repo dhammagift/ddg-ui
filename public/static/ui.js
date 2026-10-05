@@ -200,11 +200,18 @@
     if (headword && typeof playAudio === 'function') playAudio(headword, firstPlay.getAttribute('data-gender'));
     else if (w && typeof playAudio === 'function') playAudio(w);
   };
+  // One reading at a time: while it is being made or played the button (and the hotkey) ignore new
+  // presses, so it cannot be spammed into overlapping voices. A safety timer frees the lock anyway.
+  let speakBusy = false;
   window.speakWord = () => {
     const w = currentWord();
-    if (!w) return;
-    if (typeof window.dgSpeak !== 'function') return dpdSpeak(w);
-    window.dgSpeak(w).then(ok => ok || dpdSpeak(w)).catch(() => dpdSpeak(w));
+    if (!w || speakBusy) return;
+    speakBusy = true;
+    const safety = setTimeout(() => { speakBusy = false; }, 30000);
+    const done = (ms) => { clearTimeout(safety); setTimeout(() => { speakBusy = false; }, ms); };
+    if (typeof window.dgSpeak !== 'function') { dpdSpeak(w); return done(2500); }
+    window.dgSpeak(w).then(ok => { if (ok) done(300); else { dpdSpeak(w); done(2500); } })
+      .catch(() => { dpdSpeak(w); done(2500); });
   };
   window.copyWord = () => { const w = currentWord(); if (w) navigator.clipboard.writeText(w).then(() => notify(T.copied)); };
   window.copyLink = () => navigator.clipboard.writeText(location.href).then(() => notify(T.linkCopied));

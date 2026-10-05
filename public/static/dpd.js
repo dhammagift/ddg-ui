@@ -28,6 +28,8 @@ async function dgSpeak(text) {
     if (!url) return false;
     audio.src = url;
     await audio.play();
+    // resolves when the reading is over (or stopped), so the caller can keep its "busy" lock until then
+    await new Promise(done => { audio.onended = audio.onpause = audio.onerror = done; });
     return true;
 }
 
