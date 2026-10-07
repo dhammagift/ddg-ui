@@ -538,3 +538,6 @@ body.is-offline #speakbtn{opacity:.35;pointer-events:none}
 /* A long unbroken word in an entry (the Sanskrit dictionaries have them) must wrap: on a phone it widened the whole layout
    viewport, and the burger sheet (fixed, full width) came out wider than the screen with a scroll bar. */
 .sources,.dpd-pane,.dpd-results,.summary-results{overflow-wrap:anywhere;min-width:0;max-width:100%}
+
+/* TEST of the app update bar (2026-10-08): classes nobody uses; remove together with this comment. */
+.dg-update-test-a{color:red}.dg-update-test-b{margin:0}
