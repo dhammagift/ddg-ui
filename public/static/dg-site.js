@@ -6,7 +6,12 @@
 // Also drives the burger menu (#p-menu): open/close and keeping its theme / font-size controls in
 // step with the settings panel, which stays the single place those values are saved.
 (function () {
-  const SITE = location.hostname === 'dict.dhamma.gift' ? 'https://dhamma.gift' : '';
+  // The Dictionary app serves this page from its own origin (https://localhost, Capacitor): the tools are not on that
+  // host either (dict.dhamma.gift answers 404 for them), so there they come from the site, like on the subdomain.
+  const inApp = location.hostname === 'localhost' && !!window.Capacitor && !!window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform();
+  const SITE = (location.hostname === 'dict.dhamma.gift' || inApp) ? 'https://dhamma.gift' : '';
+  // quickModal.js builds its links and icons from this base (its own rule knows only the subdomain).
+  if (SITE && !window.DG_SITE_BASE) window.DG_SITE_BASE = SITE;
   // The files borrowed from the site below are served with a one-year immutable cache (dg-node's
   // CACHE_IMMUTABLE_YEAR) — a browser that already has a copy keeps it for a year. On the site
   // itself that is safe, because its HTML tags get a ?v=<hash> stamp on every change; these lazy
@@ -17,7 +22,7 @@
   // ui3: quickModal.js takes a host-provided settings opener (window.dgQuickSettings) and
   // addresses the site's own icons/links through a base — the dictionary had no quick settings
   // in the compass and its icons 404'd on the subdomain (ddg-ui #4, #5).
-  const TOOLS_V = '?v=ui3';
+  const TOOLS_V = '?v=ui4';
   // Help opens the docs on the site serving this page (test.dhamma.gift/dict → test docs).
   window.dgOpenHelp = function () {
     window.open(SITE + (window.isRu ? '/ru' : '') + '/docs/dictionary/', '_blank');
