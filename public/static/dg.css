@@ -534,3 +534,7 @@ body.is-offline #speakbtn{opacity:.35;pointer-events:none}
 @keyframes dgm-ul{0%,36%{stroke-dashoffset:1}66%,100%{stroke-dashoffset:0}}
 @keyframes dgm-dt{0%,6%{transform:translateY(-140px) scale(.4);opacity:0}24%{transform:translateY(12px) scale(1.15);opacity:1}32%,100%{transform:none;opacity:1}}
 @media(prefers-reduced-motion:reduce){.dg-play .hk,.dg-play .st,.dg-play .ul{animation:none;stroke-dasharray:none;stroke-dashoffset:0}.dg-play .dt{animation:none}}
+
+/* A long unbroken word in an entry (the Sanskrit dictionaries have them) must wrap: on a phone it widened the whole layout
+   viewport, and the burger sheet (fixed, full width) came out wider than the screen with a scroll bar. */
+.sources,.dpd-pane,.dpd-results,.summary-results{overflow-wrap:anywhere;min-width:0;max-width:100%}
