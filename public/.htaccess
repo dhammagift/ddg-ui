@@ -17,3 +17,9 @@ RewriteRule ^[^/]+/?$ index.html [L]
   Header set Service-Worker-Allowed "/"
   Header set Cache-Control "no-cache"
 </Files>
+
+# The Dictionary app (its page lives on https://localhost) refreshes its bundled files from here with fetch(): without
+# this header the browser engine blocks every one of those requests and the app never gets an update. Public static content.
+<IfModule mod_headers.c>
+  Header set Access-Control-Allow-Origin "*"
+</IfModule>
