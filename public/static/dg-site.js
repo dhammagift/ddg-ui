@@ -42,12 +42,15 @@
   }
 
   // Find on the page is always Dhamma.Gift's own file (fresh). In the app it is the bundle's copy of that very file, taken from the site
-  // when the app was built and refreshed by the app's updater (so it also opens with no network);XX
-  // on whatever origin the page has, so the dictionary site serves the four it uses (public/assets/svg/).
+  // when the app was built and refreshed by the app's updater (so it also opens with no network); its icons are /assets/svg/*.svg
+  // on the origin the panel's script came from, which the bundle carries too.
   const FIND_BASE = inApp ? '' : SITE;
+  const loadFind = (base) => load('js', base + '/assets/js/dg-page-find.js' + TOOLS_V)
+    .then(() => load('js', base + '/assets/js/dg-page-find-ui.js' + TOOLS_V));
   window.dgOpenFind = function () {
-    load('js', FIND_BASE + '/assets/js/dg-page-find.js' + TOOLS_V)
-      .then(() => load('js', FIND_BASE + '/assets/js/dg-page-find-ui.js' + TOOLS_V))
+    // An app that was built before the bundle carried the file has none to find there: the site's own is the way out.
+    loadFind(FIND_BASE).catch(() => null)
+      .then(() => (window.DgPageFindUI || !FIND_BASE ? null : loadFind(SITE)))
       .then(() => { if (window.DgPageFindUI) window.DgPageFindUI.open(); })
       .catch((e) => console.warn(e.message));
   };
