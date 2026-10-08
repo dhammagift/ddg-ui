@@ -17,7 +17,6 @@ const searchForm = document.getElementById("search-form");
 const searchButton = document.getElementById("search-button");
 const footerText = document.getElementById("footer");
 
-const themeToggle = document.getElementById("theme-toggle");
 const sansSerifToggle = document.getElementById("sans-serif-toggle");
 const niggahitaToggle = document.getElementById("niggahita-toggle");
 const grammarToggle = document.getElementById("grammar-toggle");
@@ -68,7 +67,6 @@ document.addEventListener("DOMContentLoaded", function() {
     const htmlElement = document.documentElement;
     language = htmlElement.lang || 'en';
 
-    loadToggleState("theme-toggle");
     loadToggleState("sans-serif-toggle");
     loadToggleState("niggahita-toggle");
     loadToggleState("grammar-toggle");
@@ -162,7 +160,6 @@ function decreaseFontSize() {
 
 //// save settings on toggle
 
-themeToggle.addEventListener("change", saveToggleState);
 sansSerifToggle.addEventListener("change", saveToggleState);
 niggahitaToggle.addEventListener("change", saveToggleState);
 grammarToggle.addEventListener("change", saveToggleState);
@@ -178,15 +175,7 @@ function saveToggleState(event) {
     localStorage.setItem(event.target.id, event.target.checked);
 }
 
-//// theme
-
-function toggleTheme(event) {
-    document.body.classList.toggle("dark-mode", event.target.checked);
-    localStorage.setItem("theme", event.target.checked ? "dark" : "light");
-}
-
-//// Event listener for theme toggle
-themeToggle.addEventListener("change", toggleTheme);
+//// theme: dgSetTheme() in extra.js (dark / light / auto)
 
 
 //// toggle sans / serif

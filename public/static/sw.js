@@ -40,7 +40,8 @@ const ASSETS = [
   'static/icons/fa/keyboard.svg', 'static/icons/fa/magnifying-glass.svg', 'static/icons/fa/share-nodes.svg',
   'static/icons/fa/table-columns.svg', 'static/icons/fa/telegram.svg', 'static/icons/fa/trash-can.svg',
   'static/icons/fa/volume-high.svg', 'static/icons/fa/whatsapp.svg', 'static/icons/fa/xmark.svg',
-  'static/icons/fa/youtube.svg'
+  'static/icons/fa/youtube.svg',
+  'static/icons/fa/moon.svg', 'static/icons/fa/sun.svg', 'static/icons/fa/circle-half-stroke.svg'
 ];
 
 const urlsToCache = [SHELL_EN, SHELL_RU]

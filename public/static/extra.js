@@ -103,9 +103,6 @@ function getUrlParams() {
     document.body.classList.add(theme + '-mode');
     localStorage.setItem('theme', theme);
 
-    if (window.themeToggle) {
-      themeToggle.checked = theme === 'dark';
-    }
   }
 })();
 
@@ -286,11 +283,9 @@ document.addEventListener('keydown', function(event) {
   }
 });
 
-// Add this function to programmatically toggle the theme
+// Alt+T: light -> dark -> auto, the order Dhamma.Gift uses
 function toggleThemeProgrammatically() {
-  themeToggle.checked = !themeToggle.checked;
-  const event = new Event('change');
-  themeToggle.dispatchEvent(event);
+  dgSetTheme({ light: 'dark', dark: 'auto', auto: 'light' }[dgThemeMode()]);
 }
 
 //установка фокуса в инпуте по нажатию / 
@@ -2041,7 +2036,7 @@ function appendTripitaka(query) {
     const linkBase = `https://dhamma.gift${readPath}?q={sutta_id}%23{segment_num}`;
     
     // Получаем текущую тему из настроек
-    const currentTheme = localStorage.getItem('theme') === 'dark' ? 'dark' : 'light';
+    const currentTheme = dgThemeIsDark() ? 'dark' : 'light';
     
     // Передаем динамическую тему в URL
     appendIframeDict('tripitaka', 'Sutta-Vinaya Definitions and Similies', `https://tripitaka-mcp.com/read/embed/define?term=${encodeURIComponent(query)}&sources=an,dn,mn,sn,iti,ud,snp,dhp,vinaya&theme=${currentTheme}&link_base=${linkBase}`, true, false);
@@ -2369,16 +2364,27 @@ function toggleClearHistoryButton() {
     btn.style.display = historyList.length === 0 ? "none" : "inline-block";
 }
 
-// ======== THEME (moved from home.js) ========
-function applySavedTheme() {
-    const savedTheme = localStorage.getItem("theme");
-    const themeToggle = document.getElementById("theme-toggle");
-    if (savedTheme) {
-        document.body.classList.remove("dark-mode", "light-mode");
-        document.body.classList.add(savedTheme + "-mode");
-        if (themeToggle) themeToggle.checked = savedTheme === "dark";
-    }
+// ======== THEME ========
+// localStorage.theme = 'dark' | 'light' | 'auto' (the same values and default as Dhamma.Gift; nothing saved = auto).
+function dgThemeMode() {
+    const t = localStorage.getItem("theme");
+    return t === "dark" || t === "light" ? t : "auto";
 }
+function dgThemeIsDark() {
+    const m = dgThemeMode();
+    return m === "dark" || (m === "auto" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+}
+function applySavedTheme() {
+    const m = dgThemeMode();
+    document.body.classList.remove("light-mode");
+    document.body.classList.toggle("dark-mode", dgThemeIsDark());
+    document.querySelectorAll("#theme-seg button").forEach((b) => b.setAttribute("aria-pressed", b.dataset.theme === m ? "true" : "false"));
+}
+function dgSetTheme(mode) {
+    localStorage.setItem("theme", mode);
+    applySavedTheme();
+}
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", applySavedTheme);
 
 // ======== INFLECTION TABLE HIGHLIGHT ========
 document.addEventListener('click', function(e) {
