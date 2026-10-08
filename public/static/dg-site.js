@@ -68,6 +68,11 @@
       .catch((e) => console.warn(e.message));
   };
 
+  // Esc closes the compass, as it does everywhere on Dhamma.Gift (there it is settings.js's keydown handler, which this page does not load).
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && window.quickModalIsOpen && typeof window.toggleQuickModal === 'function') window.toggleQuickModal();
+  });
+
   // The compass window asks the host page for a settings opener when there is no home.js (see
   // quickModal.js): the dictionary's own menu already holds theme, font size and language, so the
   // gear opens that instead of duplicating a second settings panel (ddg-ui #5).
