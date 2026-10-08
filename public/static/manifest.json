@@ -83,7 +83,7 @@
       "url": "/static/openDG.html?url=https://dhamma.gift/",
       "icons": [
         {
-          "src": "/static/shortcuts/dhamma-gift.png",
+          "src": "/static/shortcuts/dhamma-gift-diamond.png",
           "type": "image/png",
           "sizes": "192x192"
         }
