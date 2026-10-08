@@ -98,7 +98,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 return ret;
             };
 
-            var allWords = data.split('\n');
+            // sutta_words.txt lines are "word count" (how often the word occurs in the Suttas). That number is the Dhamma.Gift reader's
+            // business; the dictionary's list shows the words only.
+            var allWords = data.split('\n').map(function (w) { return w.replace(/\s+\d+\s*$/, ''); });
 
             $("#search-box").autocomplete({
                 autoFocus: false,

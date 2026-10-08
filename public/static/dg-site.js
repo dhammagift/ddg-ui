@@ -48,6 +48,13 @@
       .catch((e) => console.warn(e.message));
   };
 
+  // The compass (history, favorites, subscriptions of Dhamma.Gift) is the site's own window and needs the site's storage: on dhamma.gift/dict it
+  // is there, on dict.dhamma.gift and in the apps it would be an empty copy. There the menu row and the Alt+P / Alt+Y keys are gone.
+  if (SITE) {
+    const hide = document.createElement('style');
+    hide.textContent = '.mrow[onclick*="dgOpenCompass"]{display:none!important}';
+    document.head.appendChild(hide);
+  } else
   window.dgOpenCompass = function () {
     // quickModal.js sets window.isRu from the site's own URL rules on load; the dictionary's language
     // switch reads the same global, so keep the dictionary's value.
