@@ -41,9 +41,13 @@
     return loading[url];
   }
 
+  // Find on the page is always Dhamma.Gift's own file (fresh). In the app it is the bundle's copy of that very file, taken from the site
+  // when the app was built and refreshed by the app's updater (so it also opens with no network);XX
+  // on whatever origin the page has, so the dictionary site serves the four it uses (public/assets/svg/).
+  const FIND_BASE = inApp ? '' : SITE;
   window.dgOpenFind = function () {
-    load('js', SITE + '/assets/js/dg-page-find.js' + TOOLS_V)
-      .then(() => load('js', SITE + '/assets/js/dg-page-find-ui.js' + TOOLS_V))
+    load('js', FIND_BASE + '/assets/js/dg-page-find.js' + TOOLS_V)
+      .then(() => load('js', FIND_BASE + '/assets/js/dg-page-find-ui.js' + TOOLS_V))
       .then(() => { if (window.DgPageFindUI) window.DgPageFindUI.open(); })
       .catch((e) => console.warn(e.message));
   };
