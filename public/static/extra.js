@@ -428,7 +428,7 @@ function initStartMessage(lang) {
         <div class="message-container">
   <div class="messages-content">
 <p class="message">Ищите на пали с <b>Автоподсказками</b> или <b>Velthuis</b>, или русском .</p>
-<p class="message">Для <b>словаря на любом сайте</b> есть: <a target='_blank' title='Chrome, Opera, Brave, Edge или Yandex Browser. Также есть в Fierfox Add-ons' href='https://chromewebstore.google.com/detail/dhammagift-search-and-wor/dnnogjdcmhbiobpnkhdbfnfjnjlikabd?authuser=1&hl=ru'>Расширение</a>, и <a title='также через Меню Chrome → "Добавить на главную" → Установить' href='#' id='installLink'>Web</a> или <a target="" href="https://github.com/dhammagift/dg-twa/releases/download/latest/dict-dhamma-gift.apk" title="Последнее оновление APK для Dict.Dhamma.Gift TWA">приложение</a>. 
+<p class="message">Для <b>словаря на любом сайте</b> есть: <a target='_blank' rel='noopener' title='Chrome, Opera, Brave, Edge или Yandex Browser. Также есть в Fierfox Add-ons' href='https://chromewebstore.google.com/detail/dhammagift-search-and-wor/dnnogjdcmhbiobpnkhdbfnfjnjlikabd?authuser=1&hl=ru'>Расширение</a>, и <a title='также через Меню Chrome → "Добавить на главную" → Установить' href='#' id='installLink'>Web</a> или <a target="" href="https://github.com/dhammagift/dg-twa/releases/download/latest/dict-dhamma-gift.apk" title="Последнее оновление APK для Dict.Dhamma.Gift TWA">приложение</a>. 
 Затем: выделите слово → в ОС меню "поделиться" выберите Dict.DG.</p>
 <p class="message"><b>Таблицу в Словаре Грамматики</b> можно сортировать.</p>
 
@@ -2337,7 +2337,7 @@ addEventListener('hashchange', focusDictFromHash);
 
 // Универсальный генератор шапки для внешних словарей
 function renderExtDictHeader(dictCode, title, targetUrl, extraRightHtml = '') {
-    const linkHtml = `<a href="${targetUrl || '#'}" class="ext-dict-open-link" target="_blank"${targetUrl ? '' : ' style="visibility:hidden;"'} onclick="event.stopPropagation();" title="${getUiText('openInNewTab')}"><img src="static/open-link.svg" class="ext-dict-open-icon"></a>`;
+    const linkHtml = `<a href="${targetUrl || '#'}" class="ext-dict-open-link" target="_blank" rel="noopener"${targetUrl ? '' : ' style="visibility:hidden;"'} onclick="event.stopPropagation();" title="${getUiText('openInNewTab')}"><img src="static/open-link.svg" class="ext-dict-open-icon"></a>`;
 
     const states = JSON.parse(localStorage.getItem('extDictStates') || '{}');
     const isCollapsed = states[dictCode] === true;
