@@ -132,6 +132,9 @@
         var el = document.createElement('script');
         el.textContent = text;
         document.head.appendChild(el);
+        // An inline script has run once appended: the element would keep the 6-10 MB source text in the page
+        // next to the objects it made.
+        el.remove();
     }
 
     // Reads the cached files and evaluates them: they are plain `var dpd_i2h = {...}` literals.
@@ -175,11 +178,35 @@
 
     function unfold(html) { return html.replace(/ṃ/g, 'ṁ'); }
 
-    // Returns entry HTML for #dpd-results, or '' when the word is not in the data.
+    // A word typed without diacritics ("samadhi", "sila"): the spellings of it the data has (samādhi, silā, sīla, ...),
+    // in the order the letters are tried, plain first. Online, dpdict.net finds these; the data is keyed by the real spelling only.
+    var ALT = { a: 'aā', i: 'iī', u: 'uū', m: 'mṃ', n: 'nṅñṇ', t: 'tṭ', d: 'dḍ', l: 'lḷ' };
+    function spellings(key) {
+        var ebts = window.dpd_ebts, i2h = window.dpd_i2h, deco = window.dpd_deconstructor || {};
+        var all = [''];
+        for (var i = 0; i < key.length; i++) {
+            var alt = ALT[key[i]] || key[i];
+            // ponytail: every combination is tried; a word long enough to pass 32k of them gets no variants.
+            if (all.length * alt.length > 32768) return [];
+            var next = [];
+            for (var s = 0; s < all.length; s++) for (var j = 0; j < alt.length; j++) next.push(all[s] + alt[j]);
+            all = next;
+        }
+        return all.filter(function (k) { return k !== key && (i2h[k] || ebts[k] || ebts[k + ' 1'] || deco[k]); }).slice(0, 5);
+    }
+
+    // Returns entry HTML for #dpd-results, or '' when the word is not in the data. The word as typed first; only when
+    // that finds nothing and it has no diacritics, its spellings with them.
     function lookup(word) {
         if (!word || /^[\d\-]+$/.test(word)) return '';
         if (!window.dpd_i2h || !window.dpd_ebts) return '';
         var key = fold(word);
+        var out = lookupKey(key);
+        if (out || !/^[a-z]+$/.test(key)) return out;
+        return spellings(key).map(lookupKey).join('');
+    }
+
+    function lookupKey(key) {
         var ebts = window.dpd_ebts;
         var out = '';
         var heads = headwords(key);
@@ -210,7 +237,7 @@
         isRu: isRu
     };
 
-    // ——— UI: the menu row (download → % → delete), the line in the "Dictionary on any site" card,
+    // ——— UI: the menu row (download → % → delete, one icon throughout), the line in the "Dictionary on any site" card,
     // and the invitation shown in the installed app.
     var T = isRu ? {
         download: 'скачать', remove: 'удалить', downloading: 'качаю',
@@ -247,14 +274,21 @@
         if (hideAfterMs) bubble.timer = setTimeout(function () { node.classList.remove('show'); }, hideAfterMs);
     }
 
+    // The button's words change, its icon never does (owner: an icon must not turn into another one after a tap):
+    // the download mark stays, the state is the label beside it and, once downloaded, a dot on the mark (dg.css).
+    function label(btn, text) {
+        var icon = btn.querySelector('.gi');
+        btn.textContent = text;
+        if (icon) btn.insertBefore(icon, btn.firstChild);
+    }
+
     function paint(current) {
         var btn = el('offline-dl-btn'), sub = el('offline-dl-sub');
         if (!btn) return;
         var ready = current === 'ready';
         btn.disabled = false;
-        btn.innerHTML = ready
-            ? '<i class="gi i-fa-trash-can"></i>' + T.remove
-            : '<i class="gi i-fa-download"></i>' + T.download;
+        btn.classList.toggle('is-ready', ready);
+        label(btn, ready ? T.remove : T.download);
         btn.title = ready ? T.titleRemove : T.titleDownload;
         if (sub) sub.textContent = ready ? T.subReady : T.sub;
         var invite = el('dg-offline-invite');
@@ -263,11 +297,11 @@
 
     function runDownload() {
         var btn = el('offline-dl-btn'), sub = el('offline-dl-sub');
-        if (btn) { btn.disabled = true; btn.innerHTML = T.downloading + ' 0%'; }
+        if (btn) { btn.disabled = true; label(btn, T.downloading + ' 0%'); }
         bubble(T.bubbleStart + ' 0%');
         return download(function (share) {
             var pct = Math.round(share * 100) + '%';
-            if (btn) btn.innerHTML = T.downloading + ' ' + pct;
+            if (btn) label(btn, T.downloading + ' ' + pct);
             bubble(T.bubbleStart + ' ' + pct);
         }).then(function () {
             bubble(T.bubbleDone, 2500);
@@ -308,18 +342,22 @@
         var invite = el('dg-offline-invite');
         if (invite) {
             var yes = el('dg-offline-invite-yes'), no = el('dg-offline-invite-no');
-            if (yes) yes.addEventListener('click', function () { invite.hidden = true; runDownload(); });
-            if (no) no.addEventListener('click', function () {
+            // Offered once: either answer puts it away for good (a failed download is retried from the menu row).
+            var answered = function () {
                 invite.hidden = true;
                 try { localStorage.setItem('dgOfflineDismissed', '1'); } catch (e) {}
-            });
+            };
+            if (yes) yes.addEventListener('click', function () { answered(); runDownload(); });
+            if (no) no.addEventListener('click', answered);
         }
         state().then(function (current) {
             paint(current);
-            // Only in the installed app (TWA/PWA): ?source=pwa is stripped by extra.js on a language
-            // redirect, so the display-mode check is the one that survives.
+            // Only in the installed app (PWA, or the Capacitor app, whose WebView reports display-mode: browser):
+            // ?source=pwa is stripped by extra.js on a language redirect, so the display-mode check is the one that survives.
+            var cap = window.Capacitor;
             var installed = /[?&]source=pwa\b/.test(location.search) ||
-                (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+                (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
+                !!(cap && typeof cap.isNativePlatform === 'function' && cap.isNativePlatform());
             var dismissed = false;
             try { dismissed = !!localStorage.getItem('dgOfflineDismissed'); } catch (e) {}
             if (invite && installed && current !== 'ready' && !dismissed) invite.hidden = false;

@@ -397,6 +397,9 @@ input.sw:focus-visible{outline:2px solid var(--dg-accent);outline-offset:2px}
 .panel .ph .rb:first-of-type~.rb{margin-left:0}
 .rb.act{width:auto;padding:0 10px;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;font-size:11.5px;color:var(--dg-text-muted);margin-left:auto}
 .rb.act i{font-size:12px}
+/* Offline dictionary downloaded: a dot on the download mark (the icon itself never changes, offline-dpd.js paint). */
+#offline-dl-btn{position:relative}
+#offline-dl-btn.is-ready::after{content:"";position:absolute;left:18px;top:8px;width:7px;height:7px;border-radius:50%;background:var(--dg-accent);box-shadow:0 0 0 1.5px var(--dg-surface)}
 .hist-p ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:1px}
 .hist-p ul:empty::after{content:attr(data-empty);display:block;padding:4px 9px;font-size:12.5px;color:var(--dg-text-muted)}
 .hist-p li a{flex:1;min-width:0;display:block;padding:6px 9px;border-radius:7px;font-size:14px;color:var(--dg-text-2);text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
