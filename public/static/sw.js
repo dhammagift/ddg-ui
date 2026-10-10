@@ -5,7 +5,7 @@
 // same files also run under dhamma.gift/dict/. The page registers with an explicit scope (extra.js);
 // without it the worker's scope was /static/ and it controlled no navigation at all — offline the
 // app did not open at all.
-const CACHE_NAME = 'ddg-pwa-v6';
+const CACHE_NAME = 'ddg-pwa-v7';
 // The offline mini-dictionary lives in its own bucket (offline-dpd.js). activate() must not sweep
 // it away, or updating this worker would silently delete a ~15 MB download.
 const KEEP_CACHES = ['ddg-dict'];
@@ -14,12 +14,9 @@ const BASE = new URL('./', self.registration.scope).pathname.replace(/static\/$/
 const SHELL_EN = BASE;
 const SHELL_RU = BASE + 'ru/';
 
-// Everything the shell needs to boot with no network. Versioned query strings are left off on
-// purpose: fetches are matched with ignoreSearch below.
-//
-// BOTH languages, every file twice: the Russian page asks for its own copies (/ru/static/…, a
-// symlink to the same files) — without them switching the language offline opened an unstyled,
-// scriptless page.
+// Everything the shell needs to boot with no network, ONE copy: the Russian page's /ru/static/…
+// (a symlink to the same files) and every ?v= stamp are stored under the plain /static/ key
+// (keyFor). It used to be every file twice, both languages, on the very first visit.
 const ASSETS = [
   'static/home.js', 'static/dpd.js', 'static/autopali.js', 'static/offline-dpd.js',
   'static/extra.js', 'static/dg-logo.js', 'static/sorter.js', 'static/openDicts.js', 'static/ui.js', 'static/dg-site.js',
@@ -44,9 +41,21 @@ const ASSETS = [
   'static/icons/fa/moon.svg', 'static/icons/fa/sun.svg', 'static/icons/fa/circle-half-stroke.svg'
 ];
 
-const urlsToCache = [SHELL_EN, SHELL_RU]
-  .concat(ASSETS.map((a) => SHELL_EN + a))
-  .concat(ASSETS.map((a) => SHELL_RU + a));
+const urlsToCache = [SHELL_EN, SHELL_RU].concat(ASSETS.map((a) => SHELL_EN + a));
+
+function keyFor(url) {
+  const u = new URL(url);
+  if (u.origin !== self.location.origin) return url;
+  u.search = '';
+  if (u.pathname.indexOf(SHELL_RU + 'static/') === 0) u.pathname = SHELL_EN + u.pathname.slice(SHELL_RU.length);
+  return u.href;
+}
+
+// Every clean-path word (/dukkha, /ru/kamma) is the same page: one shell per language, not a copy
+// of index.html per word looked up.
+function isShellPath(pathname) {
+  return pathname.indexOf(BASE) === 0 && /^(ru\/)?[^/]*$/.test(pathname.slice(BASE.length));
+}
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
@@ -62,10 +71,10 @@ function shellFor(pathname) {
   return pathname.indexOf(SHELL_RU) === 0 ? SHELL_RU : SHELL_EN;
 }
 
-function cacheCopy(request, resp) {
+function cacheCopy(key, resp) {
   if (!resp || !resp.ok || resp.type !== 'basic') return;
   const copy = resp.clone();
-  caches.open(CACHE_NAME).then((c) => c.put(request, copy)).catch(() => {});
+  caches.open(CACHE_NAME).then((c) => c.put(key, copy)).catch(() => {});
 }
 
 self.addEventListener('fetch', (event) => {
@@ -75,20 +84,21 @@ self.addEventListener('fetch', (event) => {
   // A navigation with no network (/, /kacchapa, /ru/kacchapa, /?source=pwa) has no server to answer
   // it: give it the cached shell for that language — extra.js turns the path back into a query itself.
   if (request.mode === 'navigate') {
+    const path = new URL(request.url).pathname;
+    const shell = isShellPath(path) ? shellFor(path) : null;
     event.respondWith(
       fetch(request)
-        .then((resp) => { cacheCopy(request, resp); return resp; })
-        .catch(() => caches.match(request, { ignoreSearch: true })
-          .then((hit) => hit || caches.match(shellFor(new URL(request.url).pathname))))
+        .then((resp) => { cacheCopy(shell || keyFor(request.url), resp); return resp; })
+        .catch(() => (shell ? caches.match(shell) : caches.match(keyFor(request.url)))
+          .then((hit) => hit || caches.match(shellFor(path))))
     );
     return;
   }
 
   event.respondWith(
     fetch(request)
-      .then((resp) => { cacheCopy(request, resp); return resp; })
-      // ignoreSearch: the page asks for static/extra.js?v=ui15 while the precache holds the bare path.
-      .catch(() => caches.match(request, { ignoreSearch: true }))
+      .then((resp) => { cacheCopy(keyFor(request.url), resp); return resp; })
+      .catch(() => caches.match(keyFor(request.url)))
   );
 });
 

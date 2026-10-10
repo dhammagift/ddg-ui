@@ -85,18 +85,17 @@ document.addEventListener("DOMContentLoaded", function() {
 
 //// back button
 
+// An entry without a word ("/" — the page the reader started on) goes back to the start screen;
+// it used to keep the last word on screen under the bare address.
 window.onpopstate = function(e) {
-    if (e.state != null && e.state.q != null) {
-        searchBox.value = e.state.q;
-        if (typeof window.handleFormSubmit === 'function') window.handleFormSubmit();
+    const q = (e.state && e.state.q) || (typeof currentDictWord === 'function' ? currentDictWord() : null);
+    if (q) {
+        searchBox.value = q;
+        window.handleClientSearch(q, { fromHistory: true });
+    } else if (typeof window.dgShowStart === 'function') {
+        window.dgShowStart();
     }
 };
-
-//// trigger title clear - go home
-
-titleClear.addEventListener("dblclick", function() {
-	dpdPane.innerHTML = ""; 
-});
 
 
 
@@ -202,23 +201,25 @@ function swopSansSerif() {
 
 //// niggahita
 
-function niggahitaUp(element) {
-    element.innerHTML = element.innerHTML.replace(/ṃ/g, "ṁ");
+// Text nodes of the DPD entry and summary only: innerHTML over the whole pane reloaded every
+// dictionary iframe on each switch, and new results never got the setting at all.
+function setNiggahita(up) {
+    const from = up ? "ṃ" : "ṁ", to = up ? "ṁ" : "ṃ";
+    for (const root of [summaryResults, dpdResults]) {
+        if (!root) continue;
+        const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+        for (let n; (n = walker.nextNode());) {
+            if (n.nodeValue.includes(from)) n.nodeValue = n.nodeValue.split(from).join(to);
+        }
+    }
 }
-
-function niggahitaDown(element) {
-    element.innerHTML = element.innerHTML.replace(/ṁ/g, "ṃ");
-}
+// extra.js calls this after each render
+window.applyNiggahita = function() {
+    if (niggahitaToggle.checked) setNiggahita(true);
+};
 
 niggahitaToggle.addEventListener("change", function() {
-    if (this.checked) {
-        niggahitaUp(dpdPane);
-        niggahitaUp(historyPane);
-    } else {
-        niggahitaDown(dpdPane);
-        niggahitaDown(historyPane);
-
-    }
+    setNiggahita(this.checked);
 });
 
 //// grammar button closed / open

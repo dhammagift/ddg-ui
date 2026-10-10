@@ -339,6 +339,15 @@
     } else { wire(); paintOnline(); }
 
     // Keep what is already downloaded current, but never on a cold cache: nothing is fetched until
-    // the reader asks for it.
-    state().then(function (s) { if (s === 'ready') { revalidate(); load(); } });
+    // the reader asks for it. Not loaded here: evaluating 14-18 MB of dictionary on every page froze
+    // a weak phone for 2-3 s even online; renderOffline (extra.js) loads it when it is needed.
+    // Checked at most once a day: a check can mean a full re-download when the HTTP cache lost it.
+    state().then(function (s) {
+        if (s !== 'ready') return;
+        var last = 0;
+        try { last = +localStorage.getItem('dgOfflineChecked') || 0; } catch (e) {}
+        if (Date.now() - last < 864e5) return;
+        try { localStorage.setItem('dgOfflineChecked', String(Date.now())); } catch (e) {}
+        revalidate();
+    });
 })();

@@ -54,8 +54,19 @@
       $('recents').hidden = hist.length === 0;
     }
     $('favbtn')?.setAttribute('aria-pressed', String(fav.includes(currentWord())));
+    if (typeof toggleClearHistoryButton === 'function') toggleClearHistoryButton();
   }
   window.paintHist = paintHist;
+
+  // Back to "/" (home.js popstate): the start screen, not the last word under the bare address.
+  window.dgShowStart = () => {
+    if (typeof searchSeq !== 'undefined') searchSeq++; // drop an answer still on its way (extra.js)
+    B.dataset.screen = 'start';
+    const sb = $('search-box'); if (sb) sb.value = '';
+    if (typeof updateDocumentTitle === 'function') updateDocumentTitle('');
+    updateDgStats('');
+    paintHist();
+  };
 
   function setWord(q) {
     const w = typeof cleanQueryParam === 'function' ? cleanQueryParam(q) : q;
@@ -70,7 +81,7 @@
   // No &scope=all: the endpoint's "default" scope (4 Nikayas + Khuddaka Nikaya) is what we want.
   // Fire-and-forget: never blocks rendering, a stale/slow response for a word the user has
   // since navigated away from is dropped via the token guard below.
-  const dgStatsCache = new Map(); // word -> rendered stats innerHTML (count + info star)
+  const dgStatsCache = new Map(); // word -> Promise of the rendered stats innerHTML (count + info star)
   let dgStatsToken = 0;
 
   // resolvedPrefixes -> display name, in the order the API returns them
@@ -115,23 +126,25 @@
 
     if (!word) { el.innerHTML = ''; el.classList.remove('skel'); return; }
 
-    const cached = dgStatsCache.get(word);
-    if (cached) { el.innerHTML = cached; el.classList.remove('skel'); return; }
-
     el.textContent = '';
     el.classList.add('skel');
 
     try {
-      const url = `https://dhamma.gift/search?q=${encodeURIComponent(word)}&fast=1`;
-      const res = await fetch(url);
+      if (!dgStatsCache.has(word)) {
+        // metaOnly=1: just the counts (a few hundred bytes instead of the whole first page of
+        // results); a server that does not know it yet sends the full answer, read the same way.
+        const url = `https://dhamma.gift/search?q=${encodeURIComponent(word)}&fast=1&metaOnly=1`;
+        dgStatsCache.set(word, fetch(url).then((res) => {
+          if (!res.ok) throw new Error('dg-stats: bad response');
+          return res.json();
+        }).then((json) => {
+          const { totalFiles, totalMatches, resolvedPrefixes } = json.metadata || {};
+          return totalFiles ? dgStatsHtml(dgStatsText(totalFiles, totalMatches), resolvedPrefixes?.length ? dgStatsTip(resolvedPrefixes) : '') : '';
+        }).catch((e) => { dgStatsCache.delete(word); throw e; }));
+      }
+      const html = await dgStatsCache.get(word);
       if (token !== dgStatsToken) return; // superseded by a newer word, drop this response
-      if (!res.ok) throw new Error('dg-stats: bad response');
-      const json = await res.json();
-      const { totalFiles, totalMatches, resolvedPrefixes } = json.metadata || {};
       el.classList.remove('skel');
-      if (!totalFiles) { el.innerHTML = ''; return; }
-      const html = dgStatsHtml(dgStatsText(totalFiles, totalMatches), resolvedPrefixes?.length ? dgStatsTip(resolvedPrefixes) : '');
-      dgStatsCache.set(word, html);
       el.innerHTML = html;
     } catch (e) {
       if (token !== dgStatsToken) return;
@@ -305,9 +318,10 @@
     // hide the search bar on scroll-down (more room), reveal on scroll-up or on focus (incl. the "/" shortcut)
     const tbar = document.querySelector('.tbar');
     if (tbar) {
-      const setH = () => document.documentElement.style.setProperty('--tbar-h', tbar.offsetHeight + 'px');
-      setH();
-      addEventListener('resize', setH);
+      const setH = (h) => document.documentElement.style.setProperty('--tbar-h', h + 'px');
+      // ResizeObserver reports the size after layout, instead of forcing one at start and on every resize
+      if (window.ResizeObserver) new ResizeObserver(([en]) => setH(en.borderBoxSize?.[0]?.blockSize ?? tbar.offsetHeight)).observe(tbar);
+      else { setH(tbar.offsetHeight); addEventListener('resize', () => setH(tbar.offsetHeight)); }
       const hideMinY = 320; // don't hide until scrolled this far down
       let lastY = scrollY, ticking = false;
       addEventListener('scroll', () => {

@@ -261,7 +261,9 @@ function openWithQuery(event, baseUrl) {
   
   // Если target пустой или равен '_self', ссылка откроется в текущей вкладке.
   // Если target равен '_blank', она откроется в новой.
-  window.open(finalUrl, target);
+  // noopener: the opened dictionary site gets no handle on this tab (window.opener)
+  if (target === '_blank') window.open(finalUrl, target, 'noopener');
+  else window.open(finalUrl, target);
   
   return false;
 }

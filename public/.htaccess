@@ -5,6 +5,11 @@ RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
 
+# A clean-path word with a trailing slash (/dukkha/, /ru/dukkha/) would resolve the page's relative
+# static/ paths under /dukkha/ and render unstyled: send it to the address without the slash.
+RewriteCond %{REQUEST_URI} ^(.*[^/])/+$
+RewriteRule ^(ru/)?[^/]+/+$ %1 [R=301,L]
+
 # Clean-path search, e.g. /kacchapa or /ru/kacchapa: serve the SPA shell, query string
 # (and any ?q= it already had) is passed through automatically. extra.js turns the path
 # segment into ?q= on load.
@@ -22,4 +27,20 @@ RewriteRule ^[^/]+/?$ index.html [L]
 # this header the browser engine blocks every one of those requests and the app never gets an update. Public static content.
 <IfModule mod_headers.c>
   Header set Access-Control-Allow-Origin "*"
+</IfModule>
+
+# Caching. HTML and unversioned files must be revalidated, or browsers keep a deploy-old copy on
+# heuristics for hours (and the service worker fetches through that same cache). Files linked
+# with ?v= change their URL on every edit, so they can be kept for good.
+# FileETag None: mod_deflate appends "-gzip" to the ETag, so If-None-Match never matched and every
+# revalidation got the full body; Last-Modified gives a working 304 instead.
+FileETag None
+<IfModule mod_headers.c>
+  # HSTS: after one https visit the browser goes straight to https for a year, so even the first
+  # request of a typed http:// address cannot be read or changed on the way (browsers ignore it over http).
+  Header always set Strict-Transport-Security "max-age=31536000"
+  Header set Cache-Control "no-cache"
+  <If "%{QUERY_STRING} =~ /(^|&)v=/ && %{REQUEST_URI} !~ /sw\.js$/">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </If>
 </IfModule>

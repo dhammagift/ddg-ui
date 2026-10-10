@@ -22,9 +22,10 @@ function getAppBase() {
 // the scope of its own folder (/static/), so it controlled no navigation and the app never opened
 // offline. The scope is the install base, so this line also works under dhamma.gift/dict/ (where
 // the Service-Worker-Allowed header is not set — the registration simply fails and is ignored).
+// After load: its precache must not compete with the page's own first requests.
 if ('serviceWorker' in navigator) {
     const swBase = getAppBase();
-    navigator.serviceWorker.register(swBase + 'static/sw.js', { scope: swBase }).catch(() => {});
+    addEventListener('load', () => navigator.serviceWorker.register(swBase + 'static/sw.js', { scope: swBase }).catch(() => {}));
     // Clean up the registrations the old inline script left behind (scope .../static/, controlling
     // nothing): a browser that ever opened this site still carries one, and under /dict/ two.
     navigator.serviceWorker.getRegistrations().then((regs) => {
@@ -52,7 +53,7 @@ let pathWord = (function () {
     let rest = window.location.pathname.startsWith(installBase)
         ? window.location.pathname.slice(installBase.length)
         : window.location.pathname.replace(/^\//, '');
-    rest = rest.replace(/^(ru|th)\/?/, '').replace(/^\/+|\/+$/g, '');
+    rest = rest.replace(/^(ru|th)(\/|$)/, '').replace(/^\/+|\/+$/g, '');
 
     return (rest && !rest.includes('/')) ? decodeURIComponent(rest) : null;
 })();
@@ -83,7 +84,7 @@ function currentDictWord() {
     if (q) return q;
     const base = getAppBase();
     let rest = window.location.pathname.startsWith(base) ? window.location.pathname.slice(base.length) : '';
-    rest = rest.replace(/^(ru|th)\/?/, '').replace(/^\/+|\/+$/g, '');
+    rest = rest.replace(/^(ru|th)(\/|$)/, '').replace(/^\/+|\/+$/g, '');
     return (rest && !rest.includes('/')) ? decodeURIComponent(rest) : null;
 }
 
@@ -571,7 +572,71 @@ function markDpdOffline(on) {
     mark.textContent = window.isRu ? 'офлайн мини' : 'offline mini';
 }
 
-async function renderOffline(query, resultsContainer, summaryContainer) {
+// Text that goes into HTML (the searched word, names from a dictionary's API).
+function escHtml(s) {
+    return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+// Third-party HTML (dpdict.net, Cologne) goes into the page: parsed in an inert document (no script
+// runs, no image loads), then elements that can run code, on* handlers and javascript:/data: links
+// are taken out. DPD itself uses none of them (no inline handlers, no scripts in its entries).
+const UNSAFE_TAGS = 'script,iframe,frame,frameset,object,embed,link,meta,base,form,template,noscript,animate,set';
+function sanitizeHtml(html) {
+    const doc = new DOMParser().parseFromString(String(html), 'text/html');
+    doc.querySelectorAll(UNSAFE_TAGS).forEach((n) => n.remove());
+    for (const el of doc.body.querySelectorAll('*')) {
+        for (const a of Array.from(el.attributes)) {
+            const n = a.name.toLowerCase();
+            if (n.startsWith('on') || n === 'srcdoc' || n === 'formaction' ||
+                (/(^|:)(href|src|action)$/.test(n) && /^(javascript|vbscript|data):/i.test(a.value.replace(/[\s\u0000-\u001f]+/g, '')))) {
+                el.removeAttribute(a.name);
+            }
+        }
+    }
+    return doc.body.innerHTML;
+}
+
+// A big DPD entry is mostly folded tables: kamma is 1.15 MB and 55k elements, 99.5% of them in the
+// hidden word-family and frequency blocks. Building them all froze a phone for ~1 s although ~300
+// are visible. Their HTML is kept as text and built when the reader presses that block's button.
+const lazyDpdBlocks = new Map(); // block id -> its raw inner HTML, sanitized when built
+// Cut on the string, before any parsing: parsing the whole entry (even in an inert document, for
+// sanitizeHtml) cost as much as building it. Markup DPD does not have any more simply is not cut.
+function cutHiddenDpdBlocks(html) {
+    lazyDpdBlocks.clear();
+    const open = /<div id="((?:family|frequency)_[^"]*)" class="dpd content hidden">/g;
+    let out = '', last = 0, m;
+    while ((m = open.exec(html))) {
+        const tag = /<(\/?)div\b/gi;
+        tag.lastIndex = open.lastIndex;
+        let depth = 1, t, end = -1;
+        while ((t = tag.exec(html))) { depth += t[1] ? -1 : 1; if (!depth) { end = t.index; break; } }
+        if (end < 0) break; // unbalanced: leave the rest as it is
+        lazyDpdBlocks.set(m[1], html.slice(open.lastIndex, end));
+        out += html.slice(last, m.index) + `<div id="${m[1]}" class="dpd content hidden" data-lazy="1">`;
+        last = end; // the block's own </div> stays
+        open.lastIndex = end;
+    }
+    return out + html.slice(last);
+}
+function fillLazyDpdBlock(el) {
+    if (!el || el.dataset.lazy !== '1') return;
+    el.innerHTML = sanitizeHtml(lazyDpdBlocks.get(el.id) || '');
+    delete el.dataset.lazy;
+    if (typeof window.applyNiggahita === 'function') window.applyNiggahita();
+    if (typeof window.initSorter === 'function') window.initSorter();
+}
+// Capture phase: runs before dpd.js's own click handler shows the block.
+document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.dpd-button[data-target]');
+    if (btn) fillLazyDpdBlock(document.getElementById(btn.getAttribute('data-target')));
+}, true);
+
+// Bumped by every handleClientSearch: an answer that arrives after a newer search started must not
+// overwrite it (Enter on dukkha, then kacchapa: a late dukkha answer showed under the kacchapa title).
+let searchSeq = 0;
+
+async function renderOffline(query, resultsContainer, summaryContainer, seq) {
     if (!resultsContainer || !window.dgOffline) return false;
     const ru = window.isRu;
     const note = (text) => `<div class="offline-dpd-note">${text}</div>`;
@@ -583,26 +648,33 @@ async function renderOffline(query, resultsContainer, summaryContainer) {
     if (!entry) {
         const state = await window.dgOffline.state().catch(() => 'none');
         if (state !== 'ready') return false;  // nothing downloaded: the caller explains that
+        if (seq !== searchSeq) return true;
         resultsContainer.innerHTML = note(ru ? 'Нет в офлайн-словаре' : 'Not in the offline dictionary');
     } else {
+        if (seq !== searchSeq) return true;
         resultsContainer.innerHTML = entry;
     }
     markDpdOffline(true);
+    if (typeof window.applyNiggahita === 'function') window.applyNiggahita();
     resultsContainer.dataset.stale = 'false';
     if (summaryContainer) summaryContainer.innerHTML = '';
     return true;
 }
 
-async function handleClientSearch(rawQuery) {
+async function handleClientSearch(rawQuery, opts) {
     const query = cleanQueryParam(rawQuery);
     if (!query) return;
+    const seq = ++searchSeq;
+    updateDocumentTitle(query);
 
     const searchBox = document.getElementById('search-box');
     if (searchBox && searchBox.value !== query) {
         searchBox.value = query;
     }
 
-    if (typeof addToHistory === 'function') {
+    if (opts && opts.fromHistory) {
+        // Back/Forward: the address is already right, and the word keeps its place in the history
+    } else if (typeof addToHistory === 'function') {
         addToHistory(query);
     } else {
         window.history.pushState({ q: query }, '', dictUrl(query));
@@ -638,7 +710,8 @@ async function handleClientSearch(rawQuery) {
     // No connection: skip a doomed request to dpdict.net (and seven doomed iframes) and answer from
     // the offline mini-dictionary straight away.
     if (navigator.onLine === false) {
-        const shown = await renderOffline(query, resultsContainer, summaryContainer);
+        const shown = await renderOffline(query, resultsContainer, summaryContainer, seq);
+        if (seq !== searchSeq) return;
         if (!shown && resultsContainer) {
             resultsContainer.innerHTML = `
                 <div class="offline-dpd-note">${window.isRu
@@ -654,10 +727,11 @@ async function handleClientSearch(rawQuery) {
     try {
         const currentLang = window.isRu ? 'ru' : 'en';
         const data = await fetchFromBackend(query, currentLang);
+        if (seq !== searchSeq) return;
 
         markDpdOffline(false);
         if (resultsContainer) {
-            const rawHtml = data.dpd_html || '<div class="message">Ничего не найдено</div>';
+            const rawHtml = data.dpd_html ? sanitizeHtml(cutHiddenDpdBlocks(data.dpd_html)) : '<div class="message">Ничего не найдено</div>';
             resultsContainer.innerHTML = typeof wrapApostrophesInHTML === 'function'
                 ? wrapApostrophesInHTML(rawHtml)
                 : rawHtml;
@@ -665,8 +739,10 @@ async function handleClientSearch(rawQuery) {
         }
 
         if (summaryContainer && data.summary_html) {
-            summaryContainer.innerHTML = data.summary_html;
+            summaryContainer.innerHTML = sanitizeHtml(data.summary_html);
         }
+        if (typeof window.applyNiggahita === 'function') window.applyNiggahita();
+        if (typeof window.initSorter === 'function') window.initSorter(); // the first header click sorts too
 
         const togglesToUpdate = [
             'summary-toggle',
@@ -715,15 +791,17 @@ async function handleClientSearch(rawQuery) {
         // A failed DPD request is most often no connection: answer from the offline mini-dictionary
         // if it is downloaded, and only otherwise show the error (bilingual now — it was Russian
         // even on the English page).
-        const shown = await renderOffline(query, resultsContainer, summaryContainer);
+        if (seq !== searchSeq) return;
+        const shown = await renderOffline(query, resultsContainer, summaryContainer, seq);
+        if (seq !== searchSeq) return;
         if (!shown && resultsContainer) {
             // The offline dictionary would have answered this — say so, the reader has no other
             // way to learn it exists.
             resultsContainer.innerHTML = `
                 <div style="color: #c08552; padding: 20px; text-align: center;">
                     ${window.isRu
-                        ? `Ошибка загрузки словаря: ${error.message}.<br>Проверьте соединение. Офлайн-словарь можно скачать при подключении к сети.`
-                        : `Could not load the dictionary: ${error.message}.<br>Check the connection. The offline dictionary can be downloaded once you are online.`}
+                        ? `Ошибка загрузки словаря: ${escHtml(error.message)}.<br>Проверьте соединение. Офлайн-словарь можно скачать при подключении к сети.`
+                        : `Could not load the dictionary: ${escHtml(error.message)}.<br>Check the connection. The offline dictionary can be downloaded once you are online.`}
                 </div>
             `;
         }
@@ -738,7 +816,7 @@ async function handleClientSearch(rawQuery) {
 //и обновление при клике
 document.addEventListener('click', (e) => {
   const dg = e.target.closest('.dg-link');
-  const dpd = e.target.closest('.dpd-link');
+  const dpd = e.target.closest('.pagefoot .dpd-link');
 
   if (dg) {
     // window.isRu, not pathname.startsWith('/ru'): under dhamma.gift/dict/ru/ the path starts
@@ -1300,7 +1378,7 @@ function highlightQuery(html, query) {
     if (!query) return html;
     
     const div = document.createElement('div');
-    div.innerHTML = html;
+    div.innerHTML = sanitizeHtml(html); // a detached div still loads <img onerror>: sanitize first
     
     const SEP = '[\\-\\.\\–\\—\\―\\~\\s]*';
     const chars = query.split('').map(c =>
@@ -1311,9 +1389,22 @@ function highlightQuery(html, query) {
     function traverse(node) {
         if (node.nodeType === 3) {
             const val = node.nodeValue;
+            regex.lastIndex = 0;
             if (regex.test(val)) {
+                // matches as text nodes: putting the text back through innerHTML turned &lt;b&gt; into tags
                 const span = document.createElement('span');
-                span.innerHTML = val.replace(regex, '<b style="color: #d35400;">$1</b>');
+                let last = 0, m;
+                regex.lastIndex = 0;
+                while ((m = regex.exec(val))) {
+                    if (!m[0]) { regex.lastIndex++; continue; }
+                    span.append(val.slice(last, m.index));
+                    const b = document.createElement('b');
+                    b.style.color = '#d35400';
+                    b.textContent = m[0];
+                    span.append(b);
+                    last = m.index + m[0].length;
+                }
+                span.append(val.slice(last));
                 node.parentNode.replaceChild(span, node);
             }
         } else if (node.nodeType === 1) {
@@ -1402,7 +1493,7 @@ async function fetchSanskrit(query, isFallback = false, originalQuery = '') {
     const isRu = window.isRu;
     let fallbackText = '';
     if (isFallback) {
-        fallbackText = ` <span style="font-size: 0.85em; color: #999;">(${isRu ? 'поиск по' : 'searching:'} <b>${query}</b>)</span>`;
+        fallbackText = ` <span style="font-size: 0.85em; color: #999;">(${isRu ? 'поиск по' : 'searching:'} <b>${escHtml(query)}</b>)</span>`;
     }
     
     container.innerHTML = `<div style="color: #666; padding: 5px;">${getUiText('loading')}${fallbackText}</div>`;
@@ -1473,13 +1564,13 @@ async function fetchSanskrit(query, isFallback = false, originalQuery = '') {
                 if (!entries || entries.length === 0) return;
 
                 hasResults = true;
-                let dictName = (data.dictmeta && data.dictmeta[dictCode] && data.dictmeta[dictCode].name)
+                let dictName = escHtml((data.dictmeta && data.dictmeta[dictCode] && data.dictmeta[dictCode].name)
                     ? data.dictmeta[dictCode].name
-                    : dictCode.toUpperCase();
+                    : dictCode.toUpperCase());
 
                 if (nameCounts[dictName] > 1) {
                     const year = (data.dictmeta && data.dictmeta[dictCode] && data.dictmeta[dictCode].year) ? data.dictmeta[dictCode].year + ', ' : '';
-                    dictName += ` <span style="font-weight: normal; font-size: 0.9em; color: #888;">(${year}${dictCode})</span>`;
+                    dictName += ` <span style="font-weight: normal; font-size: 0.9em; color: #888;">(${escHtml(year + dictCode)})</span>`;
                 }
 
                 const isCollapsed = dictStates[dictCode] === true;
@@ -1487,8 +1578,8 @@ async function fetchSanskrit(query, isFallback = false, originalQuery = '') {
                 const displayStyle = isCollapsed ? 'none' : 'block';
 
                 htmlContent += `
-                    <div class="sanskrit-dict-wrapper" data-dictcode="${dictCode}">
-                        <div class="sanskrit-dict-header" data-dictcode="${dictCode}">
+                    <div class="sanskrit-dict-wrapper" data-dictcode="${escHtml(dictCode)}">
+                        <div class="sanskrit-dict-header" data-dictcode="${escHtml(dictCode)}">
                             <div>
                                 <span class="dict-icon">${icon}</span> ${dictName}:
                             </div>
@@ -1498,7 +1589,7 @@ async function fetchSanskrit(query, isFallback = false, originalQuery = '') {
                                 <span class="dict-drag-handle" title="Drag to reorder">☰</span>
                             </div>
                         </div>
-                        <div class="sanskrit-dict-content" id="sanskrit-content-${dictCode}" style="display: ${displayStyle};">`;
+                        <div class="sanskrit-dict-content" id="sanskrit-content-${escHtml(dictCode)}" style="display: ${displayStyle};">`;
 
                 entries.forEach(entry => {
                     if (entry.csl && entry.csl.html) {
@@ -1513,12 +1604,12 @@ async function fetchSanskrit(query, isFallback = false, originalQuery = '') {
 
         if (!hasResults) {
             const msgEmpty = isRu
-                ? `Санскритские параллели для «${originalQuery || query}» не найдены.`
-                : `No Sanskrit parallels found for "${originalQuery || query}".`;
+                ? `Санскритские параллели для «${escHtml(originalQuery || query)}» не найдены.`
+                : `No Sanskrit parallels found for "${escHtml(originalQuery || query)}".`;
             container.innerHTML = `<div style="opacity: 0.7;">${msgEmpty}</div>`;
         } else {
             if (isFallback) {
-                 htmlContent = `<div style="margin-bottom: 8px; font-size: 0.9em; color: #666;">${isRu ? 'Найдено по слову' : 'Found for'}: <b>${query}</b></div>` + htmlContent;
+                 htmlContent = `<div style="margin-bottom: 8px; font-size: 0.9em; color: #666;">${isRu ? 'Найдено по слову' : 'Found for'}: <b>${escHtml(query)}</b></div>` + htmlContent;
             }
             container.innerHTML = htmlContent;
         }
@@ -1530,7 +1621,7 @@ async function fetchSanskrit(query, isFallback = false, originalQuery = '') {
             : 'Failed to load Sanskrit data due to a network error.';
         container.innerHTML = `
         <div style="color: #c08552; padding: 10px; background: rgba(192, 133, 82, 0.1); border-radius: 5px;">
-            ⚠️ ${msgNetworkError} <span style="color: #999; font-size: 0.9em;">(${error.message})</span>
+            ⚠️ ${msgNetworkError} <span style="color: #999; font-size: 0.9em;">(${escHtml(error.message)})</span>
         </div>`;
     }
 }
@@ -1865,15 +1956,16 @@ function _initExtSlots(extContainer) {
     slot.innerHTML = headerObj.headerHtml;
     const contentDiv = document.createElement('div');
     contentDiv.className = 'ext-dict-content';
-    // Force collapsed by default
-    contentDiv.style.cssText = `max-height: 450px; overflow: auto; display: none;`;
+    // Collapsed by default. The saved "expanded" was ignored: extDictStates.buddhadust was auto-written
+    // as false (expanded) for everyone, so only a reader's own click (buddhadustChosen) counts.
+    const bdOpen = localStorage.getItem('buddhadustChosen') === '1' && extStates['buddhadust'] === false;
+    contentDiv.style.cssText = `max-height: 450px; overflow: auto; display: ${bdOpen ? 'block' : 'none'};`;
     slot.appendChild(contentDiv);
     extContainer.appendChild(slot);
 
-    // Set icon to collapsed state (▶)
     const icon = slot.querySelector('.ext-dict-toggle-icon');
     if (icon) {
-        icon.textContent = '▶';
+        icon.textContent = bdOpen ? '▼' : '▶';
     }
 }
  else if (dictName === 'wisdomlib') {
@@ -2042,109 +2134,91 @@ function appendTripitaka(query) {
     appendIframeDict('tripitaka', 'Sutta-Vinaya Definitions and Similies', `https://tripitaka-mcp.com/read/embed/define?term=${encodeURIComponent(query)}&sources=an,dn,mn,sn,iti,ud,snp,dhp,vinaya&theme=${currentTheme}&link_base=${linkBase}`, true, false);
 }
 
-async function appendBuddhadust(query) {
-    const dictId = 'buddhadust';
-    const container = document.getElementById(`ext-slot-${dictId}`);
-    if (!container) return;
+// The glossology index is a local copy (no CORS); parsed once, not on every search.
+let buddhadustIndex = null;
+async function getBuddhadustIndex() {
+    if (buddhadustIndex) return buddhadustIndex;
+    const res = await fetch('static/buddhadust-glossology.htm');
+    if (!res.ok) throw new Error('buddhadust index: HTTP ' + res.status);
+    const doc = new DOMParser().parseFromString(await res.text(), 'text/html');
+    const norm = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
+    const list = [];
+    doc.querySelectorAll("a").forEach(link => {
+        const href = link.getAttribute("href");
+        if (!href) return;
+        // The term is the parent's text before "[".
+        const parentText = link.parentElement ? (link.parentElement.textContent || "") : "";
+        const bracketIndex = parentText.indexOf("[");
+        const label = (bracketIndex !== -1 ? parentText.substring(0, bracketIndex) : parentText).trim();
+        // "English gloss (PaliTerm1 PaliTerm2, PaliTerm3)": every term on its own, or a long English
+        // gloss before the brackets hides a short Pali term inside them.
+        const parenMatch = label.match(/^(.*?)\(([^)]*)\)\s*$/);
+        const candidates = (parenMatch ? [parenMatch[1], ...parenMatch[2].split(/[,;]/)] : [label]).map(norm).filter(Boolean);
+        list.push({ label, href, candidates });
+    });
+    buddhadustIndex = { list, norm };
+    return buddhadustIndex;
+}
 
-    // Ищем область для контента внутри стандартной обертки слота
+async function appendBuddhadust(query) {
+    const container = document.getElementById('ext-slot-buddhadust');
+    if (!container) return;
     const contentDiv = container.querySelector('.ext-dict-content') || container;
-    contentDiv.innerHTML = '<div class="text-muted" style="padding: 15px;">Ищем в Buddhadust...</div>';
+    const ru = window.isRu;
+    const note = (cls, text) => `<div class="${cls}" style="padding: 15px;">${text}</div>`;
+    contentDiv.innerHTML = note('text-muted', ru ? 'Ищем в Buddhadust…' : 'Searching Buddhadust…');
 
     try {
-        // Используем локальную статическую копию TOC чтобы избежать CORS
-        const targetUrl = 'static/buddhadust-glossology.htm';
-        const res = await fetch(targetUrl);
-        const html = await res.text();
-        
-        const doc = new DOMParser().parseFromString(html, 'text/html');
-        
-        // Нормализуем запрос пользователя
-        const normalizedQuery = query.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
-        
+        const { list, norm } = await getBuddhadustIndex();
+        const normalizedQuery = norm(query);
         let exactLink = null;
-        let matches = [];
+        const matches = [];
+        for (const e of list) {
+            if (e.candidates.includes(normalizedQuery)) exactLink = e.href;
+            else if (e.candidates.some(c => c.includes(normalizedQuery))) matches.push(e);
+        }
+        const base = 'https://buddhadust.net/backmatter/glossology/';
 
-        const norm = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
-
-        // Собираем ссылки из HTML
-        doc.querySelectorAll("a").forEach(link => {
-            const href = link.getAttribute("href");
-            if (!href) return;
-
-            // Для Buddhadust извлекаем текст термина из родительского элемента (текст перед [)
-            const parentText = link.parentElement ? (link.parentElement.textContent || "") : "";
-            const bracketIndex = parentText.indexOf("[");
-            const label = (bracketIndex !== -1 ? parentText.substring(0, bracketIndex) : parentText).trim();
-
-            // Записи вида "English gloss (PaliTerm1 PaliTerm2, PaliTerm3)": сравниваем запрос
-            // с каждым отдельным термином, а не со всей строкой — иначе длинный английский
-            // глосс перед скобкой не даёт найти короткий пали-термин внутри неё.
-            const parenMatch = label.match(/^(.*?)\(([^)]*)\)\s*$/);
-            const candidates = (parenMatch ? [parenMatch[1], ...parenMatch[2].split(/[,;]/)] : [label])
-                .map(norm).filter(Boolean);
-
-            if (candidates.includes(normalizedQuery)) {
-                exactLink = href;
-            } else if (candidates.some(c => c.includes(normalizedQuery))) {
-                matches.push({ text: label, href: href });
-            }
-        });
-
-        // Сценарий 1: Точное совпадение
         if (exactLink) {
-            const fullUrl = `https://buddhadust.net/backmatter/glossology/${exactLink}`;
-            _renderBuddhadustIframe(contentDiv, fullUrl, container);
-        } 
-        // Сценарий 2: Несколько вариантов
-        else if (matches.length > 0) {
-            // Рисуем список. По клику на текст - открываем в iframe, по клику на ↗️ - в новом окне
-            let listHtml = matches.map(m => {
-                const fullUrl = `https://buddhadust.net/backmatter/glossology/${m.href}`;
+            _renderBuddhadustIframe(contentDiv, base + exactLink, container);
+        } else if (matches.length > 0) {
+            // A click on the term opens it in the frame, ↗ in a new tab.
+            const listHtml = matches.map(m => {
+                const url = escHtml(base + m.href);
                 return `<li style="margin-bottom: 10px; display: flex; align-items: center;">
-                            <a href="javascript:void(0)" 
-                               onclick="_renderBuddhadustIframe(this.closest('.ext-dict-content') || document.getElementById('ext-slot-buddhadust'), '${fullUrl}', this.closest('.dict-slot-container'))" 
-                               style="text-decoration: none; border-bottom: 1px dashed #0066cc; color: #0066cc;">
-                               ${m.text}
-                            </a>
-                            <a href="${fullUrl}" target="_blank" title="Открыть в новом окне" style="margin-left: 10px; text-decoration: none; font-size: 0.9em; opacity: 0.7;">
-                                ↗️
-                            </a>
+                            <a href="${url}" data-buddhadust="${url}" style="text-decoration: none; border-bottom: 1px dashed #0066cc; color: #0066cc;">${escHtml(m.label)}</a>
+                            <a href="${url}" target="_blank" rel="noopener" title="${ru ? 'Открыть в новой вкладке' : 'Open in a new tab'}" style="margin-left: 10px; text-decoration: none; font-size: 0.9em; opacity: 0.7;">↗️</a>
                         </li>`;
             }).join('');
-            
             contentDiv.innerHTML = `
                 <div style="padding: 15px;">
-                    <h5 style="margin-top: 0; margin-bottom: 15px;">Variants:</h5>
+                    <h5 style="margin-top: 0; margin-bottom: 15px;">${ru ? 'Варианты:' : 'Variants:'}</h5>
                     <ul style="list-style-type: none; padding-left: 0; margin: 0;">${listHtml}</ul>
                 </div>`;
-        } 
-        // Сценарий 3: Ничего не найдено
-        else {
-            // Если пусто, можно скрыть слот целиком (раскомментировать строку ниже)
-            // container.style.display = 'none'; 
-            contentDiv.innerHTML = '<div class="text-muted" style="padding: 15px;">В Buddhadust совпадений не найдено.</div>';
+        } else {
+            contentDiv.innerHTML = note('text-muted', ru ? 'В Buddhadust совпадений не найдено.' : 'No matches in Buddhadust.');
         }
-
     } catch (e) {
-        console.error("Ошибка при загрузке Buddhadust:", e);
-        contentDiv.innerHTML = '<div class="text-danger" style="padding: 15px;">Ошибка загрузки словаря.</div>';
+        console.error("Buddhadust failed to load:", e);
+        contentDiv.innerHTML = note('text-danger', ru ? 'Ошибка загрузки словаря.' : 'Could not load the dictionary.');
     }
 }
 
-// Вспомогательная функция для отрисовки iframe и обновления ссылки в шапке
+document.addEventListener('click', (e) => {
+    const a = e.target.closest('a[data-buddhadust]');
+    if (!a) return;
+    e.preventDefault();
+    _renderBuddhadustIframe(a.closest('.ext-dict-content'), a.dataset.buddhadust, document.getElementById('ext-slot-buddhadust'));
+});
+
+// The frame, and the header's "open in a new tab" pointing at the same page. A collapsed block gets
+// data-src: the expand handler loads it, so a collapsed Buddhadust no longer loads a third-party page.
 window._renderBuddhadustIframe = function(contentNode, url, containerNode) {
-    // Вставляем сам iframe
-    contentNode.innerHTML = `<iframe src="${url}" class="dict-iframe-invert" style="width:100%; height:500px; border:none; display:block;"></iframe>`;
-    
-    // Динамически обновляем кнопку "открыть в новом окне" в шапке слота, 
-    // чтобы она вела на ту же страницу, что сейчас открыта в iframe
-    if (containerNode) {
-        const extLinkBtn = containerNode.querySelector('.ext-link-btn'); // Замените класс на тот, что используется у вас в шапках
-        if (extLinkBtn) {
-            extLinkBtn.href = url;
-        }
-    }
+    if (!contentNode) return;
+    const src = (contentNode.style.display === 'none' ? 'data-src="' : 'src="') + escHtml(url) + '"';
+    contentNode.innerHTML = `<iframe ${src} class="dict-iframe-invert" style="width:100%; height:500px; border:none; display:block;" sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox" title="Buddhadust"></iframe>`;
+    const openLink = containerNode && containerNode.querySelector('.ext-dict-open-link');
+    if (openLink) openLink.href = url;
 };
 
 
@@ -2177,9 +2251,10 @@ document.addEventListener('click', (e) => {
             content.style.display = isHidden ? 'block' : 'none';
             icon.textContent = isHidden ? '▼' : '▶';
 
-            if (dictCode) {
+            if (dictCode && !header.dgNoSave) {
                 let states = JSON.parse(localStorage.getItem('extDictStates') || '{}');
                 states[dictCode] = !isHidden;
+                if (dictCode === 'buddhadust') localStorage.setItem('buddhadustChosen', '1');
                 localStorage.setItem('extDictStates', JSON.stringify(states));
             }
 
@@ -2229,10 +2304,9 @@ const codeFromHash = (h) => {
 
 // Copy a link that reopens this word with a specific dictionary expanded/focused.
 function shareDict(code) {
-    const q = (document.getElementById('search-box')?.value.trim()) ||
-              new URLSearchParams(location.search).get('q') || '';
-    const url = location.origin + location.pathname +
-                (q ? '?q=' + encodeURIComponent(q) : '') + '#' + hashFromCode(code);
+    const q = (document.getElementById('search-box')?.value.trim()) || currentDictWord() || '';
+    // dictUrl keeps ?lang=ru (a Russian link opened in English for someone new) and puts the word once
+    const url = location.origin + dictUrl(q) + '#' + hashFromCode(code);
     navigator.clipboard?.writeText(url).catch(() => {});
     if (typeof showBubbleNotification === 'function')
         showBubbleNotification(window.isRu ? 'Ссылка скопирована' : 'Link copied');
@@ -2247,7 +2321,12 @@ function focusDictFromHash() {
     if (!slot) return;
     const header = slot.querySelector('.ext-dict-header');
     const content = slot.querySelector('.ext-dict-content');
-    if (header && content && content.style.display === 'none') header.click();
+    // Expanded for this visit only: someone else's #pts link must not change the reader's saved layout
+    if (header && content && content.style.display === 'none') {
+        header.dgNoSave = true;
+        header.click();
+        header.dgNoSave = false;
+    }
     document.querySelectorAll('.dict-focused').forEach((s) => s.classList.remove('dict-focused'));
     slot.classList.add('dict-focused');
     slot.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -2361,7 +2440,8 @@ function toggleClearHistoryButton() {
     const btn = document.getElementById("clear-history-button");
     if (!btn) return;
     const historyList = JSON.parse(localStorage.getItem("history-list")) || [];
-    btn.style.display = historyList.length === 0 ? "none" : "inline-block";
+    const favList = JSON.parse(localStorage.getItem("fav-list")) || [];
+    btn.style.display = historyList.length === 0 && favList.length === 0 ? "none" : "inline-block";
 }
 
 // ======== THEME ========

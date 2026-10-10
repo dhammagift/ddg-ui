@@ -15,6 +15,7 @@ function uniCoder(textInput) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+    let wordsRequested = false;
     let paliauto = document.getElementById("paliauto");
 
     if (paliauto) {
@@ -26,8 +27,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Добавляем обработчик клика по пустому инпуту
         paliauto.addEventListener("click", function() {
-            if (paliauto.value === "") {
-                // Триггерим событие поиска с пустым запросом
+            // before the word list is in, autocomplete does not exist yet (it threw on an early click)
+            if (paliauto.value === "" && $(paliauto).autocomplete("instance")) {
                 $(paliauto).autocomplete("search", "");
             }
         });
@@ -36,17 +37,23 @@ document.addEventListener('DOMContentLoaded', function() {
     // НОВЫЙ БЛОК: Отслеживаем клик и фокус в главном поле поиска
     let searchBoxInput = document.getElementById("search-box");
     if (searchBoxInput) {
+        // The word list (340 KB) is fetched on the first click or key in the field, not on every
+        // page: the field is focused automatically on load, so focus alone says nothing, and someone
+        // who opened a link to a word and types nothing never needed the list.
         const triggerEmptySearch = function() {
-            if (searchBoxInput.value === "") {
-                // Запускаем автокомплит с пустой строкой
+            if (searchBoxInput.value === "" && $(searchBoxInput).autocomplete("instance")) {
                 $(searchBoxInput).autocomplete("search", "");
             }
         };
         // Срабатывает и при клике мышкой, и при переходе табом (фокусе)
         searchBoxInput.addEventListener("click", triggerEmptySearch);
         searchBoxInput.addEventListener("focus", triggerEmptySearch);
+        for (const ev of ["pointerdown", "keydown", "input"]) searchBoxInput.addEventListener(ev, loadWords);
     }
- 
+
+  function loadWords() {
+  if (wordsRequested) return;
+  wordsRequested = true;
   $.ajax({
         url: "./static/sutta_words.txt",
         dataType: "text",
@@ -98,9 +105,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 return ret;
             };
 
-            // sutta_words.txt lines are "word count" (how often the word occurs in the Suttas). That number is the Dhamma.Gift reader's
-            // business; the dictionary's list shows the words only.
-            var allWords = data.split('\n').map(function (w) { return w.replace(/\s+\d+\s*$/, ''); });
+            // sutta_words.txt lines are "word count": how often the form occurs in the Suttas. The count
+            // orders the suggestions (frequent forms first); phrases carry none and sort last.
+            var allWords = [], allFreq = [];
+            data.split('\n').forEach(function (line) {
+                var m = line.match(/^(.*?)\s+(\d+)\s*$/);
+                var w = m ? m[1] : line.trim();
+                if (w) { allWords.push(w); allFreq.push(m ? +m[2] : 0); }
+            });
+            var allNorm = null; // normalize(allWords[i]), made once on the first search, not twice per letter
+            var byFreq = function (a, b) { return allFreq[b] - allFreq[a] || a - b; };
 
             $("#search-box").autocomplete({
                 autoFocus: false,
@@ -182,22 +196,22 @@ document.addEventListener('DOMContentLoaded', function() {
                     var matchbeginonly = new RegExp("^" + modifiedRe, "i");
                     var matchall = new RegExp(modifiedRe, "i");
 
-                    var listBeginOnly = $.grep(allWords, function(value) {
-                        value = value.label || value.value || value;
-                        return matchbeginonly.test(normalize(value));
-                    });
-
-                    var listAll = $.grep(allWords, function(value) {
-                        value = value.label || value.value || value;
-                        return matchall.test(normalize(value));
-                    });
-
-                    listAll = listAll.filter(function(el) {
-                        return !listBeginOnly.includes(el);
-                    });
-
-                    var maxRecord = 1000;
-                    var resultList = listBeginOnly.concat(listAll).slice(0, maxRecord);
+                    // One pass over the pre-normalized list. Order: the typed word itself (it was below
+                    // row 100 for tattha, paññā, samma), then words that begin with it, frequent forms
+                    // first (dhammo, bhikkhave show up after 3 letters, not 5-7), then words that contain it.
+                    if (!allNorm) allNorm = allWords.map(normalize);
+                    var maxRecord = 100;
+                    var matchexact = new RegExp("^" + modifiedRe + "$", "i");
+                    var exact = [], begin = [], inside = [];
+                    for (var i = 0; i < allNorm.length; i++) {
+                        if (matchbeginonly.test(allNorm[i])) (matchexact.test(allNorm[i]) ? exact : begin).push(i);
+                        else if (inside.length < maxRecord && matchall.test(allNorm[i])) inside.push(i);
+                    }
+                    // exact = equal up to diacritics (samma, sammā): the very letters typed go first
+                    var typed = lastTerm.toLowerCase();
+                    exact.sort(function (a, b) { return (allWords[b].toLowerCase() === typed) - (allWords[a].toLowerCase() === typed) || byFreq(a, b); });
+                    var resultList = exact.concat(begin.sort(byFreq), inside).slice(0, maxRecord)
+                        .map(function (i) { return allWords[i]; });
 
                     // 6. ФИНАЛ: Объединяем отфильтрованную историю и найденные слова, убирая дубликаты
                     var finalResult = Array.from(new Set([...filteredHistory, ...resultList]));
@@ -259,8 +273,13 @@ document.addEventListener('DOMContentLoaded', function() {
             $("#search-box").autocomplete("instance")._resizeMenu = function () {
                 this.menu.element.outerWidth($("#search-form").outerWidth());
             };
+            // the field may already be focused and empty: show the history list it asked for
+            if (document.activeElement === document.getElementById("search-box") && !$("#search-box").val()) {
+                $("#search-box").autocomplete("search", "");
+            }
         }
-    });
+  });
+  }
 });
 
 
