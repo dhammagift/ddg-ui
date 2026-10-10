@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', function() {
         searchBoxInput.addEventListener("click", triggerEmptySearch);
         searchBoxInput.addEventListener("focus", triggerEmptySearch);
         for (const ev of ["pointerdown", "keydown", "input"]) searchBoxInput.addEventListener(ev, loadWords);
-        if (searchBoxInput.value) loadWords(); // typed before this deferred script ran
+        if (window.dgSearchTyped) loadWords(); // typed before this deferred script ran
     }
 
   function loadWords() {

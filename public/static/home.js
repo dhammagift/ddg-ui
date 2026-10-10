@@ -336,6 +336,7 @@ function uniCoder(textInput) {
 }
 
 searchBox.addEventListener("input", function() {
+    window.dgSearchTyped = true; // autopali.js: the reader typed before it ran (a word page's own word does not count)
     let textInput = searchBox.value;
     let convertedText = uniCoder(textInput);
     searchBox.value = convertedText;
