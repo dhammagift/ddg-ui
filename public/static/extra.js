@@ -584,6 +584,7 @@ const UNSAFE_TAGS = 'script,iframe,frame,frameset,object,embed,link,meta,base,fo
 function sanitizeHtml(html) {
     const doc = new DOMParser().parseFromString(String(html), 'text/html');
     doc.querySelectorAll(UNSAFE_TAGS).forEach((n) => n.remove());
+    doc.querySelectorAll('a[target="_blank"]').forEach((a) => a.setAttribute('rel', 'noopener')); // explicit, not left to the browser
     for (const el of doc.body.querySelectorAll('*')) {
         for (const a of Array.from(el.attributes)) {
             const n = a.name.toLowerCase();

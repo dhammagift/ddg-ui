@@ -1,19 +1,3 @@
-function uniCoder(textInput) {
-    if (!textInput || textInput === "") return textInput;
-    return textInput
-        .replace(/aa/g, "ā")
-        .replace(/ii/g, "ī")
-        .replace(/uu/g, "ū")
-        .replace(/\"n/g, "ṅ")
-        .replace(/\~n/g, "ñ")
-        .replace(/\.t/g, "ṭ")
-        .replace(/\.d/g, "ḍ")
-        .replace(/\.n/g, "ṇ")
-        .replace(/\.m/g, "ṃ")
-        .replace(/\.l/g, "ḷ")
-        .replace(/\.h/g, "ḥ");
-}
-
 document.addEventListener('DOMContentLoaded', function() {
     let wordsRequested = false;
     let paliauto = document.getElementById("paliauto");
@@ -49,6 +33,7 @@ document.addEventListener('DOMContentLoaded', function() {
         searchBoxInput.addEventListener("click", triggerEmptySearch);
         searchBoxInput.addEventListener("focus", triggerEmptySearch);
         for (const ev of ["pointerdown", "keydown", "input"]) searchBoxInput.addEventListener(ev, loadWords);
+        if (searchBoxInput.value) loadWords(); // typed before this deferred script ran
     }
 
   function loadWords() {
@@ -273,9 +258,10 @@ document.addEventListener('DOMContentLoaded', function() {
             $("#search-box").autocomplete("instance")._resizeMenu = function () {
                 this.menu.element.outerWidth($("#search-form").outerWidth());
             };
-            // the field may already be focused and empty: show the history list it asked for
-            if (document.activeElement === document.getElementById("search-box") && !$("#search-box").val()) {
-                $("#search-box").autocomplete("search", "");
+            // The field may already be focused: show what it asked for while the list was on its way
+            // (the history when empty, otherwise suggestions for the letters already typed).
+            if (document.activeElement === document.getElementById("search-box")) {
+                $("#search-box").autocomplete("search", $("#search-box").val());
             }
         }
   });

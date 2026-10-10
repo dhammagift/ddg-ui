@@ -317,6 +317,24 @@ window.showHideSandhi = showHideSandhi;
 
 //// text to unicode
 
+// Velthuis to Unicode. Here, not in autopali.js: that one is deferred, and typing before it ran threw
+// "uniCoder is not defined" on this listener. autopali.js uses it from here.
+function uniCoder(textInput) {
+    if (!textInput || textInput === "") return textInput;
+    return textInput
+        .replace(/aa/g, "ā")
+        .replace(/ii/g, "ī")
+        .replace(/uu/g, "ū")
+        .replace(/\"n/g, "ṅ")
+        .replace(/\~n/g, "ñ")
+        .replace(/\.t/g, "ṭ")
+        .replace(/\.d/g, "ḍ")
+        .replace(/\.n/g, "ṇ")
+        .replace(/\.m/g, "ṃ")
+        .replace(/\.l/g, "ḷ")
+        .replace(/\.h/g, "ḥ");
+}
+
 searchBox.addEventListener("input", function() {
     let textInput = searchBox.value;
     let convertedText = uniCoder(textInput);
