@@ -95,9 +95,21 @@
         let redirectUrl;
         const customUrl = getQueryParam('url');
 
-        if (customUrl) {
-            // Если есть параметр url=..., перенаправляем туда
-            redirectUrl = decodeURIComponent(customUrl);
+        // Only https links to the sites the app shortcuts open (static/manifest.json, manifest-ru.json).
+        // The parameter used to be followed as given: ?url=javascript:... ran code on dhamma.gift (this
+        // page is also served under dhamma.gift/dict/) and ?url=https://other.site was an open redirect.
+        const ALLOWED_HOSTS = ['dhamma.gift', 'dharmamitra.org', 'www.aksharamukha.com', 'aksharamukha.com'];
+        function allowedTarget(raw) {
+            try {
+                const u = new URL(raw, window.location.href);
+                if (u.protocol === 'https:' && ALLOWED_HOSTS.indexOf(u.hostname) !== -1) return u.href;
+            } catch (e) { /* not a URL */ }
+            return null;
+        }
+
+        if (customUrl && allowedTarget(customUrl)) {
+            // Если есть параметр url=... (из разрешённых), перенаправляем туда
+            redirectUrl = allowedTarget(customUrl);
         } else {
             // Иначе перенаправляем на dhamma.gift (с учётом /ru/)
             const shouldRedirectToRU = window.location.href.includes('/ru/');
