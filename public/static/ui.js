@@ -323,19 +323,32 @@
       if (window.ResizeObserver) new ResizeObserver(([en]) => setH(en.borderBoxSize?.[0]?.blockSize ?? tbar.offsetHeight)).observe(tbar);
       else { setH(tbar.offsetHeight); addEventListener('resize', () => setH(tbar.offsetHeight)); }
       const hideMinY = 320; // don't hide until scrolled this far down
-      let lastY = scrollY, ticking = false;
+      // iOS WebKit leaves the caret of a focused field where the field was while the bar slid away and back (owner,
+      // TestFlight 563: after scrolling down and up again the caret hung below the search box). So the bar stays while one of
+      // its fields has the focus (the field being typed in stays in sight, too), and after the bar has moved or the page has
+      // stopped scrolling the caret is set again where it is.
+      const typing = () => tbar.contains(document.activeElement) && /^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName);
+      const recaret = () => {
+        const f = document.activeElement;
+        if (!typing() || f.selectionStart == null) return;
+        try { f.setSelectionRange(f.selectionStart, f.selectionEnd); } catch (e) { /* a type without a selection */ }
+      };
+      let lastY = scrollY, ticking = false, settle = 0;
       addEventListener('scroll', () => {
+        clearTimeout(settle);
+        settle = setTimeout(recaret, 150);
         if (ticking) return;
         ticking = true;
         requestAnimationFrame(() => {
           const y = scrollY, dy = y - lastY;
-          if (y < hideMinY) B.classList.remove('tbar-hide');
+          if (y < hideMinY || typing()) B.classList.remove('tbar-hide');
           else if (dy > 8) B.classList.add('tbar-hide');
           else if (dy < -8) B.classList.remove('tbar-hide');
           lastY = y;
           ticking = false;
         });
       }, { passive: true });
+      tbar.addEventListener('transitionend', (e) => { if (e.target === tbar && e.propertyName === 'transform') recaret(); });
       tbar.addEventListener('focusin', () => B.classList.remove('tbar-hide'));
     }
   });
