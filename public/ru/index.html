@@ -47,7 +47,10 @@
     var th = localStorage.getItem('theme');
     if (th === 'dark' || (th !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches)) document.body.classList.add('dark-mode');
     if (localStorage.getItem('desktopHistoryHidden') === 'true') document.body.dataset.hist = 'off';
-    if (/[?&]q=/.test(location.search)) document.body.dataset.screen = 'entry';
+    // A word in the address (?q=word, /word, /ru/word, /dict/ru/word): the entry screen from the first paint,
+    // not the start screen for the second or so until the scripts run.
+    var wp = location.pathname.replace(/^\/dict(?=\/|$)/, '').replace(/^\/(ru|th)(?=\/|$)/, '');
+    if (/[?&]q=/.test(location.search) || /^\/[^\/.]+\/?$/.test(wp)) document.body.dataset.screen = 'entry';
   } catch (e) {}
 </script>
 
