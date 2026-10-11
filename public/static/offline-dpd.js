@@ -237,7 +237,7 @@
         isRu: isRu
     };
 
-    // ——— UI: the menu row (download → % → delete, one icon throughout), the line in the "Dictionary on any site" card,
+    // ——— UI: the menu row (download → % → delete), the line in the "Dictionary on any site" card,
     // and the invitation shown in the installed app.
     var T = isRu ? {
         download: 'скачать', remove: 'удалить', downloading: 'качаю',
@@ -274,21 +274,14 @@
         if (hideAfterMs) bubble.timer = setTimeout(function () { node.classList.remove('show'); }, hideAfterMs);
     }
 
-    // The button's words change, its icon never does (owner: an icon must not turn into another one after a tap):
-    // the download mark stays, the state is the label beside it and, once downloaded, a dot on the mark (dg.css).
-    function label(btn, text) {
-        var icon = btn.querySelector('.gi');
-        btn.textContent = text;
-        if (icon) btn.insertBefore(icon, btn.firstChild);
-    }
-
     function paint(current) {
         var btn = el('offline-dl-btn'), sub = el('offline-dl-sub');
         if (!btn) return;
         var ready = current === 'ready';
         btn.disabled = false;
-        btn.classList.toggle('is-ready', ready);
-        label(btn, ready ? T.remove : T.download);
+        btn.innerHTML = ready
+            ? '<i class="gi i-fa-trash-can"></i>' + T.remove
+            : '<i class="gi i-fa-download"></i>' + T.download;
         btn.title = ready ? T.titleRemove : T.titleDownload;
         if (sub) sub.textContent = ready ? T.subReady : T.sub;
         var invite = el('dg-offline-invite');
@@ -297,11 +290,11 @@
 
     function runDownload() {
         var btn = el('offline-dl-btn'), sub = el('offline-dl-sub');
-        if (btn) { btn.disabled = true; label(btn, T.downloading + ' 0%'); }
+        if (btn) { btn.disabled = true; btn.innerHTML = T.downloading + ' 0%'; }
         bubble(T.bubbleStart + ' 0%');
         return download(function (share) {
             var pct = Math.round(share * 100) + '%';
-            if (btn) label(btn, T.downloading + ' ' + pct);
+            if (btn) btn.innerHTML = T.downloading + ' ' + pct;
             bubble(T.bubbleStart + ' ' + pct);
         }).then(function () {
             bubble(T.bubbleDone, 2500);
