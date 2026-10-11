@@ -248,7 +248,8 @@
         bubbleStart: 'Скачиваю офлайн-словарь…',
         bubbleDone: 'Офлайн-словарь скачан',
         bubbleHave: 'Офлайн-словарь уже скачан',
-        bubbleFail: 'Не удалось скачать словарь'
+        bubbleFail: 'Не удалось скачать словарь',
+        cardReady: '✓ Уже у вас: краткие значения работают без интернета.', update: 'обновить'
     } : {
         download: 'download', remove: 'delete', downloading: 'loading',
         titleDownload: 'Download the offline mini-dictionary', titleRemove: 'Delete the offline mini-dictionary',
@@ -258,7 +259,8 @@
         bubbleStart: 'Downloading the offline dictionary…',
         bubbleDone: 'Offline dictionary downloaded',
         bubbleHave: 'The offline dictionary is already downloaded',
-        bubbleFail: 'Could not download the dictionary'
+        bubbleFail: 'Could not download the dictionary',
+        cardReady: '✓ You already have it: short meanings work with no network.', update: 'update'
     };
 
     function el(id) { return document.getElementById(id); }
@@ -286,6 +288,15 @@
         if (sub) sub.textContent = ready ? T.subReady : T.sub;
         var invite = el('dg-offline-invite');
         if (invite && ready) invite.hidden = true;
+        // The start card: once downloaded it says so (owner, 2026-10-11: it kept offering "download the mini-dictionary",
+        // and the tap only answered "already downloaded"), with a small "update" link; after a delete the template's text again.
+        var link = el('offline-dl-link'), card = link && link.parentNode;
+        if (card) {
+            if (!card.hasAttribute('data-idle')) card.setAttribute('data-idle', card.innerHTML);
+            card.innerHTML = ready
+                ? T.cardReady + ' <a href="#" id="offline-dl-link" class="offline-upd">' + T.update + '</a>'
+                : card.getAttribute('data-idle');
+        }
     }
 
     function runDownload() {
@@ -321,17 +332,17 @@
                 });
             });
         }
-        var link = el('offline-dl-link');
-        if (link) {
-            link.addEventListener('click', function (e) {
-                e.preventDefault();
-                state().then(function (current) {
-                    // From the card there is no button to watch, so the bubble is the only feedback.
-                    if (current === 'ready') { bubble(T.bubbleHave, 2500); paint(current); return; }
-                    runDownload();
-                });
+        // The card's link is redrawn by paint(), so the click is taken on the document. "download" fetches it,
+        // "update" fetches it again (the bubble shows the progress: there is no button on the card to watch).
+        document.addEventListener('click', function (e) {
+            var link = e.target && e.target.closest ? e.target.closest('#offline-dl-link') : null;
+            if (!link) return;
+            e.preventDefault();
+            state().then(function (current) {
+                if (current === 'ready' && !link.classList.contains('offline-upd')) { bubble(T.bubbleHave, 2500); paint(current); return; }
+                runDownload();
             });
-        }
+        });
         var invite = el('dg-offline-invite');
         if (invite) {
             var yes = el('dg-offline-invite-yes'), no = el('dg-offline-invite-no');
