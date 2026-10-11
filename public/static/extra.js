@@ -718,9 +718,9 @@ async function handleClientSearch(rawQuery, opts) {
                 <div class="offline-dpd-note">${window.isRu
                     ? 'Нет сети, офлайн-словарь не скачан'
                     : 'No network, the offline dictionary is not downloaded'}</div>
-                <button type="button" class="rb act offline-dpd-go">${window.isRu
-                    ? 'Где скачать — нажмите, когда будет сеть'
-                    : 'Where to download it — tap it once online'}</button>
+                <br><button type="button" class="offline-dpd-go"><i class="gi i-fa-download"></i>${window.isRu
+                    ? 'Скачать, когда будет сеть'
+                    : 'Download once online'}</button>
             `;
             // Opens the menu at its "Offline dictionary" row and makes the row blink, so the button is easy to find later.
             resultsContainer.querySelector('.offline-dpd-go').addEventListener('click', () => {
