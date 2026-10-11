@@ -716,9 +716,23 @@ async function handleClientSearch(rawQuery, opts) {
         if (!shown && resultsContainer) {
             resultsContainer.innerHTML = `
                 <div class="offline-dpd-note">${window.isRu
-                    ? 'Нет сети, офлайн-словарь не скачан — скачать при подключении к сети'
-                    : 'No network, the offline dictionary is not downloaded — download it once online'}</div>
+                    ? 'Нет сети, офлайн-словарь не скачан'
+                    : 'No network, the offline dictionary is not downloaded'}</div>
+                <button type="button" class="rb act offline-dpd-go">${window.isRu
+                    ? 'Где скачать — нажмите, когда будет сеть'
+                    : 'Where to download it — tap it once online'}</button>
             `;
+            // Opens the menu at its "Offline dictionary" row and makes the row blink, so the button is easy to find later.
+            resultsContainer.querySelector('.offline-dpd-go').addEventListener('click', () => {
+                const menu = document.getElementById('p-menu');
+                if (menu && menu.dataset.open !== 'true' && typeof window.dgToggleMenu === 'function') window.dgToggleMenu();
+                const row = document.getElementById('offline-dl-btn')?.closest('.set');
+                if (!row) return;
+                setTimeout(() => {
+                    row.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                    row.classList.remove('dg-blink'); void row.offsetWidth; row.classList.add('dg-blink');
+                }, 250);
+            });
             resultsContainer.dataset.stale = 'false';
         }
         clearExternalSlots();
