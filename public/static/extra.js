@@ -360,7 +360,11 @@ function initStartMessage(lang) {
     
     // === НОВОЕ: Обработка silent режима ===
     const urlParams = getUrlParams();
-    if (urlParams.has('silent')) {
+    // Inside a frame (Dhamma.Gift's dictionary popup) every page is silent, not only the first one: a word
+    // clicked inside an entry opens a page without ?silent, which showed the long start text before the word.
+    let framed = false;
+    try { framed = window.self !== window.top; } catch (e) { framed = true; }
+    if (urlParams.has('silent') || framed) {
         // Используем lang (аргумент) или language (глобальную переменную)
         // Оборачиваем в HTML, чтобы сохранились отступы и стили
         if (lang === 'ru' || (typeof language !== 'undefined' && language === 'ru')) {
