@@ -327,6 +327,12 @@ body.dark-mode .dict-iframe-invert{filter:invert(1) hue-rotate(180deg)}
 .projrow a[aria-current=page]{background:var(--dg-surface);border-color:var(--dg-border);color:var(--dg-text);font-weight:600}
 .projrow a[aria-current=page]::before{content:"";position:absolute;left:0;right:0;top:0;height:1px;background:var(--dg-surface)}
 .pagefoot{max-width:1140px;margin:12px auto 0;padding:18px 20px 40px;border-top:1px solid var(--dg-border);display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--dg-text-muted)}
+/* a short page leaves the project tabs and the footer at the window's bottom, not under the content: .frame is a column
+   at least as tall as the window and the tabs take the free space above them (the 38px gap stays as the page's margin) */
+.frame{display:flex;flex-direction:column;min-height:calc(100dvh / var(--dg-zoom, 1))}
+.frame>.page,.frame>.pagefoot{width:100%}
+.frame>.page{margin-bottom:38px}
+.frame>.projrow{margin-top:auto}
 .pagefoot .dot{opacity:.6}
 .pagefoot a{color:var(--dg-text-muted)}
 .pagefoot a:hover{color:var(--dg-text-2)}
