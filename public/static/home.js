@@ -79,6 +79,15 @@ document.addEventListener("DOMContentLoaded", function() {
 
     loadFontSize();
     swopSansSerif();
+
+    // The input carries the HTML `autofocus` attribute, which focuses it on desktop, but a WebView (the app)
+    // ignores that attribute and the keyboard never comes up. Focus it in JS too, only on the empty start screen
+    // (not while a word is already loading on the entry screen). Android then raises the soft keyboard; iOS needs a
+    // user gesture and is handled natively in the app.
+    var sb = document.getElementById("search-box");
+    if (sb && document.body.dataset.screen === "start" && !sb.value) {
+        try { sb.focus(); } catch (e) { /* focus can throw on a detached/hidden input */ }
+    }
 });
 
 //// listeners
