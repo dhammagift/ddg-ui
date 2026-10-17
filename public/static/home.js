@@ -88,7 +88,14 @@ document.addEventListener("DOMContentLoaded", function() {
     if (sb && document.body.dataset.screen === "start" && !sb.value) {
         try { sb.focus(); } catch (e) { /* focus can throw on a detached/hidden input */ }
         // Android only: nudge the soft keyboard up (no-op on the web and on iOS, where DgKeyboard is undefined).
-        try { if (window.DgKeyboard && window.DgKeyboard.show) window.DgKeyboard.show(); } catch (e) { /* ignore */ }
+        try {
+            if (window.DgKeyboard && window.DgKeyboard.show) {
+                window.DgKeyboard.show();
+                // The native side touch-focuses the WebView to open the IME, which drops the input's own focus;
+                // put it back a beat later so the first letters land in the box, not the page's keyboard shortcuts.
+                setTimeout(function () { try { sb.focus(); } catch (e) { /* ignore */ } }, 400);
+            }
+        } catch (e) { /* ignore */ }
     }
 });
 
