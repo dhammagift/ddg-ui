@@ -153,10 +153,46 @@
     }
   }
 
+  // ---- popular words typed loosely (owner) ----
+  // The ~380 key terms (owner's sheet "Mapping Pali-Rus"): a word typed in plain ASCII that matches one of them
+  // without diacritics or with a single/double consonant off (dukha, nibana, kama) gets a hint under the headword -
+  // "Did you mean: dukkha →". The word as typed is what is shown and searched (owner: never rewrite the query).
+  const POPULAR = ["abhijjhā", "abhiññā", "abhiññāya", "abyāpāda", "adhamma", "ādīnava", "adinnādāna", "adinnādānā veramaṇī", "āhuneyyo", "akāliko", "ākāsadhātu", "ākāsānañcāyatana", "ākiñcaññāyatana", "akusala", "akusala kammapatha", "anabhijjhā", "anāgāmī", "anatta", "anattha", "aṅga", "anicca", "animitta", "añjalikaraṇīyo", "anta", "anuloma", "anunaya", "anusaya", "anuttaraṁ puññakkhettaṁ lokassa", "anuttaro purisadammasārathi", "api", "āpodhātu", "appamāda", "appaṇihita", "appiyehi sampayogo", "apuñña", "arahaṁ", "arati", "ariya", "ariyasacca", "ariyo aṭṭhaṅgiko maggo", "arūparāga", "asaṅkhata", "asappurisa", "asāta", "āsava", "asekha", "assāda", "assāsa", "asubha", "ātāpī", "attha", "avijjā", "avijjānusaya", "āvuso", "āyatana", "ayya", "bala", "bāla", "bhadante", "bhagavā", "bhante", "bhava", "bhavarāgānusaya", "bhavataṇhā", "bhāvetabba", "bhaya", "bhojanīya", "bojjhaṅga", "brahmacariya", "brāhmaṇa", "brahmavihara", "buddho", "byāpāda", "cakkhu", "cattāri ariyasaccāni", "catuttha jhāna", "cetanā", "ceto", "chanda", "chandasamādhippadhānasaṅkhārasamannāgata iddhipāda", "citta", "cittānupassanā", "cittasamādhippadhānasaṅkhārasamannāgata iddhipāda", "dakkhiṇeyyo", "dāna", "dassana", "deva", "devatā", "dhamma", "dhammānudhamma", "dhammānupassanā", "dhammavicaya", "dhātu", "diṭṭhānusaya", "domanassa", "dosa", "dukkha", "dukkhanirodha", "dukkhanirodhagāminī paṭipadā", "dukkhasamudaya", "dukkhata", "dutiya jhāna", "ehi tvaṁ", "ehipassiko", "esanā", "evamevaṁ", "gandha", "gantha", "ghāna", "iddhipāda", "indriya", "iṭṭhā kantā manāpā piyarūpā kāmūpasaṁhitā rajanīyā", "jarā", "jāti", "jhāna", "jhāyatha", "jivhā", "kalyāṇa", "kāma", "kāmacchanda", "kāmaguṇā", "kāmarāgānusaya", "kāmataṇhā", "kāmesumicchācāra", "kāmesumicchācārā veramaṇī", "kamma", "kappa", "karuṇā", "kāya", "kāyagatāsati", "kāyānupassanā", "khādanīya", "khandha", "khaya", "khila", "kilesa", "kusala", "kusala kammapatha", "lobha", "lokavidū", "loko", "macchariyā", "magga", "mahābhūta", "majjhimā paṭipadā", "mala", "māna", "mānānusaya", "manasikāra", "mano", "maraṇa", "māro pāpimā", "mettā", "micchādiṭṭhi", "micchattā", "mitta", "moghapurisa", "moha", "muditā", "mūla", "musāvāda", "musāvādā veramaṇī", "nāma", "nāmarūpa", "ñāṇa", "ñāṇadassana", "nandī", "nandīrāga", "nandīrāgasahagatā", "ñāyappaṭipanno", "nevasaññānāsaññāyatana", "nibbāna", "nibbidā", "nidāna", "nīgha", "nirāmisa", "nirodha", "nissaraṇa", "nissita", "nīvaraṇa", "ogha", "opaneyyiko", "orambhāgiya", "paccattaṁ veditabbo viññūhi", "paccaya", "padhāna", "pahāna", "pahānāya", "pahātabba", "pāhuneyyo", "pajānāti", "pamāda", "pāmojja", "pananca", "pāṇātipāta", "pāṇātipātā veramaṇī", "pañcupādānakkhandha", "paṇḍita", "paññā", "paññābala", "paññindriya", "pāpaka", "parideva", "parinibbāna", "pariññā", "pariññāya", "pariññeyya", "passaddhi", "passāsa", "paṭhama jhāna", "paṭhavīdhātu", "paṭicca", "paṭiccasamuppāda", "paṭigha", "paṭighānusaya", "paṭiloma", "paṭinissagga", "paṭivirato", "pātubhāvo", "pharusā vācā", "pharusāya vācāya veramaṇī", "phasso", "phoṭṭhabba", "pisuṇā vācā", "pisuṇāya vācāya veramaṇī", "pīti", "piyehi vippayogo", "ponobhavikā", "puggala", "puñña", "puthujjana", "rāga", "rajanīyā", "rasa", "rūpa", "rūparāga", "sacchikātabba", "sacchikiriyā", "sacchikiriyāya", "sadda", "saddhā", "saddhābala", "saddhindriya", "sahagata", "sakadāgāmī", "sakkāyadiṭṭhi", "saḷāyatana", "samādhi", "samādhibala", "samādhindriya", "samaṇa", "samanupassati", "samatha", "sambodhāya", "sāmīcippaṭipanno", "sāmisa", "sammāājīva", "sammādiṭṭhi", "sammākammanta", "sammāsamādhi", "sammāsambuddho", "sammāsaṅkappa", "sammāsati", "sammattā", "sammāvācā", "sammāvāyāma", "sampajāna", "samphappalāpa", "samphappalāpā veramaṇī", "samudaya", "saṁyojana", "sandiṭṭhiko", "saṅgha", "saṅkhāra", "saṅkhata", "saṅkhittena", "saññā", "saññāvedayitanirodha", "sappurisa", "satibala", "satindriya", "satipaṭṭhāna", "satthā", "satthā devamanussānaṁ", "sāvaka", "sekha", "seyyathāpi", "sīla", "sīlabbataparāmāsa", "soka", "somanassa", "sota", "sotāpanna", "soto", "sugato", "sukha", "suññatā", "suppaṭipanno", "svākkhāto", "taṇhā", "tasinā", "tathāgata", "tatiya jhāna", "tatratatrābhinandinī", "tejodhātu", "thinamiddha", "uddhacca", "uddhaccakukkucca", "uddhambhāgiya", "ujuppaṭipanno", "upādāna", "upadhi", "upakkilesa", "upasamāya", "upāyāsa", "upekkhā", "uposatho", "vagga", "vaya", "vāyodhātu", "vedanā", "vedanānupassanā", "vibhava", "vibhavataṇhā", "vicāra", "vicikicchā", "vicikicchānusaya", "vidhā", "vihāra", "vihesā", "vijja", "vijjācaraṇasampanno", "vīmaṁsāsamādhippadhānasaṅkhārasamannāgata iddhipāda", "vimutti", "vinaya", "viññāṇa", "viññāṇadhātu", "viññāṇañcāyatana", "vipāka", "vipassanā", "virāga", "vīriya", "vīriyabala", "vīriyasamādhippadhānasaṅkhārasamannāgata iddhipāda", "vīriyindriya", "vitakka", "viveka", "vūpasama", "yampicchaṁ na labhati", "yathābhūtaṁ", "yoga", "yogakkhema", "yoniso manasikāra", "adukkhamasukha", "anupassī", "arahant", "ariyasāvaka", "avihiṁsā", "bhikkhu", "bhikkhunī", "ekaggacitta", "ekodibhāva", "evaṁ me sutaṁ", "hirī", "jāgara", "khama", "khanti", "khattiya", "manasi karoti", "nekkhamma", "nimitta", "ottappa", "parinibbāyati", "saddhamma", "sammāsambuddha", "saṅkappa", "sati", "sugata", "vācā", "vāyāma", "viharati", "vihiṁsā", "yoniso"];
+  const looseKey = (w) => w.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/(.)\1+/g, '$1');
+  const popularByKey = new Map();
+  POPULAR.forEach((w) => { const k = looseKey(w); popularByKey.set(k, [...(popularByKey.get(k) || []), w]); });
+  // Plain ASCII only: a word typed with diacritics is meant exactly (aṭṭha "eight" is not attha). Common corpus
+  // words that collapse onto a key term stay themselves (f3-ultra ran the dg.db vocab through this).
+  const NEVER_ALIAS = ['atha', 'pana', 'puna', 'satti', 'sammasati', 'bhaggava'];
+  function popularFor(q) {
+    const w = (typeof cleanQueryParam === 'function' ? cleanQueryParam(q) : q || '').trim().toLowerCase();
+    if (!/^[a-z ]+$/.test(w) || POPULAR.includes(w) || NEVER_ALIAS.includes(w)) return null;
+    const hit = popularByKey.get(looseKey(w));
+    return hit ? { words: hit } : null;
+  }
+  function paintAliasNote(a) {
+    $('alias-note')?.remove();
+    if (!a) return;
+    const p = document.createElement('p');
+    p.id = 'alias-note';
+    p.className = 'alias-note';
+    p.innerHTML = (isRu ? 'Возможно, вы имели в виду: ' : 'Did you mean: ')
+      + a.words.map((w) => `<a href="#" data-alias-word="${esc(w)}">${esc(w)} →</a>`).join(', ');
+    document.querySelector('#s-entry .meta')?.after(p);
+  }
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest('[data-alias-word]');
+    if (!a) return;
+    e.preventDefault();
+    const sb = $('search-box'); if (sb) sb.value = a.dataset.aliasWord;
+    window.handleClientSearch(a.dataset.aliasWord);
+  });
+
   // Wrap the search entry point from extra.js: switch screen, set headword, repaint lists.
   const _search = window.handleClientSearch;
   window.handleClientSearch = async function (q) {
     setWord(q);
+    paintAliasNote(popularFor(q));
     const r = await _search.apply(this, arguments);
     paintHist();
     return r;
