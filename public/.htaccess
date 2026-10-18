@@ -10,6 +10,12 @@ RewriteRule ^ - [L]
 RewriteCond %{REQUEST_URI} ^(.*[^/])/+$
 RewriteRule ^(ru/)?[^/]+/+$ https://%{HTTP_HOST}%1 [R=301,L]
 
+# A key term with its head pre-rendered (build-pages.js writes w/<word>.html and ru/w/<word>.html, the DPD
+# meaning in <title>/<meta> for crawlers that do not run JS): served at the same clean path.
+RewriteCond %{REQUEST_FILENAME} ^(.*/)[^/]+$
+RewriteCond %1w/$2.html -f
+RewriteRule ^(ru/)?([^/]+)$ $1w/$2.html [L]
+
 # Clean-path search, e.g. /kacchapa or /ru/kacchapa: serve the SPA shell, query string
 # (and any ?q= it already had) is passed through automatically. extra.js turns the path
 # segment into ?q= on load.

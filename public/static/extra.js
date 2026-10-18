@@ -1217,6 +1217,11 @@ document.addEventListener('click', function(event) {
 function updateDocumentTitle(query) {
   const baseTitle = "Dict.Dhamma.Gift";
   const word = (query || "").trim();
+  // A key-term page comes with its head already written (build-pages.js): keep it for that word; any other
+  // word drops the mark, so coming back to it later gets the head built here.
+  const pre = document.head.querySelector('meta[name="dg-prerendered"]');
+  if (pre && pre.content === word) return;
+  if (pre) pre.remove();
 
   if (word !== "") {
     document.title = word + " — Dict.DG";
@@ -1261,6 +1266,7 @@ function updateWordHead(word) {
 // Headwords of the word itself come first, then the ones DPD lists it as a form of (sati -> santa).
 // No DPD entry: the title stays "word — Dict.DG".
 function setWordMeaningHead(word, container) {
+  if (document.head.querySelector('meta[name="dg-prerendered"]')?.content === word) return;
   const lemma = h => h.replace(/\s+[\d.]+$/, "").trim();
   const heads = [...container.querySelectorAll("h3.dpd")].map(h => {
     const box = h.nextElementSibling;
