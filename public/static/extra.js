@@ -787,6 +787,7 @@ async function handleClientSearch(rawQuery, opts) {
         const ptsSlot = document.getElementById('ext-slot-pts');
 
         if (firstHeading && hasRealEntry) {
+            try { setWordMeaningHead(query, resultsContainer); } catch (e) { console.warn('[dict] meaning title skipped', e); } // a DPD markup change must not stop the other dictionaries
             // Очищаем запрос для сторонних словарей от цифр, слова Root и символов корня
             let normalizedQuery = firstHeading.textContent.replace(/\s+\d+(\.\d+)*$/, '').trim();
             normalizedQuery = normalizedQuery.replace(/root:?/gi, '').replace(/[√✓]/g, '').trim();
@@ -1246,12 +1247,49 @@ function updateWordHead(word) {
   link('link[rel="alternate"][hreflang="x-default"]', { rel: "alternate", hreflang: "x-default", href: url("en") });
   if (!word) return;
   const desc = window.isRu
-    ? word + " — словарь пали: DPD, PTS, гандхари, санскрит и определения из самого Канона (Сутта, Виная) в одном поиске."
-    : word + " — Pāḷi dictionary: the Digital Pāḷi Dictionary (DPD), PTS, Gandhari, Sanskrit and the Canon's own definitions (Sutta, Vinaya) in one search.";
+    ? word + " — словарь пали: 5+ словарей и определения из самого Канона (Сутта, Виная) в одном поиске."
+    : word + " — Pāḷi dictionary: 5+ dictionaries and the Canon's own definitions (Sutta, Vinaya) in one search.";
   const meta = document.head.querySelector('meta[name="description"]');
   if (meta) meta.setAttribute("content", desc);
   const ogUrl = document.head.querySelector('meta[property="og:url"]');
   if (ogUrl) ogUrl.setAttribute("content", own);
+}
+
+// SEO (owner): the tab title and search description carry the DPD meaning - "sati — memory; mindfulness;
+// when there is +2 — Dict.DG". One first meaning per DPD headword in DPD's own order (owner: no reordering),
+// whole meanings only, ~60 chars, "+N" for the ones left; a one-headword word shows several of its meanings.
+// Headwords of the word itself come first, then the ones DPD lists it as a form of (sati -> santa).
+// No DPD entry: the title stays "word — Dict.DG".
+function setWordMeaningHead(word, container) {
+  const lemma = h => h.replace(/\s+[\d.]+$/, "").trim();
+  const heads = [...container.querySelectorAll("h3.dpd")].map(h => {
+    const box = h.nextElementSibling;
+    const b = box && box.matches(".dpd.summary") ? box.querySelector("b") : null;
+    if (!b) return null;
+    const pos = (b.previousSibling ? b.previousSibling.textContent : "").replace(/\(.*?\)/g, "").trim();
+    const means = b.textContent.split(";").map(m => m.trim()).filter(Boolean);
+    return { head: lemma(h.textContent), pos, means };
+  }).filter(h => h && h.means.length);
+  if (!heads.length) return;
+  heads.sort((a, b) => (b.head === word) - (a.head === word)); // stable: DPD order within each group
+  const firsts = [...new Set(heads.map(h => h.means[0]))];
+  const list = firsts.length > 1 ? firsts : heads[0].means;
+  let title = word + " — " + list[0], n = 1;
+  while (n < list.length && (title + "; " + list[n]).length <= 60) title += "; " + list[n++];
+  if (firsts.length > 1 && n < list.length) title += " +" + (list.length - n);
+  document.title = title + " — Dict.DG";
+  const tail = window.isRu ? " 5+ словарей в одном поиске." : " 5+ dictionaries in one search."; // owner: no list, it changes
+  const used = new Set();
+  let desc = word + " — ";
+  for (const h of heads) {
+    const m = heads.length > 1 ? h.means[0] : h.means.join("; ");
+    if (used.has(m)) continue;
+    const add = (used.size ? "; " : "") + (h.pos ? h.pos + " " : "") + m;
+    if ((desc + add + "." + tail).length > 155 && used.size) break;
+    desc += add; used.add(m);
+  }
+  const meta = document.head.querySelector('meta[name="description"]');
+  if (meta) meta.setAttribute("content", desc + "." + tail);
 }
 
 // Отдельный слушатель для инициализации заголовка страницы
