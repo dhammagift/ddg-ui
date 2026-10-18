@@ -1215,12 +1215,43 @@ document.addEventListener('click', function(event) {
 // Функция для обновления заголовка вкладки
 function updateDocumentTitle(query) {
   const baseTitle = "Dict.Dhamma.Gift";
-  
-  if (query && query.trim() !== "") {
-    document.title = query.trim() + " — Dict.DG";
+  const word = (query || "").trim();
+
+  if (word !== "") {
+    document.title = word + " — Dict.DG";
   } else {
     document.title = baseTitle;
   }
+  updateWordHead(word);
+}
+
+// SEO: one static shell serves every word, so a fixed <link rel=canonical> to the home page made each
+// word a copy of it for Google (GSC: only ~4 dictionary URLs ever shown). The canonical, hreflang and
+// description are set here for the word on screen — always on dict.dhamma.gift, also when this runs at
+// dhamma.gift/dict/ or in the app. Russian is /ru/<word>: the address that serves the Russian page itself
+// (?lang=ru answers the English shell and redirects there by JS — f3-ultra). Nothing here is visible.
+function updateWordHead(word) {
+  const SITE = "https://dict.dhamma.gift/";
+  const path = word ? (word.includes("/") ? "?q=" + encodeURIComponent(word) : encodeURIComponent(word)) : "";
+  const url = lang => SITE + (lang === "ru" ? "ru/" : "") + path;
+  const link = (sel, attrs) => {
+    let el = document.head.querySelector(sel);
+    if (!el) { el = document.createElement("link"); document.head.appendChild(el); }
+    Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
+  };
+  const own = url(window.isRu ? "ru" : "en");
+  link('link[rel="canonical"]', { rel: "canonical", href: own });
+  link('link[rel="alternate"][hreflang="en"]', { rel: "alternate", hreflang: "en", href: url("en") });
+  link('link[rel="alternate"][hreflang="ru"]', { rel: "alternate", hreflang: "ru", href: url("ru") });
+  link('link[rel="alternate"][hreflang="x-default"]', { rel: "alternate", hreflang: "x-default", href: url("en") });
+  if (!word) return;
+  const desc = window.isRu
+    ? word + " — словарь пали: DPD, PTS, гандхари, санскрит и определения из самого Канона (Сутта, Виная) в одном поиске."
+    : word + " — Pāḷi dictionary: the Digital Pāḷi Dictionary (DPD), PTS, Gandhari, Sanskrit and the Canon's own definitions (Sutta, Vinaya) in one search.";
+  const meta = document.head.querySelector('meta[name="description"]');
+  if (meta) meta.setAttribute("content", desc);
+  const ogUrl = document.head.querySelector('meta[property="og:url"]');
+  if (ogUrl) ogUrl.setAttribute("content", own);
 }
 
 // Отдельный слушатель для инициализации заголовка страницы
@@ -1231,6 +1262,8 @@ document.addEventListener('DOMContentLoaded', function() {
   
   if (initialQuery) {
     updateDocumentTitle(initialQuery);
+  } else {
+    updateWordHead(''); // the home page's canonical/hreflang (no longer in the static shell); its title stays
   }
 
   // 2. Вешаем обработчик на инпут для изменения на лету

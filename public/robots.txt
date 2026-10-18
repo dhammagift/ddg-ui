@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://dict.dhamma.gift/sitemap.xml
