@@ -30,6 +30,7 @@
   "<h2>What is included</h2>": "<h2>Что подключено</h2>",
   "<li><b>Buddhadust Glossology</b><em>comparative terms, Michael Olds</em></li>": "<li><b>Buddhadust Glossology</b><em>сравнение терминов, Michael Olds</em></li>",
   "<li><b>Sanskrit</b><em>Monier-Williams, Shabda-Sagara and 30+ more</em></li>": "<li><b>Sanskrit</b><em>Monier-Williams, Shabda-Sagara и ещё 30+ словарей</em></li>",
+  "<li><b>Gandhari Dictionaries</b><em>M. Cone and others</em></li>": "<li><b>Gandhari Dictionaries</b><em>M. Cone и другие</em></li>",
   "<li><b>Sutta-Vinaya Definitions and Similes</b><span class=\"n\">definitions from the Canon</span></li>": "<li><b>Sutta-Vinaya Definitions and Similes</b><span class=\"n\">определения из Канона</span></li>",
   "<li><b>Wisdom Library</b><em>reference on Indian teachings: Buddhism, Hinduism, Jainism</em></li>": "<li><b>Wisdom Library</b><em>справочник по учениям Индии: буддизм, индуизм, джайнизм</em></li>",
   "<button class=\"rb\" id=\"favbtn\" type=\"button\" aria-pressed=\"false\" title=\"Favorite: pins the word above history\" onclick=\"favToggle()\"><i class=\"gi i-star\"></i></button>": "<button class=\"rb\" id=\"favbtn\" type=\"button\" aria-pressed=\"false\" title=\"В избранное: закрепляет слово над историей\" onclick=\"favToggle()\"><i class=\"gi i-star\"></i></button>",

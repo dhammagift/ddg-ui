@@ -2036,7 +2036,7 @@ function _initExtSlots(extContainer) {
         } else if (dictName === 'tripitaka') {
             extContainer.appendChild(_createIframeDictSlot('tripitaka', 'Sutta-Vinaya Definitions and Similies', 'https://tripitaka-mcp.com/read/embed/define', 'margin-bottom: 15px; margin-top: 15px;'));
         } else if (dictName === 'gandhari') {
-            extContainer.appendChild(_createIframeDictSlot('gandhari', 'Gandhari Dictionary', 'https://gandhari.org/dictionary?section=dop', 'margin-bottom: 15px; margin-top: 15px;'));
+            extContainer.appendChild(_createIframeDictSlot('gandhari', 'Gandhari Dictionaries', 'https://gandhari.org/dictionary?section=dop', 'margin-bottom: 15px; margin-top: 15px;'));
         } else if (dictName === 'pts') {
             extContainer.appendChild(_createIframeDictSlot('pts', 'PTS Dictionary', 'https://dsal.uchicago.edu/cgi-bin/app/pali_query.py', 'margin-bottom: 15px;'));
         } else if (dictName === 'buddhadust') {
@@ -2321,7 +2321,7 @@ window._renderBuddhadustIframe = function(contentNode, url, containerNode) {
 
 function appendGandhari(query) {
     // Здесь флаг не передается, используется значение по умолчанию (false)
-    appendIframeDict('gandhari', 'Gandhari Dictionary', `https://gandhari.org/dictionary?section=dop&search=${encodeURIComponent(query)}`);
+    appendIframeDict('gandhari', 'Gandhari Dictionaries', `https://gandhari.org/dictionary?section=dop&search=${encodeURIComponent(query)}`);
 }
 
 function appendPts(query) {
