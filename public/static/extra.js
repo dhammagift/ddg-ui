@@ -1,6 +1,3 @@
-//TODO починить чтобы ответ Buddhadust шрифт нужно тоже инвертировать а то он на светлой теме нормально. а в темной остается темным.
-//
-//
 window.isRu = /\/ru(\/|$)/.test(window.location.pathname);
 
 // Returns the app's install base path (e.g. '/' or '/dict/'), stripping any /ru or /th segment.
