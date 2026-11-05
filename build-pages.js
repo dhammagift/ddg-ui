@@ -52,7 +52,8 @@ function main() {
 // extra.js, which leaves a pre-rendered head as it is. Rebuilt with the pages, so the copies never go stale.
 // No mini-dictionary on this box (DPD_DIR): the copies are left untouched with a loud warning, the build still succeeds.
 const SITE = 'https://dict.dhamma.gift/';
-const DPD_DIR = process.env.DPD_DIR || '/var/www/html/assets/js/standalone-dpd';
+// dg-node is the dictionary's home now (its build-dpd-dictionary.yml); the old PHP site's copy is no longer updated
+const DPD_DIR = process.env.DPD_DIR || '/var/www/dg-node-prod/public/overrides/js/standalone-dpd';
 
 function loadDpd(file) {
     const ctx = {};
@@ -63,7 +64,8 @@ function loadDpd(file) {
 function meaningHead(word, i2h, ebts, ru, byLemma) {
     const lemma = (h) => h.replace(/\s+[\d.]+$/, '').trim();
     // i2h lists only the forms the texts use; a bare stem (lobha, appamāda) is found by its headwords
-    const heads = (i2h[word] || byLemma.get(word) || []).map((h) => {
+    // the DG glossary's own entries ("<term> (DG)") stay out of the titles and descriptions: those are DPD's meanings
+    const heads = (i2h[word] || byLemma.get(word) || []).filter((h) => !/ \(DG\)$/.test(h)).map((h) => {
         const m = /^(.*?)<b>(.*?)<\/b>/.exec(ebts[h] || '');
         if (!m) return null;
         const means = m[2].replace(/<[^>]+>/g, '').split(';').map((x) => x.trim()).filter(Boolean);

@@ -170,13 +170,23 @@
         heads = heads.filter(function (h, i) { return heads.indexOf(h) === i; });
         // i2h lists candidates alphabetically, not by relevance: for "nibbāna" it puts "nibba" (eaves)
         // first. A Pali form extends its lemma, so the longest headword the form starts with IS it.
+        // "<term> (DG)" (dg-node scripts/dpd-dg-glossary.py) ranks as its term, so it stays first, as on dhamma.gift
         return heads.slice().sort(function (a, b) {
-            var la = a.replace(/ \d+$/, ''), lb = b.replace(/ \d+$/, '');
+            var la = a.replace(/ (\d+|\(DG\))$/, ''), lb = b.replace(/ (\d+|\(DG\))$/, '');
             return (key.indexOf(lb) === 0 ? lb.length : -1) - (key.indexOf(la) === 0 ? la.length : -1);
         });
     }
 
     function unfold(html) { return html.replace(/ṃ/g, 'ṁ'); }
+
+    // The DG glossary's link to the sutta where a term is defined is site-relative (/an10.114:2.1, for the reader on
+    // dhamma.gift and in its app): here it is made a full dhamma.gift address, in the page's language, in a new tab.
+    var READER = /^https?:/.test(ORIGIN) ? ORIGIN : 'https://dhamma.gift';
+    function readerLinks(html) {
+        return html.replace(/<a class="dg-seg" href="(\/[^"]*)" target="_top">/g, function (m, path) {
+            return '<a class="dg-seg" href="' + READER + path + (isRu ? '?lang=ru' : '') + '" target="_blank" rel="noopener">';
+        });
+    }
 
     // A word typed without diacritics ("samadhi", "sila"): the spellings of it the data has (samādhi, silā, sīla, ...),
     // in the order the letters are tried, plain first. Online, dpdict.net finds these; the data is keyed by the real spelling only.
@@ -214,7 +224,7 @@
             out += '<ul class="offline-dpd-list">';
             heads.forEach(function (head) {
                 if (!ebts[head]) return;
-                out += '<li><span class="pli-lang" lang="pi"><b>' + head + '</b>. ' + ebts[head] + '</span></li>';
+                out += '<li><span class="pli-lang" lang="pi"><b>' + head + '</b>. ' + readerLinks(ebts[head]) + '</span></li>';
             });
             out += '</ul>';
             if (out.indexOf('<li>') === -1) out = '';
