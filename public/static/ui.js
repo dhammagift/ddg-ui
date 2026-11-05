@@ -65,6 +65,7 @@
     const sb = $('search-box'); if (sb) sb.value = '';
     if (typeof updateDocumentTitle === 'function') updateDocumentTitle('');
     updateDgStats('');
+    updateDgGloss('');
     paintHist();
   };
 
@@ -73,6 +74,44 @@
     B.dataset.screen = 'entry';
     const h = $('whead-word'); if (h) h.textContent = w;
     updateDgStats(w);
+    updateDgGloss(w);
+  }
+
+  // ---- Dhamma.Gift glossary (owner 2026-11-05): the project's own rendering of a key term, in the word's card,
+  // under the stats line, then the dictionaries as before. "Defined in": every sutta where the term is defined
+  // (dg-docs glossary.json canon.where, the main link first), one link per text, opening the reader at the segment.
+  // Only the ~410 glossary terms get it; any other word's card stays as it was.
+  let dgGloss = null;
+  const dgGlossKey = (w) => String(w || '').trim().toLowerCase().replace(/ṃ/g, 'ṁ');
+  function loadDgGloss() {
+    if (!dgGloss) dgGloss = fetch('static/dg-glossary.json?v=1').then((r) => r.json()).then((d) => {
+      const m = new Map(); Object.keys(d).forEach((k) => m.set(dgGlossKey(k), d[k])); return m;
+    }).catch(() => new Map());
+    return dgGloss;
+  }
+  // The reader on the site this page belongs to: dhamma.gift (and test.) itself, dict.dhamma.gift -> dhamma.gift.
+  const DG_SITE = (/(^|\.)dhamma\.gift$/.test(location.hostname) && location.hostname !== 'dict.dhamma.gift' ? location.origin : 'https://dhamma.gift') + (isRu ? '/ru/' : '/');
+  async function updateDgGloss(word) {
+    let box = $('dg-gloss');
+    const meta = document.querySelector('#s-entry .meta');
+    if (!box && meta) { box = document.createElement('div'); box.id = 'dg-gloss'; box.className = 'dg-gloss'; box.hidden = true; meta.after(box); }
+    if (!box) return;
+    const want = dgGlossKey(word);
+    box.dataset.word = want;
+    if (!want) { box.hidden = true; box.innerHTML = ''; return; }
+    const e = (await loadDgGloss()).get(want);
+    if (box.dataset.word !== want) return;              // the reader has moved on to another word
+    if (!e) { box.hidden = true; box.innerHTML = ''; return; }
+    const seen = new Set(), links = [];
+    for (const seg of e.w) {
+      const text = seg.split(':')[0];
+      if (seen.has(text)) continue;
+      seen.add(text);
+      links.push(`<a class="dg-gloss-seg" href="${esc(DG_SITE + seg)}" target="_blank" rel="noopener" title="${esc(seg)}">${esc(text)}</a>`);
+    }
+    box.innerHTML = `<div class="dg-gloss-m">${esc(isRu ? e.ru : e.en)}</div>` +
+      (links.length ? `<div class="dg-gloss-def"><span>${isRu ? 'Определение в:' : 'Defined in:'}</span>${links.join('')}</div>` : '');
+    box.hidden = false;
   }
 
   // ---- Dhamma.Gift word stats (text/match count next to "Open on Dhamma.Gift") ----
@@ -344,7 +383,7 @@
     $('histbtn')?.setAttribute('aria-pressed', String(B.dataset.hist === 'on'));
     $('clear-history-button')?.addEventListener('click', clearHistory); // clears history + favorites, repaints
     const q = new URLSearchParams(location.search).get('q') || window.dgPathWord; // word may be in the path (extra.js)
-    if (q) { const h = $('whead-word'); if (h) h.textContent = q; updateDgStats(q); }
+    if (q) { const h = $('whead-word'); if (h) h.textContent = q; updateDgStats(q); updateDgGloss(q); }
     paintHist();
     // shadow under the sticky bar once the page scrolls (no scroll listener)
     const s = document.createElement('div'); s.style.cssText = 'position:absolute;top:0;height:1px;width:1px';

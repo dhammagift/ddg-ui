@@ -552,3 +552,10 @@ body.is-offline #speakbtn{opacity:.35;pointer-events:none}
    viewport, and the burger sheet (fixed, full width) came out wider than the screen with a scroll bar. */
 .sources,.dpd-pane,.dpd-results,.summary-results{overflow-wrap:anywhere;min-width:0;max-width:100%}
 .how .soon{opacity:.6}
+
+/* Dhamma.Gift glossary in the word's card (ui.js updateDgGloss), under the stats line */
+.dg-gloss{margin:.2em 0 .9em}
+.dg-gloss-m{font-size:1.15em;font-weight:700;margin:0 0 .45em}
+.dg-gloss-def{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 6px;font-size:.9em}
+.dg-gloss-def>span{opacity:.7;margin-right:2px}
+.dg-gloss-seg{padding:1px 8px;border-radius:10px;border:1px solid color-mix(in srgb,var(--accent,#1f6f54) 45%,transparent);text-decoration:none}
