@@ -84,7 +84,7 @@
   let dgGloss = null;
   const dgGlossKey = (w) => String(w || '').trim().toLowerCase().replace(/ṃ/g, 'ṁ');
   function loadDgGloss() {
-    if (!dgGloss) dgGloss = fetch('static/dg-glossary.json?v=1').then((r) => r.json()).then((d) => {
+    if (!dgGloss) dgGloss = fetch('static/dg-glossary.json?v=2').then((r) => r.json()).then((d) => {
       const m = new Map(); Object.keys(d).forEach((k) => m.set(dgGlossKey(k), d[k])); return m;
     }).catch(() => new Map());
     return dgGloss;
