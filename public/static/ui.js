@@ -80,17 +80,28 @@
   // ---- Dhamma.Gift glossary (owner 2026-11-05): the project's own rendering of a key term, in the word's card,
   // under the stats line, then the dictionaries as before. "Defined in": every sutta where the term is defined
   // (dg-docs glossary.json canon.where, the main link first), one link per text, opening the reader at the segment.
-  // Only the ~410 glossary terms get it; any other word's card stays as it was.
+  // Only the glossary's terms get it; any other word's card stays as it was.
+  // The glossary itself is dg-docs' glossary.json as the dictionary job publishes it next to the reader's DPD files
+  // (dg-node build-dpd-dictionary.yml -> /assets/js/standalone-dpd/dg-glossary.json): no copy here (owner 2026-11-13:
+  // «максимально в одном месте»; the copy kept by hand stopped at 410 terms).
+  // The reader on the site this page belongs to: dhamma.gift (and test.) itself, dict.dhamma.gift -> dhamma.gift.
+  const DG_ORIGIN = /(^|\.)dhamma\.gift$/.test(location.hostname) && location.hostname !== 'dict.dhamma.gift' ? location.origin : 'https://dhamma.gift';
+  const DG_SITE = DG_ORIGIN + (isRu ? '/ru/' : '/');
   let dgGloss = null;
   const dgGlossKey = (w) => String(w || '').trim().toLowerCase().replace(/ṃ/g, 'ṁ');
   function loadDgGloss() {
-    if (!dgGloss) dgGloss = fetch('static/dg-glossary.json?v=2').then((r) => r.json()).then((d) => {
-      const m = new Map(); Object.keys(d).forEach((k) => m.set(dgGlossKey(k), d[k])); return m;
+    if (!dgGloss) dgGloss = fetch(DG_ORIGIN + '/assets/js/standalone-dpd/dg-glossary.json').then((r) => r.json()).then((d) => {
+      const m = new Map();
+      for (const t of d.terms || []) {
+        const c = t.canon || {};
+        // every place it is defined, the main link first (owner 2026-11-13: all of them)
+        const w = [c.link, ...(c.where || [])].filter(Boolean).map((s) => String(s).replace(/^\//, ''));
+        m.set(dgGlossKey(t.pali), {ru: t.ru, en: t.en, w, kind: String(t.kind || '').replace(/^special:\s*/, '')});
+      }
+      return m;
     }).catch(() => new Map());
     return dgGloss;
   }
-  // The reader on the site this page belongs to: dhamma.gift (and test.) itself, dict.dhamma.gift -> dhamma.gift.
-  const DG_SITE = (/(^|\.)dhamma\.gift$/.test(location.hostname) && location.hostname !== 'dict.dhamma.gift' ? location.origin : 'https://dhamma.gift') + (isRu ? '/ru/' : '/');
   async function updateDgGloss(word) {
     let box = $('dg-gloss');
     const meta = document.querySelector('#s-entry .meta');
@@ -110,7 +121,8 @@
       links.push(`<a class="dg-gloss-seg" href="${esc(DG_SITE + seg)}" target="_blank" rel="noopener" title="${esc(seg)}">${esc(text)}</a>`);
     }
     box.innerHTML = `<div class="dg-gloss-m">${esc(isRu ? e.ru : e.en)}</div>` +
-      (links.length ? `<div class="dg-gloss-def"><span>${isRu ? 'Определение в:' : 'Defined in:'}</span>${links.join('')}</div>` : '');
+      // a special definition (ariyassa vinaye...) says so by its Pali phrase instead of «Defined in» (as in the reader)
+      (links.length ? `<div class="dg-gloss-def"><span>${e.kind ? `<i>${esc(e.kind)}</i>:` : (isRu ? 'Определение в:' : 'Defined in:')}</span>${links.join('')}</div>` : '');
     box.hidden = false;
   }
 
