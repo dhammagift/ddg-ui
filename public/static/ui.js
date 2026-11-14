@@ -110,7 +110,16 @@
     const want = dgGlossKey(word);
     box.dataset.word = want;
     if (!want) { box.hidden = true; box.innerHTML = ''; return; }
-    const e = (await loadDgGloss()).get(want);
+    const gloss = await loadDgGloss();
+    let e = gloss.get(want);
+    // An inflected form (samuddo): its dictionary headwords, as DPD itself found them for this page (the summary links,
+    // the same form -> headword lookup the reader's built-in dictionary does), owner 2026-11-14
+    for (let i = 0; !e && i < 20 && box.dataset.word === want; i++) {
+      const hws = [...document.querySelectorAll('#summary-results .summary-link')].map((a) => dgGlossKey(a.textContent.trim().replace(/\s+\d+(\.\d+)?$/, '')));
+      e = hws.map((h) => gloss.get(h)).find(Boolean);
+      if (!e && !hws.length) await new Promise((r) => setTimeout(r, 300));
+      else break;
+    }
     if (box.dataset.word !== want) return;              // the reader has moved on to another word
     if (!e) { box.hidden = true; box.innerHTML = ''; return; }
     const seen = new Set(), links = [];
