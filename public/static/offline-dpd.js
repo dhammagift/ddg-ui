@@ -38,9 +38,9 @@
     // The Russian page downloads both (owner) — Russian readers use the English glosses too, and the
     // English page then has nothing left to fetch — but injects only its own.
     var SHARED = [DIR + 'dpd_i2h.js', DIR + 'dpd_deconstructor.js'];
-    // The DG glossary and its forms: downloaded along, so the word card's DG block works offline too (ui.js loadDgGloss),
+    // The DG glossary (each term with its forms): downloaded along, so the word card's DG block works offline too (ui.js loadDgGloss),
     // but not part of «ready» - a dictionary downloaded before them keeps working (owner 2026-11-14)
-    var EXTRA = [DIR + 'dg-glossary.json', DIR + 'dg-glossary-forms.json'];
+    var EXTRA = [DIR + 'dg-glossary.json'];
     var EBTS_EN = DIR + 'dpd_ebts.js';
     var EBTS_RU = DIR + 'ru/dpd_ebts.js';
     var FILES = isRu ? SHARED.concat([EBTS_RU, EBTS_EN]) : SHARED.concat([EBTS_EN]);
