@@ -5,7 +5,7 @@
 // same files also run under dhamma.gift/dict/. The page registers with an explicit scope (extra.js);
 // without it the worker's scope was /static/ and it controlled no navigation at all — offline the
 // app did not open at all.
-const CACHE_NAME = 'ddg-pwa-v12';
+const CACHE_NAME = 'ddg-pwa-v13';
 // The offline mini-dictionary lives in its own bucket (offline-dpd.js). activate() must not sweep
 // it away, or updating this worker would silently delete a ~15 MB download.
 const KEEP_CACHES = ['ddg-dict'];
@@ -22,7 +22,9 @@ const ASSETS = [
   'static/extra.js', 'static/dg-logo.js', 'static/sorter.js', 'static/openDicts.js', 'static/ui.js', 'static/dg-site.js',
   'static/jquery-3.7.0.min.js', 'static/jquery-ui.min.js',
   'static/dpd.css', 'static/dg.css', 'static/jquery-ui.min.css', 'static/icons-fa.css',
-  'static/sutta_words.txt', 'static/circle-notch.svg', 'static/open-link.svg',
+  'static/sutta_words.txt', 'static/circle-notch.svg', 'static/open-link.svg', 'static/magnifying-glass.svg',
+  // the text font (dg.css Lato 400/700): offline the page fell back to the system font (2026-11-14 offline check)
+  'static/fonts/lato-400.woff2', 'static/fonts/lato-400-ext.woff2', 'static/fonts/lato-700.woff2', 'static/fonts/lato-700-ext.woff2',
   'static/buddhadust-glossology.htm', 'static/manifest.json',
   // Masked SVG icons (dg.css .gi/.i-*) — without them the star/copy/link buttons render as blank
   // squares offline, which is what made the word actions look missing.
