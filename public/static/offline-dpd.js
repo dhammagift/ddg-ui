@@ -259,26 +259,26 @@
     // and the invitation shown in the installed app.
     var T = isRu ? {
         download: 'скачать', remove: 'удалить', downloading: 'качаю',
-        titleDownload: 'Скачать офлайн мини-словарь', titleRemove: 'Удалить офлайн мини-словарь',
-        sub: 'краткие значения без интернета · ~' + SIZE_MB + ' МБ',
+        titleDownload: 'Скачать офлайн-словарь', titleRemove: 'Удалить офлайн-словарь',
+        sub: 'определения по суттам и краткие значения без интернета · ~' + SIZE_MB + ' МБ',
         subReady: 'скачан, работает без интернета',
         failed: 'Не удалось скачать. Проверьте соединение и попробуйте ещё раз.',
         bubbleStart: 'Скачиваю офлайн-словарь…',
         bubbleDone: 'Офлайн-словарь скачан',
         bubbleHave: 'Офлайн-словарь уже скачан',
         bubbleFail: 'Не удалось скачать словарь',
-        cardReady: '✓ Уже у вас: краткие значения работают без интернета.', update: 'обновить'
+        cardReady: '✓ Уже у вас: определения по суттам и краткие значения работают без интернета.', update: 'обновить'
     } : {
         download: 'download', remove: 'delete', downloading: 'loading',
-        titleDownload: 'Download the offline mini-dictionary', titleRemove: 'Delete the offline mini-dictionary',
-        sub: 'short meanings with no network · ~' + SIZE_MB + ' MB',
+        titleDownload: 'Download the offline dictionary', titleRemove: 'Delete the offline dictionary',
+        sub: 'definitions by the Suttas and short meanings with no network · ~' + SIZE_MB + ' MB',
         subReady: 'downloaded, works with no network',
         failed: 'Download failed. Check the connection and try again.',
         bubbleStart: 'Downloading the offline dictionary…',
         bubbleDone: 'Offline dictionary downloaded',
         bubbleHave: 'The offline dictionary is already downloaded',
         bubbleFail: 'Could not download the dictionary',
-        cardReady: '✓ You already have it: short meanings work with no network.', update: 'update'
+        cardReady: '✓ You already have it: definitions by the Suttas and short meanings work with no network.', update: 'update'
     };
 
     function el(id) { return document.getElementById(id); }

@@ -90,7 +90,7 @@
     <main class="screen" id="s-start">
       <div class="start">
       <div class="dg-offline-invite" id="dg-offline-invite" hidden>
-        <span>Скачать офлайн мини-словарь (~6,1 МБ)? Краткие значения будут работать без интернета.</span>
+        <span>Скачать офлайн-словарь (~6,1 МБ)? Определения по суттам и краткие значения будут работать без интернета.</span>
         <span class="dg-offline-invite-btns">
           <button class="rb act" type="button" id="dg-offline-invite-yes">Скачать</button>
           <button class="rb" type="button" id="dg-offline-invite-no">Не сейчас</button>
@@ -107,7 +107,7 @@
           <div class="how"><b><i class="gi i-fa-arrow-up-right-from-square"></i>Словарь на любом сайте</b><p>Расширение для <a href="https://chromewebstore.google.com/detail/dhammagift-search-and-wor/dnnogjdcmhbiobpnkhdbfnfjnjlikabd?hl=ru" target="_blank" rel="noopener">Chrome</a>, <a href="https://addons.mozilla.org/ru/firefox/addon/dhamma-gift/" target="_blank" rel="noopener">Firefox</a> и <a href="https://microsoftedge.microsoft.com/addons/detail/dhammagift-search-and-wo/aokegkhdaijkikbdocanadeghllhfmhj" target="_blank" rel="noopener">Edge</a>: выделите слово на странице и увидите его значение.<!-- Desktop apps, once their store links are in (the Uposatha session has them; Microsoft Store submitted, macOS in testing): Есть и приложение для <a href="">Windows</a> и <a href="">macOS</a>. --></p></div>
           <div class="how"><b><i class="gi i-fa-share-nodes"></i>На телефоне</b><p><a href="https://dhamma.gift/apps?app=dict" target="_blank" rel="noopener">Android</a>, <a href="https://apps.apple.com/app/dict-dhamma-gift/id6816639947" target="_blank" rel="noopener">iPhone</a>, <a href="https://apps.microsoft.com/detail/9P3B7HLRXXGC" target="_blank" rel="noopener">Windows</a>, <a href="#" id="installLink" title="Меню Chrome → Добавить на главную">веб-приложение</a> или <a href="https://t.me/dgift_bot" target="_blank" rel="noopener">Telegram-бот</a>. В других приложениях: выделите слово → «Поделиться» → Dict.DG.</p></div>
           <div class="how how-typing"><b><i class="gi i-fa-keyboard"></i>Четыре способа ввода</b><p>Пали с автоподсказками, Velthuis (<code>kacchapaa</code>), английский, русский.</p></div>
-          <div class="how"><b><i class="gi i-fa-cloud-arrow-down"></i>Работает офлайн</b><p>Краткие значения без интернета: <a href="#" id="offline-dl-link">скачать мини-словарь</a> (~6,1 МБ).</p></div>
+          <div class="how"><b><i class="gi i-fa-cloud-arrow-down"></i>Работает офлайн</b><p>Определения по суттам и краткие значения без интернета: <a href="#" id="offline-dl-link">скачать словарь</a> (~6,1 МБ).</p></div>
           <!-- Hidden for now (owner, 2026-10-13): <div class="how"><b><i class="gi i-fa-table-columns"></i>Sortable tables</b><p>In the grammar dictionary any column header sorts: case, number, gender.</p></div> -->
         </div>
         <div class="recents" id="recents" hidden>
@@ -207,8 +207,8 @@
     <div class="set"><span class="lb">Показывать ссылки на проекты</span><input class="sw" type="checkbox" id="tabs-toggle"></div>
 
     <div class="grp">Данные</div>
-    <div class="set"><span class="lb">Офлайн-словарь<em id="offline-dl-sub">краткие значения без интернета · ~6,1 МБ</em></span>
-      <button class="rb act" type="button" id="offline-dl-btn" title="Скачать офлайн мини-словарь"><i class="gi i-fa-download"></i>скачать</button></div>
+    <div class="set"><span class="lb">Офлайн-словарь<em id="offline-dl-sub">определения по суттам и краткие значения без интернета · ~6,1 МБ</em></span>
+      <button class="rb act" type="button" id="offline-dl-btn" title="Скачать офлайн-словарь"><i class="gi i-fa-download"></i>скачать</button></div>
     <div class="set"><span class="lb">История и избранное<em>хранится только в этом браузере</em></span>
       <button class="rb act" type="button" id="clear-history-button" title="Очистить историю и избранное"><i class="gi i-fa-trash-can"></i>очистить</button></div>
     <div class="set"><span class="lb">Настройки<em>вернуть все значения к стандартным</em></span>
@@ -244,7 +244,7 @@
 <script src="static/home.js?v=ui21"></script>
 <script src="static/dpd.js?v=tts3" defer></script>
 <script src="static/autopali.js?v=ui8" defer></script>
-<script src="static/offline-dpd.js?v=ui34"></script>
+<script src="static/offline-dpd.js?v=ui35"></script>
 <script src="static/dg-logo.js?v=ui28"></script>
 <script src="static/extra.js?v=ui43"></script>
 <script src="static/sorter.js" defer></script>
