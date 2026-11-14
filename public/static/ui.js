@@ -89,8 +89,13 @@
   const DG_SITE = DG_ORIGIN + (isRu ? '/ru/' : '/');
   let dgGloss = null;
   const dgGlossKey = (w) => String(w || '').trim().toLowerCase().replace(/ṃ/g, 'ṁ');
+  // From the downloaded dictionary when it is there (offline-dpd.js keeps both files in Cache Storage «ddg-dict»), else
+  // from dhamma.gift (owner 2026-11-14: on the phone when downloaded, from the server otherwise)
+  const dgJson = (url) => (window.caches ? caches.match(url) : Promise.resolve(null))
+    .then((r) => r || fetch(url)).then((r) => r.json());
   function loadDgGloss() {
-    if (!dgGloss) dgGloss = fetch(DG_ORIGIN + '/assets/js/standalone-dpd/dg-glossary.json').then((r) => r.json()).then((d) => {
+    const dir = DG_ORIGIN + '/assets/js/standalone-dpd/';
+    if (!dgGloss) dgGloss = Promise.all([dgJson(dir + 'dg-glossary.json'), dgJson(dir + 'dg-glossary-forms.json').catch(() => null)]).then(([d, forms]) => {
       const m = new Map();
       for (const t of d.terms || []) {
         const c = t.canon || {};
@@ -98,8 +103,11 @@
         const w = [c.link, ...(c.where || [])].filter(Boolean).map((s) => String(s).replace(/^\//, ''));
         m.set(dgGlossKey(t.pali), {ru: t.ru, en: t.en, w, kind: String(t.kind || '').replace(/^special:\s*/, '')});
       }
-      return m;
-    }).catch(() => new Map());
+      // an inflected form (samuddo -> samudda): its glossary term, from the dictionary job's form list
+      const look = (word) => m.get(word) || (forms && forms[word] || []).map((t) => m.get(dgGlossKey(t))).find(Boolean);
+      look.hasForms = !!forms;
+      return look;
+    }).catch(() => () => undefined);
     return dgGloss;
   }
   async function updateDgGloss(word) {
@@ -110,15 +118,13 @@
     const want = dgGlossKey(word);
     box.dataset.word = want;
     if (!want) { box.hidden = true; box.innerHTML = ''; return; }
-    const gloss = await loadDgGloss();
-    let e = gloss.get(want);
-    // An inflected form (samuddo): its dictionary headwords, as DPD itself found them for this page (the summary links,
-    // the same form -> headword lookup the reader's built-in dictionary does), owner 2026-11-14
-    for (let i = 0; !e && i < 20 && box.dataset.word === want; i++) {
+    const look = await loadDgGloss();
+    let e = look(want);
+    // no form list on this server yet (it comes with the next prod rollout): the headwords DPD found for the page
+    for (let i = 0; !e && !look.hasForms && i < 20 && box.dataset.word === want; i++) {
       const hws = [...document.querySelectorAll('#summary-results .summary-link')].map((a) => dgGlossKey(a.textContent.trim().replace(/\s+\d+(\.\d+)?$/, '')));
-      e = hws.map((h) => gloss.get(h)).find(Boolean);
-      if (!e && !hws.length) await new Promise((r) => setTimeout(r, 300));
-      else break;
+      if (hws.length) { e = hws.map(look).find(Boolean); break; }
+      await new Promise((r) => setTimeout(r, 300));
     }
     if (box.dataset.word !== want) return;              // the reader has moved on to another word
     if (!e) { box.hidden = true; box.innerHTML = ''; return; }
