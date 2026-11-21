@@ -40,7 +40,7 @@
   <script src="static/jquery-ui.min.js?v=ac1" defer></script>
 </head>
 
-<body data-screen="start" data-hist="on">
+<body data-screen="entry" data-hist="on">
 <script>
   // Apply saved theme/rail state before first paint (avoids flash)
   try {
@@ -137,7 +137,7 @@
     <!-- entry screen -->
     <main class="screen" id="s-entry">
       <div class="whead">
-        <h1 id="whead-word"></h1>
+        <h1 id="whead-word">paṭigha</h1>
         <div class="acts">
           <button class="rb" id="favbtn" type="button" aria-pressed="false" title="Favorite: pins the word above history" onclick="favToggle()"><i class="gi i-star"></i></button>
           <button class="rb" id="speakbtn" type="button" title="Pronounce" onclick="speakWord()"><i class="gi i-fa-volume-high"></i></button>
@@ -148,7 +148,7 @@
       <p class="meta"><span class="dg-stats skel" id="dg-stats" aria-live="polite"></span><a href="" class="dg-link" title="Search this word in the texts on Dhamma.Gift">Open on Dhamma.Gift<i class="gi i-ext" style="margin-left:5px;font-size:10px"></i></a></p>
       <section class="sources dpd-pane" id="dpd-pane">
         <div class="summary-results" id="summary-results"></div>
-        <div class="dpd-results" id="dpd-results"></div>
+        <div class="dpd-results" id="dpd-results"><section class="dg-static" id="dg-static-entry"><h2>paṭigha</h2><p><b>DPD:</b> masc. aversion; nt. (sense) impression.</p><p><a href="https://dhamma.gift/pa%E1%B9%ADigha">Find in the texts on Dhamma.Gift</a> · <a href="https://dhamma.gift/docs/glossary/#patigha">Glossary</a></p></section></div>
       </section>
     </main>
   </div>

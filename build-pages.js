@@ -91,6 +91,59 @@ function meaningHead(word, i2h, ebts, ru, byLemma) {
     return { title: title + ' — Dict.DG', desc: desc + '.' + tail };
 }
 
+// What a crawler or an AI reader gets with no JS (owner 2026-11-21: «надо сделать, чтобы без скрипта были видны»): the
+// definitions from the Suttas were drawn by the client only, so Google and AI bots saw a DPD meaning and no sutta at all
+// (0 sutta links in w/upekkhā.html). The block goes into #dpd-results, whose innerHTML the client replaces on load, so
+// people see the usual entry; the page opens on the entry screen. Data: the glossary the reader's lookup uses
+// (standalone-dpd/dg-glossary.json: the project's rendering, the canon's definition and where it stands).
+const DG = 'https://dhamma.gift/';
+function staticEntry(word, term, dpd, ru) {
+    const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+    const L = ru
+        ? { h: 'значение в суттах', dg: 'Перевод Dhamma.Gift', def: 'Определение в суттах', where: 'Где Канон даёт определение', dpd: 'DPD', gl: 'Глоссарий', rat: 'Обоснование перевода', open: 'Найти в текстах на Dhamma.Gift', pre: 'ru/' }
+        : { h: 'meaning in the Suttas', dg: 'Dhamma.Gift rendering', def: 'Definition in the Suttas', where: 'Where the Canon defines it', dpd: 'DPD', gl: 'Glossary', rat: 'Why this rendering', open: 'Find in the texts on Dhamma.Gift', pre: '' };
+    const c = term && term.canon;
+    let html = '<section class="dg-static" id="dg-static-entry">';
+    if (c && c.definition) {
+        html += `<h2>${esc(word)} — ${L.h}</h2>`
+            + `<p><b>${L.dg}:</b> ${esc(ru ? term.ru : term.en)}</p>`
+            + `<p><b>${L.def}</b> (<a href="${DG}${esc(c.link.replace(/^\//, ''))}">${esc(c.link.replace(/^\/|:.*$/g, ''))}</a>):</p>`
+            + `<blockquote lang="pi">${esc(c.definition)}</blockquote>`
+            + `<p>${L.where}: ` + (c.where || []).map((r) => `<a href="${DG}${esc(r)}">${esc(r.replace(/:.*$/, ''))}</a>`).join(', ') + '</p>';
+    } else {
+        html += `<h2>${esc(word)}</h2>`;
+    }
+    // The Canon's images for the term (glossary term.metaphors: kind, text, refs); the client draws them live in #dg-gloss
+    const mets = (term && term.metaphors) || [];
+    if (mets.length) html += `<p><b>${ru ? 'Метафоры' : 'Metaphors'}:</b> ` + mets.map((m) => `<i lang="pi">${esc(m.text)}</i>`
+        + (m.refs && m.refs.length ? ' (' + m.refs.map((r) => `<a href="${DG}${esc(r)}">${esc(r.replace(/:.*$/, ''))}</a>`).join(', ') + ')' : '')).join('; ') + '</p>';
+    if (dpd) html += `<p><b>${L.dpd}:</b> ${esc(dpd)}</p>`;
+    const links = [`<a href="${DG}${encodeURIComponent(word)}">${L.open}</a>`];
+    if (term) links.push(`<a href="${DG}${L.pre}docs/glossary/#${esc(term.id)}">${L.gl}</a>`);
+    if (term && term.rationale) links.push(`<a href="${DG}${L.pre}docs/rationale/#${esc(term.id)}">${L.rat}</a>`);
+    html += `<p>${links.join(' · ')}</p></section>`;
+    const ld = c && c.definition ? `<script type="application/ld+json">${JSON.stringify({
+        '@context': 'https://schema.org', '@type': 'DefinedTerm', name: word, inLanguage: 'pi',
+        description: (ru ? term.ru : term.en) + '. ' + c.definition,
+        url: SITE + L.pre + encodeURIComponent(word),
+        inDefinedTermSet: { '@type': 'DefinedTermSet', name: 'Dhamma.Gift glossary', url: DG + L.pre + 'docs/glossary/' },
+        subjectOf: { '@type': 'WebPage', url: DG + c.link.replace(/^\//, '') } }).replace(/</g, '\\u003c')}</script>` : '';
+    return { html, ld };
+}
+
+// Title and description for a glossary term: the Suttas' meaning first, the way people ask («X meaning», «что значит X»)
+function termHead(word, term, ru) {
+    const r = (ru ? term.ru : term.en).split(/,\s*/);
+    let mean = r[0], i = 1;
+    while (i < r.length && (mean + ', ' + r[i]).length <= 40) mean += ', ' + r[i++];
+    const c = term.canon, ref = c.link.replace(/^\/|:.*$/g, '');
+    const title = word + (ru ? ' — значение в суттах: ' : ' — meaning in the Suttas: ') + mean + ' — Dict.DG';
+    let desc = `${word}: ${mean}. ` + (ru ? `Определение в суттах (${ref}): «` : `As the Suttas define it (${ref}): “`);
+    const room = 155 - desc.length - 1;
+    desc += (c.definition.length > room ? c.definition.slice(0, room - 1).replace(/\s+\S*$/, '') + '…' : c.definition) + (ru ? '»' : '”');
+    return { title, desc };
+}
+
 function prerenderWords() {
     if (!fs.existsSync(path.join(DPD_DIR, 'dpd_i2h.js'))) {
         // not removed: a box without the data would delete 654 tracked pages on its next commit (f3-ultra)
@@ -98,6 +151,9 @@ function prerenderWords() {
     }
     const words = JSON.parse(fs.readFileSync(path.join(ROOT, 'public', 'static', 'ui.js'), 'utf8').match(/const POPULAR = (\[.*?\]);/)[1])
         .filter((w) => !w.includes(' '));
+    const gl = fs.existsSync(path.join(DPD_DIR, 'dg-glossary.json')) ? JSON.parse(fs.readFileSync(path.join(DPD_DIR, 'dg-glossary.json'), 'utf8')).terms : [];
+    const byTerm = new Map(gl.filter((t) => t.pali && !t.pali.includes(' ')).map((t) => [t.pali, t]));
+    for (const [w, t] of byTerm) if (t.canon && t.canon.definition && !words.includes(w)) words.push(w);
     const i2h = loadDpd('dpd_i2h.js');
     const esc = (s) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
     for (const [i, page] of PAGES.entries()) {
@@ -111,8 +167,13 @@ function prerenderWords() {
         fs.mkdirSync(dir);
         let n = 0;
         for (const word of words) {
-            const h = meaningHead(word, i2h, ebts, ru, byLemma);
-            if (!h) continue;
+            const term = byTerm.get(word);
+            const dh = meaningHead(word, i2h, ebts, ru, byLemma);
+            const defined = term && term.canon && term.canon.definition;
+            if (!dh && !defined) continue;
+            const h = defined ? termHead(word, term, ru) : dh;
+            const dpdLine = dh ? dh.desc.replace(/^[^—]*—\s*/, '').replace(/\s*5\+.*$/, '') : '';
+            const st = staticEntry(word, term, dpdLine, ru);
             const url = (lang) => SITE + (lang === 'ru' ? 'ru/' : '') + encodeURIComponent(word);
             const links = `<link rel="canonical" href="${url(ru ? 'ru' : 'en')}">\n  <link rel="alternate" hreflang="en" href="${url('en')}">\n  `
                 + `<link rel="alternate" hreflang="ru" href="${url('ru')}">\n  <link rel="alternate" hreflang="x-default" href="${url('en')}">\n  `
@@ -121,7 +182,10 @@ function prerenderWords() {
                 .replace(/<title>[^<]*<\/title>/, `<title>${esc(h.title)}</title>`)
                 .replace(/(<meta name="description" content=")[^"]*/, `$1${esc(h.desc)}`)
                 .replace(/(<meta property="og:url" content=")[^"]*/, `$1${url(ru ? 'ru' : 'en')}`)
-                .replace('<link rel="manifest"', links + '<link rel="manifest"');
+                .replace('<link rel="manifest"', links + st.ld + '<link rel="manifest"')
+                .replace('<body data-screen="start"', '<body data-screen="entry"')
+                .replace('<h1 id="whead-word"></h1>', `<h1 id="whead-word">${esc(word)}</h1>`)
+                .replace('<div class="dpd-results" id="dpd-results"></div>', `<div class="dpd-results" id="dpd-results">${st.html}</div>`);
             fs.writeFileSync(path.join(dir, word + '.html'), out, 'utf8');
             n++;
         }
