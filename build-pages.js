@@ -138,6 +138,10 @@ function staticEntry(word, term, dpd, ru, images) {
     const mets = (term && term.metaphors) || [];
     if (mets.length) html += `<p><b>${ru ? 'Сравнения в суттах' : 'Similes in the Suttas'}:</b> ` + mets.map((m) => `<i lang="pi">${esc(m.text)}</i>`
         + (m.refs && m.refs.length ? ' (' + m.refs.map((r) => `<a href="${DG}${esc(r)}">${esc(r.replace(/:.*$/, ''))}</a>`).join(', ') + ')' : '')).join('; ') + '</p>';
+    // Gratification, danger, escape as the Suttas name them for the term (glossary term.assada: kind, text, refs), Pali only
+    const aan = (term && term.assada) || [];
+    if (aan.length) html += '<p><b lang="pi">assāda · ādīnava · nissaraṇa</b></p><ul>' + aan.map((a) => `<li><i lang="pi">${esc(a.kind)}</i>: <span lang="pi">${esc(a.text)}</span>`
+        + (a.refs && a.refs.length ? ' (' + a.refs.map((r) => `<a href="${DG}${esc(r)}">${esc(r.replace(/:.*$/, ''))}</a>`).join(', ') + ')' : '') + '</li>').join('') + '</ul>';
     if (dpd) html += `<p><b>${L.dpd}:</b> ${esc(dpd)}</p>`;
     const links = [`<a href="${DG}${encodeURIComponent(word)}">${L.open}</a>`];
     if (term) links.push(`<a href="${DG}${L.pre}docs/glossary/#${esc(term.id)}">${L.gl}</a>`);
@@ -220,7 +224,7 @@ function prerenderWords() {
     for (const t of gl) for (const w of (t.pali || '').split(/,\s*/)) if (w && !w.includes(' ') && !byTerm.has(w)) byTerm.set(w, t);
     const byImage = new Map();
     for (const t of gl) for (const m of t.metaphors || []) if (m.text && !m.text.includes(' ')) byImage.set(m.text, [...(byImage.get(m.text) || []), { term: t, refs: m.refs || [], kind: m.kind || '' }]);
-    for (const [w, t] of byTerm) if (((t.canon && t.canon.definition) || (t.metaphors && t.metaphors.length)) && !words.includes(w)) words.push(w);
+    for (const [w, t] of byTerm) if (((t.canon && t.canon.definition) || (t.metaphors && t.metaphors.length) || (t.assada && t.assada.length)) && !words.includes(w)) words.push(w);
     for (const w of byImage.keys()) if (!words.includes(w)) words.push(w);
     const i2h = loadDpd('dpd_i2h.js');
     const esc = (s) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
