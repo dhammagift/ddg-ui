@@ -97,7 +97,15 @@ function meaningHead(word, i2h, ebts, ru, byLemma) {
 // people see the usual entry; the page opens on the entry screen. Data: the glossary the reader's lookup uses
 // (standalone-dpd/dg-glossary.json: the project's rendering, the Suttas' or Vinaya's definition and where it stands).
 const DG = 'https://dhamma.gift/';
-function staticEntry(word, term, dpd, ru) {
+// Three words, so nothing is confused (owner 2026-11-21): «определение» (a definition), «определение в Винае Благородного»
+// (ariyassa vinaye), «сравнение» for every image, metaphor or simile, whatever the formula (adhivacana, seyyathāpi…) or none
+function imgLabel(n, ru) {
+    if (!ru) return n === 1 ? 'simile' : 'similes';
+    const m10 = n % 10, m100 = n % 100;
+    return m10 === 1 && m100 !== 11 ? 'сравнение' : m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14) ? 'сравнения' : 'сравнений';
+}
+const cap = (x) => x.charAt(0).toUpperCase() + x.slice(1);
+function staticEntry(word, term, dpd, ru, images) {
     const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
     const L = ru
         ? { h: 'определение из самих сутт', dg: 'Перевод Dhamma.Gift', def: 'Определение в суттах', where: 'Где сутты дают определение', dpd: 'DPD', gl: 'Глоссарий', rat: 'Обоснование перевода', open: 'Найти в текстах на Dhamma.Gift', pre: 'ru/' }
@@ -105,6 +113,8 @@ function staticEntry(word, term, dpd, ru) {
     const c = term && term.canon;
     // The term's main definition may stand in the Vinaya (owner 2026-11-21: «Vinaya meaning» there, «Sutta meaning» otherwise)
     if (c && c.link && /^\/?pli-tv-/.test(c.link)) Object.assign(L, ru ? { h: 'определение из Винаи', def: 'Определение в Винае', where: 'Где Виная даёт определение' } : { h: 'how the Vinaya defines it', def: 'Definition in the Vinaya', where: 'Where the Vinaya defines it' });
+    const special = term && /ariyassa vinaye/.test(term.kind || '');
+    if (special) L.h = ru ? 'определение в Винае Благородного' : "definition in the Noble One's Vinaya";
     let html = '<section class="dg-static" id="dg-static-entry">';
     if (c && c.definition) {
         html += `<h2>${esc(word)} — ${L.h}</h2>`
@@ -113,11 +123,20 @@ function staticEntry(word, term, dpd, ru) {
             + `<blockquote lang="pi">${esc(c.definition)}</blockquote>`
             + `<p>${L.where}: ` + (c.where || []).map((r) => `<a href="${DG}${esc(r)}">${esc(r.replace(/:.*$/, ''))}</a>`).join(', ') + '</p>';
     } else {
-        html += `<h2>${esc(word)}</h2>`;
+        const own = term && term.metaphors && term.metaphors.length;
+        const lab = own ? (ru ? 'сравнения в суттах' : 'similes in the Suttas') : images && images.length ? (ru ? 'сравнение в суттах' : 'a simile in the Suttas') : '';
+        html += `<h2>${esc(word)}${lab ? ' — ' + lab : ''}</h2>`;
+        if (term) html += `<p><b>${L.dg}:</b> ${esc(ru ? term.ru : term.en)}</p>`;
+    }
+    // The word is itself an image the Suttas use for a term (with a formula - adhivacana, seyyathāpi… - or without): what it stands for, where
+    for (const im of images || []) {
+        const t = im.term, tw = t.pali.split(/,\s*/)[0];
+        html += `<p><b>${ru ? 'Сравнение в суттах для' : 'Simile in the Suttas for'}:</b> <a href="${SITE}${L.pre}${encodeURIComponent(tw)}" lang="pi">${esc(t.pali)}</a> — ${esc(ru ? t.ru : t.en)}`
+            + (im.refs.length ? ' (' + im.refs.map((r) => `<a href="${DG}${esc(r)}">${esc(r.replace(/:.*$/, ''))}</a>`).join(', ') + ')' : '') + '</p>';
     }
     // The Suttas' images for the term (glossary term.metaphors: kind, text, refs); the client draws them live in #dg-gloss
     const mets = (term && term.metaphors) || [];
-    if (mets.length) html += `<p><b>${ru ? 'Метафоры' : 'Metaphors'}:</b> ` + mets.map((m) => `<i lang="pi">${esc(m.text)}</i>`
+    if (mets.length) html += `<p><b>${ru ? 'Сравнения в суттах' : 'Similes in the Suttas'}:</b> ` + mets.map((m) => `<i lang="pi">${esc(m.text)}</i>`
         + (m.refs && m.refs.length ? ' (' + m.refs.map((r) => `<a href="${DG}${esc(r)}">${esc(r.replace(/:.*$/, ''))}</a>`).join(', ') + ')' : '')).join('; ') + '</p>';
     if (dpd) html += `<p><b>${L.dpd}:</b> ${esc(dpd)}</p>`;
     const links = [`<a href="${DG}${encodeURIComponent(word)}">${L.open}</a>`];
@@ -137,7 +156,40 @@ function staticEntry(word, term, dpd, ru) {
 // значение не зацепило вообще… это просто словарь, а у нас не просто словарь»): the Suttas' own definition, word for word,
 // and in how many suttas it stands; the project's rendering comes last.
 const refName = (r) => r.replace(/:.*$/, '').replace(/^pli-tv-/, '').replace(/^([a-z]+)(\d)/, (m, b, d) => b.toUpperCase() + ' ' + d);
+const mean2 = (txt, max) => { const r = txt.split(/,\s*/); let m = r[0], i = 1; while (i < r.length && (m + ', ' + r[i]).length <= max) m += ', ' + r[i++]; return m; };
+const cut = (raw, room) => { raw = raw.replace(/^[“"‘'«]+/, ''); return raw.length > room ? raw.slice(0, room - 1).replace(/\s+\S*$/, '') + '…' : raw; };
+// A word the Suttas use as an image for a term (any formula or none) (owner 2026-11-21: «а если будет метафора?»)
+function imageHead(word, images, ru) {
+    const im = images[0], t = im.term, ref = im.refs.length ? refName(im.refs[0]) : '';
+    const more = images.length > 1 ? ` +${images.length - 1}` : '';
+    // the formula the Suttas use (adhivacana, seyyathāpi, evameva, yathā…) when there is one, not always «adhivacana»
+    const kind = im.kind && !/no formula/i.test(im.kind) ? ` (${im.kind})` : '';
+    const title = word + (ru ? ' — сравнение в суттах: ' : ' — simile in the Suttas: ') + t.pali.split(/,\s*/)[0] + ` (${mean2(ru ? t.ru : t.en, 18)})` + more + (ref ? ' · ' + ref : '') + ' — Dict.DG';
+    const desc = ru
+        ? `В суттах ${word} — сравнение${kind} для ${t.pali}: ${mean2(t.ru, 40)}${ref ? ' (' + ref + ')' : ''}. Где сутты определяют ${t.pali.split(/,\s*/)[0]} и другие сравнения для него.`
+        : `In the Suttas ${word} is a simile${kind} for ${t.pali}: ${mean2(t.en, 40)}${ref ? ' (' + ref + ')' : ''}. Where the Suttas define ${t.pali.split(/,\s*/)[0]}, and its other similes.`;
+    return { title, desc: desc.length > 160 ? desc.slice(0, 158).replace(/\s+\S*$/, '') + '…' : desc };
+}
+// A term with images but no definition of its own in the glossary
+function metaphorsHead(word, term, ru) {
+    const ms = term.metaphors.map((m) => m.text).filter((x) => !x.includes(' '));
+    const list = (ms.length ? ms : term.metaphors.map((m) => m.text)).slice(0, 2).join(', ') + (term.metaphors.length > 2 ? ` +${term.metaphors.length - 2}` : '');
+    const n = term.metaphors.length;
+    const title = word + ` — ${n} ${imgLabel(n, ru)}` + (ru ? ' в суттах: ' : ' in the Suttas: ') + list + ' — Dict.DG';
+    const desc = ru ? `Какими образами сутты говорят о ${word}: ${term.metaphors.map((m) => m.text).join('; ')}. Перевод DG: ${mean2(term.ru, 40)}.`
+        : `The images the Suttas use for ${word}: ${term.metaphors.map((m) => m.text).join('; ')}. DG rendering: ${mean2(term.en, 40)}.`;
+    return { title, desc: desc.length > 160 ? desc.slice(0, 158).replace(/\s+\S*$/, '') + '…' : desc };
+}
 function termHead(word, term, ru) {
+    if (/ariyassa vinaye/.test(term.kind || '')) {
+        // «ariyassa vinaye»: the sense a word has in the noble one's discipline (owner 2026-11-21: «или ариясса винае?»)
+        const c = term.canon, refs = [...new Set((c.where && c.where.length ? c.where : [c.link.replace(/^\//, '')]).map(refName))];
+        const m = mean2(ru ? term.ru : term.en, 30);
+        const title = `${word} — ${ru ? 'определение в Винае Благородного' : "definition in the Noble One's Vinaya"}: ${m} · ${refs[0]}${refs.length > 1 ? ' +' + (refs.length - 1) : ''} — Dict.DG`;
+        const head = ru ? `Что значит ${word} в Винае Благородного (ariyassa vinaye), словами сутт (${refs[0]}): «` : `What ${word} means in the Noble One's Vinaya (ariyassa vinaye), in the Suttas' words (${refs[0]}): “`;
+        const tail = (ru ? '» Перевод DG: ' : '” DG rendering: ') + m + '.';
+        return { title, desc: head + cut(c.definition, 158 - head.length - tail.length) + tail };
+    }
     const r = (ru ? term.ru : term.en).split(/,\s*/);
     let mean = r[0], i = 1;
     while (i < r.length && (mean + ', ' + r[i]).length <= 30) mean += ', ' + r[i++];
@@ -163,8 +215,13 @@ function prerenderWords() {
     const words = JSON.parse(fs.readFileSync(path.join(ROOT, 'public', 'static', 'ui.js'), 'utf8').match(/const POPULAR = (\[.*?\]);/)[1])
         .filter((w) => !w.includes(' '));
     const gl = fs.existsSync(path.join(DPD_DIR, 'dg-glossary.json')) ? JSON.parse(fs.readFileSync(path.join(DPD_DIR, 'dg-glossary.json'), 'utf8')).terms : [];
-    const byTerm = new Map(gl.filter((t) => t.pali && !t.pali.includes(' ')).map((t) => [t.pali, t]));
-    for (const [w, t] of byTerm) if (t.canon && t.canon.definition && !words.includes(w)) words.push(w);
+    // a glossary entry may name several words («andu, bandhana»): each one-word name gets the page
+    const byTerm = new Map();
+    for (const t of gl) for (const w of (t.pali || '').split(/,\s*/)) if (w && !w.includes(' ') && !byTerm.has(w)) byTerm.set(w, t);
+    const byImage = new Map();
+    for (const t of gl) for (const m of t.metaphors || []) if (m.text && !m.text.includes(' ')) byImage.set(m.text, [...(byImage.get(m.text) || []), { term: t, refs: m.refs || [], kind: m.kind || '' }]);
+    for (const [w, t] of byTerm) if (((t.canon && t.canon.definition) || (t.metaphors && t.metaphors.length)) && !words.includes(w)) words.push(w);
+    for (const w of byImage.keys()) if (!words.includes(w)) words.push(w);
     const i2h = loadDpd('dpd_i2h.js');
     const esc = (s) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
     for (const [i, page] of PAGES.entries()) {
@@ -181,10 +238,13 @@ function prerenderWords() {
             const term = byTerm.get(word);
             const dh = meaningHead(word, i2h, ebts, ru, byLemma);
             const defined = term && term.canon && term.canon.definition;
-            if (!dh && !defined) continue;
-            const h = defined ? termHead(word, term, ru) : dh;
+            const images = byImage.get(word) || [];
+            const mets = term && term.metaphors && term.metaphors.length;
+            if (!dh && !defined && !images.length && !mets) continue;
+            // definition first, then the word's own images, then «it is an image for…», then DPD
+            const h = defined ? termHead(word, term, ru) : mets ? metaphorsHead(word, term, ru) : images.length ? imageHead(word, images, ru) : dh;
             const dpdLine = dh ? dh.desc.replace(/^[^—]*—\s*/, '').replace(/\s*5\+.*$/, '') : '';
-            const st = staticEntry(word, term, dpdLine, ru);
+            const st = staticEntry(word, term, dpdLine, ru, images);
             const url = (lang) => SITE + (lang === 'ru' ? 'ru/' : '') + encodeURIComponent(word);
             const links = `<link rel="canonical" href="${url(ru ? 'ru' : 'en')}">\n  <link rel="alternate" hreflang="en" href="${url('en')}">\n  `
                 + `<link rel="alternate" hreflang="ru" href="${url('ru')}">\n  <link rel="alternate" hreflang="x-default" href="${url('en')}">\n  `
