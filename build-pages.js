@@ -114,7 +114,7 @@ function staticEntry(word, term, dpd, ru, images) {
     // The term's main definition may stand in the Vinaya (owner 2026-11-21: «Vinaya meaning» there, «Sutta meaning» otherwise)
     if (c && c.link && /^\/?pli-tv-/.test(c.link)) Object.assign(L, ru ? { h: 'определение из Винаи', def: 'Определение в Винае', where: 'Где Виная даёт определение' } : { h: 'how the Vinaya defines it', def: 'Definition in the Vinaya', where: 'Where the Vinaya defines it' });
     const special = term && /ariyassa vinaye/.test(term.kind || '');
-    if (special) L.h = ru ? 'определение в Винае Благородного' : "definition in the Noble One's Vinaya";
+    if (special) L.h = ru ? 'определение в Винае Благородного' : "in the Noble One's Vinaya";
     let html = '<section class="dg-static" id="dg-static-entry">';
     if (c && c.definition) {
         html += `<h2>${esc(word)} — ${L.h}</h2>`
@@ -185,7 +185,7 @@ function termHead(word, term, ru) {
         // «ariyassa vinaye»: the sense a word has in the noble one's discipline (owner 2026-11-21: «или ариясса винае?»)
         const c = term.canon, refs = [...new Set((c.where && c.where.length ? c.where : [c.link.replace(/^\//, '')]).map(refName))];
         const m = mean2(ru ? term.ru : term.en, 30);
-        const title = `${word} — ${ru ? 'определение в Винае Благородного' : "definition in the Noble One's Vinaya"}: ${m} · ${refs[0]}${refs.length > 1 ? ' +' + (refs.length - 1) : ''} — Dict.DG`;
+        const title = `${word} — ${ru ? 'определение в Винае Благородного' : "in the Noble One's Vinaya"}: ${m} · ${refs[0]}${refs.length > 1 ? ' +' + (refs.length - 1) : ''} — Dict.DG`;
         const head = ru ? `Что значит ${word} в Винае Благородного (ariyassa vinaye), словами сутт (${refs[0]}): «` : `What ${word} means in the Noble One's Vinaya (ariyassa vinaye), in the Suttas' words (${refs[0]}): “`;
         const tail = (ru ? '» Перевод DG: ' : '” DG rendering: ') + m + '.';
         return { title, desc: head + cut(c.definition, 158 - head.length - tail.length) + tail };
