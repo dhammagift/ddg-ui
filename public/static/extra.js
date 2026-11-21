@@ -2031,7 +2031,7 @@ function _initExtSlots(extContainer) {
         if (dictName === 'dpd') {
             extContainer.appendChild(createDpdSlot());
         } else if (dictName === 'tripitaka') {
-            extContainer.appendChild(_createIframeDictSlot('tripitaka', 'Sutta-Vinaya Definitions and Similies', 'https://tripitaka-mcp.com/read/embed/define', 'margin-bottom: 15px; margin-top: 15px;'));
+            extContainer.appendChild(_createIframeDictSlot('tripitaka', 'Sutta-Vinaya Definitions and Similes', 'https://tripitaka-mcp.com/read/embed/define', 'margin-bottom: 15px; margin-top: 15px;'));
         } else if (dictName === 'gandhari') {
             extContainer.appendChild(_createIframeDictSlot('gandhari', 'Gandhari Dictionaries', 'https://gandhari.org/dictionary?section=dop', 'margin-bottom: 15px; margin-top: 15px;'));
         } else if (dictName === 'pts') {
@@ -2224,7 +2224,7 @@ function appendTripitaka(query) {
     const currentTheme = dgThemeIsDark() ? 'dark' : 'light';
     
     // Передаем динамическую тему в URL
-    appendIframeDict('tripitaka', 'Sutta-Vinaya Definitions and Similies', `https://tripitaka-mcp.com/read/embed/define?term=${encodeURIComponent(query)}&sources=an,dn,mn,sn,iti,ud,snp,dhp,vinaya&theme=${currentTheme}&link_base=${linkBase}`, true, false);
+    appendIframeDict('tripitaka', 'Sutta-Vinaya Definitions and Similes', `https://tripitaka-mcp.com/read/embed/define?term=${encodeURIComponent(query)}&sources=an,dn,mn,sn,iti,ud,snp,dhp,vinaya&theme=${currentTheme}&link_base=${linkBase}`, true, false);
 }
 
 // The glossology index is a local copy (no CORS); parsed once, not on every search.
