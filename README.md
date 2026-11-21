@@ -1,11 +1,22 @@
 # Dict.Dhamma.Gift
-## Dhamma.gift edition of Dpdict.net interface
 
-This interface used as a full mode popup dictionary on Dhamma.gift Read. 
-e.g. open https://dhamma.gift/mn150
-tap: settings (gear) -> popup dictionary -> DPD online -> apply
+A Pali dictionary by the Suttas and the Vinaya: a word means what the Canon itself says it means.
 
-or as a standalone site https://dict.dhamma.gift for those who need it's unique features, need mobile friendly or minimalistic ui.
+- **The Canon's own definitions.** For 800 key terms of the Dhamma.Gift glossary (702 defined in the Canon), the
+  Pali definition word for word and every line in the Suttas and the Vinaya where it stands, with the Dhamma.Gift
+  rendering in English and Russian; special definitions marked; found by inflected forms too.
+- **Definitions and similes from the Canon** for any word.
+- **Other dictionaries beside it:** DPD (Digital Pāḷi Dictionary), PTS, the Gandhari Dictionary, Buddhadust,
+  Wisdom Library and 30+ Sanskrit dictionaries.
+
+Site: https://dict.dhamma.gift (also https://dhamma.gift/dict, offline). Apps: App Store, Google Play, Microsoft
+Store. Built into Dhamma.Gift as the click-to-look-up dictionary. User guide:
+https://dhamma.gift/docs/dictionary/
+
+Pages: `public/templates/home.html` + `i18n/ru.json` -> `node build-pages.js` (EN, RU and the key-term pages).
+Check that `i18n/ru.json` has every new template line before running it, or the RU pages fall back to English.
+
+The interface began as a Dhamma.gift edition of the dpdict.net interface; the history below is from that time.
 
 List of improvements:
 
