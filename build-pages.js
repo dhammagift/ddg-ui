@@ -101,8 +101,10 @@ function staticEntry(word, term, dpd, ru) {
     const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
     const L = ru
         ? { h: 'значение в суттах', dg: 'Перевод Dhamma.Gift', def: 'Определение в суттах', where: 'Где Канон даёт определение', dpd: 'DPD', gl: 'Глоссарий', rat: 'Обоснование перевода', open: 'Найти в текстах на Dhamma.Gift', pre: 'ru/' }
-        : { h: 'meaning in the Suttas', dg: 'Dhamma.Gift rendering', def: 'Definition in the Suttas', where: 'Where the Canon defines it', dpd: 'DPD', gl: 'Glossary', rat: 'Why this rendering', open: 'Find in the texts on Dhamma.Gift', pre: '' };
+        : { h: 'Sutta meaning', dg: 'Dhamma.Gift rendering', def: 'Definition in the Suttas', where: 'Where the Canon defines it', dpd: 'DPD', gl: 'Glossary', rat: 'Why this rendering', open: 'Find in the texts on Dhamma.Gift', pre: '' };
     const c = term && term.canon;
+    // The term's main definition may stand in the Vinaya (owner 2026-11-21: «Vinaya meaning» there, «Sutta meaning» otherwise)
+    if (c && c.link && /^\/?pli-tv-/.test(c.link)) Object.assign(L, ru ? { h: 'значение в Винае', def: 'Определение в Винае' } : { h: 'Vinaya meaning', def: 'Definition in the Vinaya' });
     let html = '<section class="dg-static" id="dg-static-entry">';
     if (c && c.definition) {
         html += `<h2>${esc(word)} — ${L.h}</h2>`
@@ -137,8 +139,9 @@ function termHead(word, term, ru) {
     let mean = r[0], i = 1;
     while (i < r.length && (mean + ', ' + r[i]).length <= 40) mean += ', ' + r[i++];
     const c = term.canon, ref = c.link.replace(/^\/|:.*$/g, '');
-    const title = word + (ru ? ' — значение в суттах: ' : ' — meaning in the Suttas: ') + mean + ' — Dict.DG';
-    let desc = `${word}: ${mean}. ` + (ru ? `Определение в суттах (${ref}): «` : `As the Suttas define it (${ref}): “`);
+    const vin = /^\/?pli-tv-/.test(c.link);
+    const title = word + (ru ? (vin ? ' — в Винае: ' : ' — в суттах: ') : (vin ? ' — Vinaya meaning: ' : ' — Sutta meaning: ')) + mean + ' — Dict.DG';
+    let desc = `${word}: ${mean}. ` + (ru ? `Определение в ${vin ? 'Винае' : 'суттах'} (${ref}): «` : `As the ${vin ? 'Vinaya' : 'Suttas'} define${vin ? 's' : ''} it (${ref}): “`);
     const room = 155 - desc.length - 1;
     desc += (c.definition.length > room ? c.definition.slice(0, room - 1).replace(/\s+\S*$/, '') + '…' : c.definition) + (ru ? '»' : '”');
     return { title, desc };
