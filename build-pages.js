@@ -95,16 +95,16 @@ function meaningHead(word, i2h, ebts, ru, byLemma) {
 // definitions from the Suttas were drawn by the client only, so Google and AI bots saw a DPD meaning and no sutta at all
 // (0 sutta links in w/upekkhā.html). The block goes into #dpd-results, whose innerHTML the client replaces on load, so
 // people see the usual entry; the page opens on the entry screen. Data: the glossary the reader's lookup uses
-// (standalone-dpd/dg-glossary.json: the project's rendering, the canon's definition and where it stands).
+// (standalone-dpd/dg-glossary.json: the project's rendering, the Suttas' or Vinaya's definition and where it stands).
 const DG = 'https://dhamma.gift/';
 function staticEntry(word, term, dpd, ru) {
     const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
     const L = ru
-        ? { h: 'значение в суттах', dg: 'Перевод Dhamma.Gift', def: 'Определение в суттах', where: 'Где Канон даёт определение', dpd: 'DPD', gl: 'Глоссарий', rat: 'Обоснование перевода', open: 'Найти в текстах на Dhamma.Gift', pre: 'ru/' }
-        : { h: 'Sutta meaning', dg: 'Dhamma.Gift rendering', def: 'Definition in the Suttas', where: 'Where the Canon defines it', dpd: 'DPD', gl: 'Glossary', rat: 'Why this rendering', open: 'Find in the texts on Dhamma.Gift', pre: '' };
+        ? { h: 'определение из самих сутт', dg: 'Перевод Dhamma.Gift', def: 'Определение в суттах', where: 'Где сутты дают определение', dpd: 'DPD', gl: 'Глоссарий', rat: 'Обоснование перевода', open: 'Найти в текстах на Dhamma.Gift', pre: 'ru/' }
+        : { h: 'how the Suttas define it', dg: 'Dhamma.Gift rendering', def: 'Definition in the Suttas', where: 'Where the Suttas define it', dpd: 'DPD', gl: 'Glossary', rat: 'Why this rendering', open: 'Find in the texts on Dhamma.Gift', pre: '' };
     const c = term && term.canon;
     // The term's main definition may stand in the Vinaya (owner 2026-11-21: «Vinaya meaning» there, «Sutta meaning» otherwise)
-    if (c && c.link && /^\/?pli-tv-/.test(c.link)) Object.assign(L, ru ? { h: 'значение в Винае', def: 'Определение в Винае' } : { h: 'Vinaya meaning', def: 'Definition in the Vinaya' });
+    if (c && c.link && /^\/?pli-tv-/.test(c.link)) Object.assign(L, ru ? { h: 'определение из Винаи', def: 'Определение в Винае', where: 'Где Виная даёт определение' } : { h: 'how the Vinaya defines it', def: 'Definition in the Vinaya', where: 'Where the Vinaya defines it' });
     let html = '<section class="dg-static" id="dg-static-entry">';
     if (c && c.definition) {
         html += `<h2>${esc(word)} — ${L.h}</h2>`
@@ -115,7 +115,7 @@ function staticEntry(word, term, dpd, ru) {
     } else {
         html += `<h2>${esc(word)}</h2>`;
     }
-    // The Canon's images for the term (glossary term.metaphors: kind, text, refs); the client draws them live in #dg-gloss
+    // The Suttas' images for the term (glossary term.metaphors: kind, text, refs); the client draws them live in #dg-gloss
     const mets = (term && term.metaphors) || [];
     if (mets.length) html += `<p><b>${ru ? 'Метафоры' : 'Metaphors'}:</b> ` + mets.map((m) => `<i lang="pi">${esc(m.text)}</i>`
         + (m.refs && m.refs.length ? ' (' + m.refs.map((r) => `<a href="${DG}${esc(r)}">${esc(r.replace(/:.*$/, ''))}</a>`).join(', ') + ')' : '')).join('; ') + '</p>';
@@ -133,18 +133,26 @@ function staticEntry(word, term, dpd, ru) {
     return { html, ld };
 }
 
-// Title and description for a glossary term: the Suttas' meaning first, the way people ask («X meaning», «что значит X»)
+// Title and description for a glossary term. The hook is what a plain dictionary doesn't have (owner 2026-11-21: «меня бы
+// значение не зацепило вообще… это просто словарь, а у нас не просто словарь»): the Suttas' own definition, word for word,
+// and in how many suttas it stands; the project's rendering comes last.
+const refName = (r) => r.replace(/:.*$/, '').replace(/^pli-tv-/, '').replace(/^([a-z]+)(\d)/, (m, b, d) => b.toUpperCase() + ' ' + d);
 function termHead(word, term, ru) {
     const r = (ru ? term.ru : term.en).split(/,\s*/);
     let mean = r[0], i = 1;
-    while (i < r.length && (mean + ', ' + r[i]).length <= 40) mean += ', ' + r[i++];
-    const c = term.canon, ref = c.link.replace(/^\/|:.*$/g, '');
-    const vin = /^\/?pli-tv-/.test(c.link);
-    const title = word + (ru ? (vin ? ' — в Винае: ' : ' — в суттах: ') : (vin ? ' — Vinaya meaning: ' : ' — Sutta meaning: ')) + mean + ' — Dict.DG';
-    let desc = `${word}: ${mean}. ` + (ru ? `Определение в ${vin ? 'Винае' : 'суттах'} (${ref}): «` : `As the ${vin ? 'Vinaya' : 'Suttas'} define${vin ? 's' : ''} it (${ref}): “`);
-    const room = 155 - desc.length - 1;
-    desc += (c.definition.length > room ? c.definition.slice(0, room - 1).replace(/\s+\S*$/, '') + '…' : c.definition) + (ru ? '»' : '”');
-    return { title, desc };
+    while (i < r.length && (mean + ', ' + r[i]).length <= 30) mean += ', ' + r[i++];
+    const c = term.canon, vin = /^\/?pli-tv-/.test(c.link);
+    const refs = [...new Set((c.where && c.where.length ? c.where : [c.link.replace(/^\//, '')]).map(refName))];
+    const n = refs.length, list = refs.slice(0, 2).join(', ') + (n > 2 ? ` +${n - 2}` : '');
+    const title = word + (vin
+        ? (ru ? ' — определение в Винае: ' : ' — defined in the Vinaya: ')
+        : (ru ? (n === 1 ? ' — определение в сутте ' : ` — определение в ${n} суттах: `) : (n === 1 ? ' — defined in ' : ` — defined in ${n} suttas: `))) + list + ' — Dict.DG';
+    const head = ru ? `Как ${vin ? 'Виная' : 'сутты'} сами определяют ${word} (${refs[0]}): «` : `How the ${vin ? 'Vinaya defines' : 'Suttas define'} ${word}, word for word (${refs[0]}): “`;
+    const tail = (ru ? '» Перевод DG: ' : '” DG rendering: ') + mean + '.';
+    const room = 158 - head.length - tail.length;
+    const raw = c.definition.replace(/^[“"‘'«]+/, '');
+    const def = raw.length > room ? raw.slice(0, room - 1).replace(/\s+\S*$/, '') + '…' : raw;
+    return { title, desc: head + def + tail };
 }
 
 function prerenderWords() {
