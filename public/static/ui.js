@@ -95,18 +95,24 @@
     .then((r) => r || fetch(url)).then((r) => r.json());
   function loadDgGloss() {
     if (!dgGloss) dgGloss = dgJson(DG_ORIGIN + '/assets/js/standalone-dpd/dg-glossary.json').then((d) => {
-      const m = new Map();
+      const m = new Map(), img = new Map();
       let hasForms = false;
       for (const t of d.terms || []) {
         const c = t.canon || {};
         // every place it is defined, the main link first (owner 2026-11-13: all of them)
         const w = [c.link, ...(c.where || [])].filter(Boolean).map((s) => String(s).replace(/^\//, ''));
-        const e = {ru: t.ru, en: t.en, w, kind: String(t.kind || '').replace(/^special:\s*/, '')};
+        const e = {ru: t.ru, en: t.en, w, kind: String(t.kind || '').replace(/^special:\s*/, ''), meta: t.metaphors || []};
         // an inflected form (samuddo -> samudda): the dictionary job adds each term's forms to the file
         if (t.forms) { hasForms = true; for (const f of t.forms) if (!m.has(dgGlossKey(f))) m.set(dgGlossKey(f), e); }
         m.set(dgGlossKey(t.pali), e);
+        // a metaphor image (owner 2026-11-21: vammika -> «adhivacana → kāya тело mn23») is found by its own forms
+        for (const x of t.metaphors || []) {
+          const line = {kind: x.kind, pali: t.pali, ru: String(t.ru || '').split(',')[0].trim(), en: String(t.en || '').split(',')[0].trim(), refs: x.refs || []};
+          for (const f of new Set([x.text, ...(x.forms || [])].map(dgGlossKey))) { if (!img.has(f)) img.set(f, []); img.get(f).push(line); }
+        }
       }
       const look = (word) => m.get(word);
+      look.img = (word) => img.get(word) || [];
       look.hasForms = hasForms;
       return look;
     }).catch(() => () => undefined);
@@ -129,17 +135,36 @@
       await new Promise((r) => setTimeout(r, 300));
     }
     if (box.dataset.word !== want) return;              // the reader has moved on to another word
-    if (!e) { box.hidden = true; box.innerHTML = ''; return; }
-    const seen = new Set(), links = [];
-    for (const seg of e.w) {
-      const text = seg.split(':')[0];
-      if (seen.has(text)) continue;
-      seen.add(text);
-      links.push(`<a class="dg-gloss-seg" href="${esc(DG_SITE + seg)}" target="_blank" rel="noopener" title="${esc(seg)}">${esc(text)}</a>`);
+    const ofImg = look.img ? look.img(want) : [];
+    if (!e && !ofImg.length) { box.hidden = true; box.innerHTML = ''; return; }
+    const segLinks = (segs) => {
+      const seen = new Set(), out = [];
+      for (const seg of segs) {
+        const text = seg.split(':')[0];
+        if (seen.has(text)) continue;
+        seen.add(text);
+        out.push(`<a class="dg-gloss-seg" href="${esc(DG_SITE + seg)}" target="_blank" rel="noopener" title="${esc(seg)}">${esc(text)}</a>`);
+      }
+      return out.join('');
+    };
+    let html = '';
+    if (e) {
+      const links = segLinks(e.w);
+      html += `<div class="dg-gloss-m">${esc(isRu ? e.ru : e.en)}</div>` +
+        // a special definition (ariyassa vinaye...) says so by its Pali phrase instead of «Defined in» (as in the reader)
+        (links ? `<div class="dg-gloss-def"><span>${e.kind ? `<i>${esc(e.kind)}</i>:` : (isRu ? 'Определение в:' : 'Defined in:')}</span>${links}</div>` : '');
+      // the word's metaphors: one collapsed line - kind, how many, the images - that opens to each with its suttas
+      if (e.meta.length) {
+        html += `<details class="dg-gloss-meta"><summary><i>${isRu ? 'Метафоры' : 'Metaphors'}</i> <span class="dg-gloss-n">${e.meta.length}</span> ` +
+          `<span class="dg-gloss-prev">${esc(e.meta.map((x) => x.text).join(', '))}</span></summary>` +
+          e.meta.map((x) => `<div class="dg-gloss-def"><span><i>${esc(x.kind)}</i> <b>${esc(x.text)}</b></span>${segLinks(x.refs || [])}</div>`).join('') + '</details>';
+      }
     }
-    box.innerHTML = `<div class="dg-gloss-m">${esc(isRu ? e.ru : e.en)}</div>` +
-      // a special definition (ariyassa vinaye...) says so by its Pali phrase instead of «Defined in» (as in the reader)
-      (links.length ? `<div class="dg-gloss-def"><span>${e.kind ? `<i>${esc(e.kind)}</i>:` : (isRu ? 'Определение в:' : 'Defined in:')}</span>${links.join('')}</div>` : '');
+    // the word is itself an image: what it stands for
+    for (const l of ofImg) {
+      html += `<div class="dg-gloss-def dg-gloss-of"><span><i>${esc(l.kind)}</i> → <b>${esc(l.pali)}</b> ${esc(isRu ? l.ru : l.en)}</span>${segLinks(l.refs)}</div>`;
+    }
+    box.innerHTML = html;
     box.hidden = false;
   }
 

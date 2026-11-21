@@ -560,3 +560,15 @@ body.is-offline #speakbtn{opacity:.35;pointer-events:none}
 .dg-gloss-def{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 6px;font-size:.9em}
 .dg-gloss-def>span{opacity:.7;margin-right:2px}
 .dg-gloss-seg{padding:1px 8px;border-radius:10px;border:1px solid color-mix(in srgb,var(--accent,#1f6f54) 45%,transparent);text-decoration:none}
+/* a word's metaphors (owner 2026-11-21): one collapsed line, opens to each image with its suttas */
+.dg-gloss-meta{margin:.45em 0 0;padding:.25em .6em;border-left:3px solid #c98a2b;background:rgba(201,138,43,.10);border-radius:4px}
+.dg-gloss-meta>summary{cursor:pointer;list-style:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.9em}
+.dg-gloss-meta>summary::-webkit-details-marker{display:none}
+.dg-gloss-meta>summary::before{content:'▸ ';color:#8a6a2a}
+.dg-gloss-meta[open]>summary::before{content:'▾ '}
+.dg-gloss-meta[open] .dg-gloss-prev{display:none}
+.dg-gloss-meta .dg-gloss-def{margin:.3em 0}
+.dg-gloss-meta i,.dg-gloss-of i{color:#8a6a2a}
+.dg-gloss-n{font-size:.8em;padding:0 5px;border-radius:8px;background:rgba(201,138,43,.22)}
+.dg-gloss-of{margin-top:.35em}
+body.dark-mode .dg-gloss-meta i,body.dark-mode .dg-gloss-of i,body.dark-mode .dg-gloss-meta>summary::before{color:#e0b878}
