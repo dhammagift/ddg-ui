@@ -101,7 +101,7 @@
         const c = t.canon || {};
         // every place it is defined, the main link first (owner 2026-11-13: all of them)
         const w = [c.link, ...(c.where || [])].filter(Boolean).map((s) => String(s).replace(/^\//, ''));
-        const e = {ru: t.ru, en: t.en, w, kind: String(t.kind || '').replace(/^special:\s*/, ''), meta: t.metaphors || []};
+        const e = {ru: t.ru, en: t.en, w, kind: String(t.kind || '').replace(/^special:\s*/, ''), meta: t.metaphors || [], assada: t.assada || []};
         // an inflected form (samuddo -> samudda): the dictionary job adds each term's forms to the file
         if (t.forms) { hasForms = true; for (const f of t.forms) if (!m.has(dgGlossKey(f))) m.set(dgGlossKey(f), e); }
         m.set(dgGlossKey(t.pali), e);
@@ -153,12 +153,12 @@
       html += `<div class="dg-gloss-m">${esc(isRu ? e.ru : e.en)}</div>` +
         // a special definition (ariyassa vinaye...) says so by its Pali phrase instead of «Defined in» (as in the reader)
         (links ? `<div class="dg-gloss-def"><span>${e.kind ? `<i>${esc(e.kind)}</i>:` : (isRu ? 'Определение в:' : 'Defined in:')}</span>${links}</div>` : '');
-      // the word's metaphors: one collapsed line - kind, how many, the images - that opens to each with its suttas
-      if (e.meta.length) {
-        html += `<details class="dg-gloss-meta"><summary><i>${isRu ? 'Метафоры' : 'Metaphors'}</i> <span class="dg-gloss-n">${e.meta.length}</span> ` +
-          `<span class="dg-gloss-prev">${esc(e.meta.map((x) => x.text).join(', '))}</span></summary>` +
-          e.meta.map((x) => `<div class="dg-gloss-def"><span><i>${esc(x.kind)}</i> <b>${esc(x.text)}</b></span>${segLinks(x.refs || [])}</div>`).join('') + '</details>';
-      }
+      // one collapsed line - label, how many, a preview - that opens to each item with its kind and suttas
+      const block = (label, items, prev) => items.length ? `<details class="dg-gloss-meta"><summary><i>${label}</i> <span class="dg-gloss-n">${items.length}</span> ` +
+        (prev ? `<span class="dg-gloss-prev">${esc(items.map((x) => x.text).join(', '))}</span>` : '') + '</summary>' +
+        items.map((x) => `<div class="dg-gloss-def"><span><i>${esc(x.kind)}</i> <b>${esc(x.text)}</b></span>${segLinks(x.refs || [])}</div>`).join('') + '</details>' : '';
+      // «ko assādo, ko ādīnavo, kiṁ nissaraṇaṁ» (owner 2026-11-21: a kind of definition), then the metaphors with their images
+      html += block('Assāda · ādīnava · nissaraṇa', e.assada, false) + block(isRu ? 'Метафоры' : 'Metaphors', e.meta, true);
     }
     // the word is itself an image: what it stands for
     for (const l of ofImg) {
