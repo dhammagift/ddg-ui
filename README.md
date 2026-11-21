@@ -5,9 +5,8 @@ A Pali dictionary by the Suttas and the Vinaya: a word means what the Canon itse
 - **The Canon's own definitions.** For 800 key terms of the Dhamma.Gift glossary (702 defined in the Canon), the
   Pali definition word for word and every line in the Suttas and the Vinaya where it stands, with the Dhamma.Gift
   rendering in English and Russian; special definitions marked; found by inflected forms too.
-- **Definitions and similes from the Canon** for any word.
-- **Other dictionaries beside it:** DPD (Digital Pāḷi Dictionary), PTS, the Gandhari Dictionary, Buddhadust,
-  Wisdom Library and 30+ Sanskrit dictionaries.
+- **Then, in the word page's default order:** DPD (Digital Pāḷi Dictionary); Sutta-Vinaya Definitions and Similes
+  (from the Canon, for any word); the Gandhari Dictionary; PTS; Buddhadust; Wisdom Library; 30+ Sanskrit dictionaries.
 
 Site: https://dict.dhamma.gift (also https://dhamma.gift/dict, offline). Apps: App Store, Google Play, Microsoft
 Store. Built into Dhamma.Gift as the click-to-look-up dictionary. User guide:
