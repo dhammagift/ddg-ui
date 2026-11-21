@@ -262,6 +262,19 @@ function prerenderWords() {
         }
         console.log('wrote ' + n + ' key-term pages in ' + path.relative(ROOT, dir));
     }
+    // The sitemap follows the pages it lists: hand-kept, it stayed at the first 348 words while the pages grew (2026-11-21)
+    const listed = (d) => new Set(fs.readdirSync(d).filter((f) => f.endsWith('.html')).map((f) => f.slice(0, -5)));
+    const en = listed(path.join(ROOT, 'public', 'w')), ruSet = listed(path.join(ROOT, 'public', 'ru', 'w'));
+    const loc = (u) => `  <url><loc>${u}</loc></url>`;
+    const lines = [loc(SITE), loc(SITE + 'ru/')];
+    for (const w of [...new Set([...en, ...ruSet])].sort()) {
+        if (en.has(w)) lines.push(loc(SITE + encodeURIComponent(w)));
+        if (ruSet.has(w)) lines.push(loc(SITE + 'ru/' + encodeURIComponent(w)));
+    }
+    fs.writeFileSync(path.join(ROOT, 'public', 'sitemap.xml'), '<?xml version="1.0" encoding="UTF-8"?>\n'
+        + '<!-- Home + every word page build-pages.js writes (public/w, public/ru/w), en and ru; generated, do not edit -->\n'
+        + '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + lines.join('\n') + '\n</urlset>\n', 'utf8');
+    console.log('wrote public/sitemap.xml (' + lines.length + ' URLs)');
 }
 
 main();
